@@ -252,6 +252,7 @@ class VenueTests(APITestCase):
         event_response = self.client.get(f"/api/events/{event.id}/").data
         self.assertEqual(event_response["venue_name"], "Media Studio")
         self.assertTrue(event_response["retired_venue"])
+        self.assertEqual(self.client.get("/api/dashboard/").data["events"], [])
         self.assertEqual(
             self.client.get("/api/reservations/?for_event=1").data["count"], 0
         )

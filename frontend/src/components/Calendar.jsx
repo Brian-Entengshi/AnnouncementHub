@@ -305,12 +305,15 @@ export default function Calendar({ availability = false }) {
                                 </span>
                                 <span>
                                   <MapPin size={14} /> {r.venue_name}
-                                  {r.retired_venue && ' · Retired venue'}
                                 </span>
                               </small>
                               <Badge
                                 value={
-                                  r.published === false ? 'draft' : r.status
+                                  r.retired_venue
+                                    ? 'retired venue'
+                                    : r.published === false
+                                      ? 'draft'
+                                      : r.status
                                 }
                               />
                             </>
@@ -400,7 +403,15 @@ function EventDirectory() {
                   <small>{formatDate(r.date)}</small>
                 </span>
                 <span className="event-management-action">
-                  <Badge value={r.published ? r.status : 'draft'} />
+                  <Badge
+                    value={
+                      r.retired_venue
+                        ? 'retired venue'
+                        : r.published
+                          ? r.status
+                          : 'draft'
+                    }
+                  />
                   <ChevronRight size={17} aria-hidden="true" />
                 </span>
               </Link>

@@ -65,7 +65,10 @@ def dashboard(request):
     today = timezone.localdate()
     events = (
         Event.objects.filter(
-            published=True, reservation__status="approved", reservation__date__gte=today
+            published=True,
+            reservation__status="approved",
+            reservation__date__gte=today,
+            reservation__venue__isnull=False,
         )
         .filter(
             Q(reservation__date__gt=today)

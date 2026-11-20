@@ -48,16 +48,18 @@ The first adviser signs in using the username and password entered at `createsup
 
 1. An adviser opens **Account Management → New account**, enters the member’s full name and username, selects Officer or Staff, and supplies an initial password. Staff require one of the four core teams. Officer and adviser accounts have no team.
 2. An officer follows the same process for Staff. The API also checks the requested role and prevents promotion through an edit.
-3. Initial and replacement passwords may be any non-empty value. Deliver temporary passwords privately. The member must choose a permanent password that passes Django validation before accessing protected pages. Subsequent sessions use an HTTP-only Django session cookie, with CSRF checks on writes.
+3. Initial and replacement passwords may be any non-empty value. Leave the replacement field blank to keep the current password. Deliver temporary passwords privately. The member must choose a permanent password that passes Django validation before accessing protected pages. Subsequent sessions use an HTTP-only Django session cookie, with CSRF checks on writes.
 4. Use the Account Management table to search and filter accounts by role, status or team. Open the row actions to edit details, replace a temporary password, activate or deactivate access. Deactivated members disappear from the active team directory.
 
 ## Reserving a venue and publishing an event
 
-The default venues are Audio-Visual Room (AVR), DLL Grounds, and ComLab 1 through ComLab 5. The initial capacities and general campus location are editable defaults. Advisers can add venues from **Venues → Add Venue**. Managers can review retired venues under **Archived venues**. Existing bookings and notices keep their original venue references.
+The default venues are Audio-Visual Room (AVR), DLL Grounds, and ComLab 1 through ComLab 5. Advisers can add venues from **Venues → Add Venue**. Managers can switch between **Active venues**, **Inactive venues**, and **Archived venues**. Turning off **Accept reservations** moves a venue to Inactive and blocks new requests. Existing reserved time slots do not change a venue's global status.
 
 An adviser can permanently delete a venue with no dependent records. If any bookings or notices reference it, choose **Archive venue** instead. Existing schedules and history remain visible, and new bookings cannot select the archived venue.
 
-In **Weekly Events**, choose **Dates With Events Only** to show dates with published scheduled or ongoing events in the selected week. Choose **All Dates** to see the full week, including cancelled events and empty dates.
+The migration for Seminar Room, Media Studio, Innovation Lab, and College Auditorium removes those four Venue rows after saving their names in the linked reservations and notices. Existing records retain their original venue names in their details. Back up the database before applying that migration to another environment.
+
+In **Weekly Events**, use **Weekly View** or **Monthly Calendar View**. The month view highlights dates with scheduled or ongoing events. Select a date to see all its events, including cancellations. **Dates With Events Only** remains available in Weekly View.
 
 1. Open **Venue Availability**, select a venue and inspect the week or month. Notices identify maintenance and other closure periods.
 2. Sign in and open **Reservations → New reservation**. Enter a future date, start and end times, attendance, responsible person and contact details. All schedules use Philippine time.

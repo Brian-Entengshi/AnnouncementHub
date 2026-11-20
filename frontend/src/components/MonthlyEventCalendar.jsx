@@ -99,7 +99,15 @@ export default function MonthlyEventCalendar({
                     <ChevronRight size={15} aria-hidden="true" />
                   </Link>
                 </h3>
-                <Badge value={event.published ? event.status : 'draft'} />
+                <Badge
+                  value={
+                    event.retired_venue
+                      ? 'retired venue'
+                      : event.published
+                        ? event.status
+                        : 'draft'
+                  }
+                />
               </div>
               <div className="slot-info">
                 <span>
@@ -109,7 +117,6 @@ export default function MonthlyEventCalendar({
                 {event.venue_name && (
                   <span>
                     <MapPin size={14} /> {event.venue_name}
-                    {event.retired_venue && ' · Retired venue'}
                   </span>
                 )}
               </div>
