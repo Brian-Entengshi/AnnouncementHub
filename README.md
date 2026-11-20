@@ -33,23 +33,31 @@ Open [the local dashboard](http://localhost:5173/dashboard) using the port print
 
 **Demonstration data.** The initialized development database includes sample campus records. On a fresh checkout, run `python manage.py seed_demo` with the virtual environment active to add these samples to an empty hub. The command skips a hub with existing content. Its sample author is inactive and has no usable password. Core teams are installed by migration independently of the demonstration.
 
+To add the extended demonstration program to an existing local database, run `python manage.py seed_program --adviser <existing-adviser-username>` from `backend/`. It schedules seven activities and related events from tomorrow in Philippine time. Each booking goes through the same availability, capacity and overlap checks as a normal approval. The command preserves existing content and records each installed item so it can be rerun safely.
+
 ## Accounts and access
 
 | Role | Access |
 | --- | --- |
-| Visitor | View published announcements, activities, events, team directory, useful links, venues, notices and the availability calendar. Private bookings appear as reserved slots. |
+| Visitor | Open Hub Help and view published announcements, activities, events, team directory, useful links, venues, notices and the availability calendar. Private bookings appear as reserved slots. |
 | Staff | Public features, personal reservation requests, status history and notifications. The server assigns the requester’s team. |
-| Officer | Manage organization content, venues, notices and reservations. Provision and manage staff accounts and team assignments. |
-| Adviser | Officer capabilities, officer account management, audit records and organization settings. |
+| Officer | Manage organization content, edit existing venues, and manage notices and reservations. Provision and manage staff accounts and team assignments. |
+| Adviser | Officer capabilities, venue creation, archiving and deletion, officer account management, audit logs and organization settings. |
 
 The first adviser signs in using the username and password entered at `createsuperuser`. Repeat that command to provision another adviser. There is no public registration endpoint. The Django admin at `/admin/` provides superusers with read-only inspection of hub records. The web workspace handles changes and records their history.
 
-1. An adviser opens **Account Management → New account**, enters the member’s full name and username, selects Officer or Staff, and supplies an initial password. Staff require an assigned team.
+1. An adviser opens **Account Management → New account**, enters the member’s full name and username, selects Officer or Staff, and supplies an initial password. Staff require one of the four core teams. Officer and adviser accounts have no team.
 2. An officer follows the same process for Staff. The API also checks the requested role and prevents promotion through an edit.
-3. Deliver the initial password privately. The member must change it at first sign-in. Subsequent sessions use an HTTP-only Django session cookie, with CSRF checks on writes.
-4. Edit the account to change its position, move a staff member to another team, set a replacement password or deactivate access. Deactivated members disappear from the active team directory.
+3. Initial and replacement passwords may be any non-empty value. Deliver temporary passwords privately. The member must choose a permanent password that passes Django validation before accessing protected pages. Subsequent sessions use an HTTP-only Django session cookie, with CSRF checks on writes.
+4. Use the Account Management table to search and filter accounts by role, status or team. Open the row actions to edit details, replace a temporary password, activate or deactivate access. Deactivated members disappear from the active team directory.
 
 ## Reserving a venue and publishing an event
+
+The default venues are Audio-Visual Room (AVR), DLL Grounds, and ComLab 1 through ComLab 5. The initial capacities and general campus location are editable defaults. Advisers can add venues from **Venues → Add Venue**. Managers can review retired venues under **Archived venues**. Existing bookings and notices keep their original venue references.
+
+An adviser can permanently delete a venue with no dependent records. If any bookings or notices reference it, choose **Archive venue** instead. Existing schedules and history remain visible, and new bookings cannot select the archived venue.
+
+In **Weekly Events**, choose **Dates With Events Only** to show dates with published scheduled or ongoing events in the selected week. Choose **All Dates** to see the full week, including cancelled events and empty dates.
 
 1. Open **Venue Availability**, select a venue and inspect the week or month. Notices identify maintenance and other closure periods.
 2. Sign in and open **Reservations → New reservation**. Enter a future date, start and end times, attendance, responsible person and contact details. All schedules use Philippine time.
@@ -66,7 +74,7 @@ SQLite uses `BEGIN IMMEDIATE` for these transactions. Writers take turns across 
 - **Manage Announcements** supports drafts, publication, pinning, expiration, archiving, images and optional PDF attachments. Every public list excludes expired and unpublished announcements.
 - **Organization Activities** tracks date-based upcoming, ongoing and completed initiatives. Multiple scheduled events can link to one activity.
 - **Organization Teams** displays current members and roles. The four core teams keep their names. Managers can edit descriptions, add other teams, and move staff through Account Management.
-- **Notifications** contains read status, links and reservation decisions. **Activity Records** gives advisers the administrative history. Settings controls contact details shown in Hub help.
+- **Notifications** contains read status, links and reservation decisions. **Audit Logs** gives advisers a searchable, paginated history of sign-ins, sign-outs and administrative changes. A failed sign-in records the failure without the submitted credentials. Settings controls the contact details shown in Student Access Hub Help.
 - Resource forms save drafts per account, form and record in the current tab’s session storage. Drafts expire after seven days and clear on successful save, cancellation or sign-out. Passwords and uploaded file contents are excluded. Reselect a file after refreshing.
 - File uploads support JPEG, PNG and WebP images and PDF announcement attachments, up to 5 MB each. Django checks access when serving uploaded files.
 
@@ -129,6 +137,7 @@ The production build precaches the app shell, icons, JavaScript and CSS. An offl
 # backend/
 .\venv\Scripts\python.exe manage.py check
 .\venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\venv\Scripts\python.exe manage.py migrate --check
 .\venv\Scripts\python.exe manage.py test
 
 # frontend/
@@ -139,6 +148,8 @@ npm run test:e2e
 
 The backend suite uses an isolated file-backed SQLite database for simultaneous-approval testing. Playwright builds the frontend and starts its own preview and Django servers on ports 4187 and 8037. It provisions temporary accounts with a generated password in a separate database. The browser suite defaults to installed Google Chrome. Set `ELITE_BROWSER_CHANNEL=msedge` to use Edge or `ELITE_TEST_PYTHON` to select a different backend Python executable.
 
+The optional `tests/local-regression.spec.js` test takes a disposable, migrated copy of the local SQLite database with the demonstration program installed. Set `ELITE_BROWSER_TEST_DB_COPY` to the copy and pass the adviser and officer credentials at runtime with `ELITE_LOCAL_ADMIN_USER`, `ELITE_LOCAL_ADMIN_PASSWORD`, `ELITE_LOCAL_OFFICER_USER` and `ELITE_LOCAL_OFFICER_PASSWORD`. Run `npx playwright test tests/local-regression.spec.js` after building the frontend. The test makes changes to its copy, including a venue deletion. Discard the copy afterward.
+
 ## Troubleshooting
 
 | Symptom | Action |
@@ -146,7 +157,8 @@ The backend suite uses an isolated file-backed SQLite database for simultaneous-
 | Dashboard cannot reach the hub | Start Django, check the Vite proxy target, and reload the same frontend origin. |
 | Login or write returns a CSRF error | Open the app through Vite or the same-origin production proxy. Check the public host, protocol and cookie settings. |
 | A booking cannot be approved | Check the latest venue availability, capacity, closure notices and approved slots. The request must still be pending and start in the future. |
-| A team or venue cannot be deleted | Review linked records. Reassign members or disable venue availability when historical bookings must be retained. |
+| A team or venue cannot be deleted | Review linked records. Reassign team members where appropriate, or archive a linked venue to retain booking history. |
+| Recent operations are missing from Audit Logs, or writes fail immediately after migrating | Restart any Django process still serving older code and check that Vite proxies to the restarted process. Confirm the target database with `manage.py migrate --check`. |
 | A page works by clicking but fails on refresh | Check the frontend host’s SPA fallback and API route precedence. |
 | Install option is missing | Use the production preview or HTTPS deployment, check browser support, and confirm the manifest and service worker load. |
 | Vite or Python dependencies are missing | Run `npm ci` in frontend and install `backend/requirements.txt` with the backend environment’s interpreter. |

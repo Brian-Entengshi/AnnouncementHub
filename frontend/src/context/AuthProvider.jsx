@@ -15,7 +15,7 @@ export default function AuthProvider({ children }) {
   async function logout() {
     const next = await api('logout/', { method: 'POST' })
     clearUserDrafts(session.user.id)
-    setSession(next)
+    return next
   }
   const user = session.user
   return (

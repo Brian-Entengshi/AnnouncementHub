@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus,
   Search,
@@ -18,7 +18,11 @@ import RecordForm from './RecordForm'
 import { managePath } from '../services/catalog'
 
 export function ResourceList({ config: c, managed }) {
-  const { user, manager } = useAuth()
+  const { user, manager, adviser } = useAuth()
+  const { state } = useLocation()
+  const [params, setParams] = useSearchParams()
+  const venueStatus = params.get('status') || 'active'
+  const showVenueFilters = c.api === 'venues' && manager
   const [search, setSearch] = useState(''),
     [filter, setFilter] = useState(''),
     [mine, setMine] = useState(false)
@@ -31,12 +35,14 @@ export function ResourceList({ config: c, managed }) {
           ? { manage: '1' }
           : {}),
         ...(mine ? { mine: '1' } : {}),
+        ...(showVenueFilters ? { status: venueStatus } : {}),
       }),
     true,
   )
   const canAdd =
     (manager || (user && c.api === 'reservations')) &&
-    (c.api !== 'announcements' || managed)
+    (c.api !== 'announcements' || managed) &&
+    (c.api !== 'venues' || adviser)
   return (
     <>
       <Heading
@@ -47,10 +53,31 @@ export function ResourceList({ config: c, managed }) {
         {canAdd && (
           <Link className="button primary" to={path + '/new'}>
             <Plus size={17} />
-            New {c.singular.toLowerCase()}
+            {c.api === 'venues'
+              ? 'Add Venue'
+              : 'New ' + c.singular.toLowerCase()}
           </Link>
         )}
       </Heading>
+      {showVenueFilters && (
+        <div className="filter-switch" role="group" aria-label="Venue status">
+          {['active', 'inactive', 'archived'].map((status) => (
+            <button
+              type="button"
+              key={status}
+              aria-pressed={venueStatus === status}
+              onClick={() => setParams({ status })}
+            >
+              {human(status)} venues
+            </button>
+          ))}
+        </div>
+      )}
+      {state?.notice && (
+        <p className="success-notice" role="status">
+          {state.notice}
+        </p>
+      )}
       <State query={q}>
         {(rows) => {
           const facet =
@@ -123,9 +150,14 @@ export function ResourceList({ config: c, managed }) {
                   </label>
                 )}
               </div>
-              <div className="record-grid">
+              <div className={'record-grid records-' + c.api}>
                 {visible.map((r) => (
-                  <article className="panel record-card" key={r.id}>
+                  <article
+                    className={
+                      'panel record-card' + (r.pinned ? ' is-pinned' : '')
+                    }
+                    key={r.id}
+                  >
                     {r.image && (
                       <img className="card-image" src={r.image} alt="" />
                     )}
@@ -140,7 +172,21 @@ export function ResourceList({ config: c, managed }) {
                         <FileText size={16} />
                       )}
                       <span>{r.category || r.role || c.singular}</span>
+                      {r.pinned && (
+                        <span className="featured-label">Pinned</span>
+                      )}
                       {r.status && <Badge value={r.status} />}
+                      {c.api === 'venues' && (
+                        <Badge
+                          value={
+                            r.archived
+                              ? 'archived'
+                              : r.available
+                                ? 'active'
+                                : 'inactive'
+                          }
+                        />
+                      )}
                     </div>
                     <h2>
                       <Link to={path + '/' + r.id}>
@@ -148,15 +194,29 @@ export function ResourceList({ config: c, managed }) {
                       </Link>
                     </h2>
                     <p>{r.description || r.position || r.location}</p>
+                    {r.members?.length > 0 && (
+                      <ul className="member-preview" aria-label="Team members">
+                        {r.members.slice(0, 3).map((member, index) => (
+                          <li key={index}>{member.name}</li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="record-foot">
                       {r.date || r.start_date || r.published_at
-                        ? formatDate(r.date || r.start_date || r.published_at)
+                        ? [
+                            formatDate(
+                              r.date || r.start_date || r.published_at,
+                            ),
+                            r.end_date && formatDate(r.end_date),
+                            r.venue_name,
+                            r.author_name,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')
                         : r.members
                           ? r.members.length + ' active members'
                           : r.capacity
-                            ? r.capacity +
-                              ' seats · ' +
-                              (r.available ? 'Available' : 'Unavailable')
+                            ? r.capacity + ' seats'
                             : r.team_name || ''}
                       {r.url && (
                         <a href={r.url} target="_blank" rel="noreferrer">

@@ -1,5 +1,7 @@
 from datetime import timedelta
 from django.utils import timezone
+from django.db import transaction
+from audit_logs.models import AuditLog
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
@@ -27,14 +29,33 @@ class SettingsSerializer(serializers.ModelSerializer):
 
 @api_view(["GET", "PATCH"])
 @permission_classes([AllowAny])
+@transaction.atomic
 def settings_view(request):
-    if request.method == "PATCH" and not adviser(request.user):
+    if not adviser(request.user):
         return Response({"detail": "An adviser account is required."}, status=403)
-    obj, _ = HubSettings.objects.get_or_create(pk=1)
+    obj = HubSettings.objects.filter(pk=1).first() or HubSettings(pk=1)
     if request.method == "PATCH":
         serializer = SettingsSerializer(obj, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        AuditLog.record(
+            request.user,
+            "Updated",
+            obj,
+            resource="settings",
+            description="Updated public contact information and office hours.",
+        )
+    return Response(SettingsSerializer(obj).data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def help_view(request):
+    if request.user.is_authenticated:
+        return Response(
+            {"detail": "Hub Help is available through Student Access."}, status=403
+        )
+    obj = HubSettings.objects.filter(pk=1).first() or HubSettings()
     return Response(SettingsSerializer(obj).data)
 
 
@@ -54,7 +75,9 @@ def dashboard(request):
     )
     announcements = published_announcements().select_related("author")
     activities = Activity.objects.filter(published=True, end_date__gte=today)
-    notices = Notice.objects.filter(ends_at__gt=timezone.now()).select_related("venue")
+    notices = Notice.objects.filter(
+        ends_at__gt=timezone.now(), venue__archived=False
+    ).select_related("venue")
     reservations = Reservation.objects.filter(status="pending")
     if not manager(request.user):
         reservations = reservations.filter(requester_id=request.user.pk)
@@ -66,7 +89,7 @@ def dashboard(request):
                     reservation__date__lt=today + timedelta(days=7)
                 ).count(),
                 "announcements": announcements.count(),
-                "venues": Venue.objects.filter(available=True).count(),
+                "venues": Venue.objects.filter(archived=False, available=True).count(),
                 "teams": Team.objects.count(),
                 "pending": reservations.count()
                 if request.user.is_authenticated

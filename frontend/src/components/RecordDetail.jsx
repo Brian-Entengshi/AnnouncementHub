@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, ExternalLink, Paperclip } from 'lucide-react'
+import { Archive, Pencil, Trash2, ExternalLink, Paperclip } from 'lucide-react'
 import { useData } from '../hooks/useData'
 import { useAuth } from '../context/auth'
 import { api } from '../services/api'
@@ -9,6 +9,7 @@ import { Badge, Heading, State } from './Common'
 import { formatDate, formatTime, human, stamp } from '../utils/format'
 import ReservationActions from './ReservationActions'
 import ConfirmDelete from './ConfirmDelete'
+import ConfirmAction from './ConfirmAction'
 
 const metadata = [
   'category',
@@ -19,6 +20,7 @@ const metadata = [
   'location',
   'capacity',
   'available',
+  'archived',
   'date',
   'start',
   'end',
@@ -50,7 +52,7 @@ function display(k, v) {
   return v
 }
 export default function RecordDetail({ config: c, id, managed }) {
-  const { manager } = useAuth(),
+  const { manager, adviser } = useAuth(),
     navigate = useNavigate()
   const q = useData(
     c.api +
@@ -60,15 +62,27 @@ export default function RecordDetail({ config: c, id, managed }) {
       (managed || (manager && c.api !== 'announcements') ? '?manage=1' : ''),
   )
   const [error, setError] = useState(''),
-    [confirm, setConfirm] = useState(false)
+    [confirm, setConfirm] = useState(''),
+    [busy, setBusy] = useState(false)
   const path = '/' + managePath(c)
   async function remove() {
+    setBusy(true)
+    setError('')
     try {
-      await api(c.api + '/' + id + '/?manage=1', { method: 'DELETE' })
-      navigate(path)
+      const result =
+        confirm === 'archive'
+          ? await api(c.api + '/' + id + '/archive/', { method: 'POST' })
+          : await api(c.api + '/' + id + '/?manage=1', { method: 'DELETE' })
+      navigate(path, {
+        state: {
+          notice: result?.detail || c.singular + ' deleted successfully.',
+        },
+      })
     } catch (e) {
       setError(e.message)
-      setConfirm(false)
+      setConfirm('')
+    } finally {
+      setBusy(false)
     }
   }
   return (
@@ -79,14 +93,35 @@ export default function RecordDetail({ config: c, id, managed }) {
             kicker={c.singular}
             title={item.title || item.name || item.full_name || item.username}
           >
-            {manager && c.api !== 'reservations' && (
-              <Link className="button" to={path + '/' + id + '/edit'}>
-                <Pencil size={16} />
-                Edit
-              </Link>
-            )}
+            {manager &&
+              c.api !== 'reservations' &&
+              !(c.api === 'notices' && item.venue === null) && (
+                <Link className="button" to={path + '/' + id + '/edit'}>
+                  <Pencil size={16} />
+                  Edit
+                </Link>
+              )}
           </Heading>
           <section className="panel detail">
+            {(item.retired_venue ||
+              (['reservations', 'notices'].includes(c.api) &&
+                item.venue === null)) && (
+              <p className="historical-note">
+                Retired venue. The original venue name is preserved for this
+                record.
+              </p>
+            )}
+            {c.api === 'venues' && (
+              <Badge
+                value={
+                  item.archived
+                    ? 'archived'
+                    : item.available
+                      ? 'active'
+                      : 'inactive'
+                }
+              />
+            )}
             {item.status && <Badge value={item.status} />}{' '}
             {item.image && (
               <img className="record-image" src={item.image} alt={item.title} />
@@ -140,27 +175,71 @@ export default function RecordDetail({ config: c, id, managed }) {
               </>
             )}
             {c.api === 'venues' && (
-              <Link className="button" to={'/availability?venue=' + item.id}>
-                Check availability
-              </Link>
+              <div className="actions">
+                <Link
+                  className="button"
+                  to={
+                    '/venues?status=' +
+                    (item.archived
+                      ? 'archived'
+                      : item.available
+                        ? 'active'
+                        : 'inactive')
+                  }
+                >
+                  Back to venues
+                </Link>
+                {item.available && !item.archived && (
+                  <Link
+                    className="button"
+                    to={'/availability?venue=' + item.id}
+                  >
+                    Check availability
+                  </Link>
+                )}
+              </div>
             )}
             {manager && c.api === 'events' && (
               <Link className="button" to={'/reservations/' + item.reservation}>
                 View booking
               </Link>
             )}
-            {manager && !['reservations', 'accounts'].includes(c.api) && (
-              <div className="detail-footer">
-                <button className="danger" onClick={() => setConfirm(true)}>
-                  <Trash2 size={15} />
-                  Delete {c.singular.toLowerCase()}
-                </button>
-              </div>
+            {manager &&
+              (c.api !== 'venues' || adviser) &&
+              !['reservations', 'accounts'].includes(c.api) && (
+                <div className="detail-footer">
+                  {c.api === 'venues' && !item.archived && (
+                    <button onClick={() => setConfirm('archive')}>
+                      <Archive size={15} />
+                      Archive venue
+                    </button>
+                  )}
+                  <button
+                    className="danger"
+                    onClick={() => setConfirm('delete')}
+                  >
+                    <Trash2 size={15} />
+                    Delete {c.singular.toLowerCase()}
+                  </button>
+                </div>
+              )}
+            {confirm === 'archive' && (
+              <ConfirmAction
+                title="Archive this venue?"
+                label="Archive venue"
+                busy={busy}
+                cancel={() => setConfirm('')}
+                confirm={remove}
+              >
+                Existing bookings and notices will be kept. The venue will no
+                longer accept new reservations.
+              </ConfirmAction>
             )}
-            {confirm && (
+            {confirm === 'delete' && (
               <ConfirmDelete
                 name={c.singular.toLowerCase()}
-                cancel={() => setConfirm(false)}
+                cancel={() => setConfirm('')}
+                busy={busy}
                 confirm={remove}
               />
             )}

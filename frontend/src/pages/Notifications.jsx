@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { BellDot, Bell } from 'lucide-react'
 import { api } from '../services/api'
 import { useData } from '../hooks/useData'
 import { State, Empty, Heading } from '../components/Common'
@@ -9,6 +10,7 @@ export default function Notifications() {
   const q = useData('notifications/', true),
     [error, setError] = useState('')
   async function mark(path) {
+    setError('')
     try {
       await api('notifications/' + path + '/', { method: 'POST' })
       q.reload()
@@ -23,12 +25,25 @@ export default function Notifications() {
         <button onClick={() => mark('read_all')}>Mark all as read</button>
       </Heading>
       {error && <p className="error">{error}</p>}
-      <section className="panel detail">
+      <section
+        className="panel notification-list"
+        aria-label="Notification center"
+      >
         <State query={q}>
           {(rows) =>
             rows.length ? (
               rows.map((r) => (
-                <article className="list-row" key={r.id}>
+                <article
+                  className={
+                    'notification-entry ' + (r.read ? 'seen' : 'unread')
+                  }
+                  key={r.id}
+                >
+                  {r.read ? (
+                    <Bell size={18} aria-hidden="true" />
+                  ) : (
+                    <BellDot size={18} aria-hidden="true" />
+                  )}
                   <div>
                     <Link to={r.link}>{r.message}</Link>
                     <small>

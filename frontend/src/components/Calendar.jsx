@@ -6,11 +6,15 @@ import {
   Plus,
   CalendarDays,
   List,
+  Clock3,
+  MapPin,
 } from 'lucide-react'
 import { useData } from '../hooks/useData'
 import { useAuth } from '../context/auth'
 import { Heading, State, Badge, Empty } from './Common'
 import { dateKey, day, todayKey, formatDate, formatTime } from '../utils/format'
+import { isActiveEvent } from '../utils/events'
+import MonthlyEventCalendar from './MonthlyEventCalendar'
 
 function move(date, days) {
   const next = new Date(date)
@@ -24,9 +28,25 @@ function monday(date) {
 export default function Calendar({ availability = false }) {
   const { user, manager } = useAuth(),
     [searchParams, setParams] = useSearchParams()
-  const [cursor, setCursor] = useState(() => day(todayKey())),
-    [mode, setMode] = useState('week'),
-    [all, setAll] = useState(false)
+  const [availabilityCursor, setAvailabilityCursor] = useState(() =>
+      day(todayKey()),
+    ),
+    [availabilityMode, setAvailabilityMode] = useState('week'),
+    [all, setAll] = useState(false),
+    [eventsOnly, setEventsOnly] = useState(false)
+  const selected = searchParams.get('date')
+  const cursor = availability
+    ? availabilityCursor
+    : selected &&
+        /^\d{4}-\d{2}-\d{2}$/.test(selected) &&
+        dateKey(day(selected)) === selected
+      ? day(selected)
+      : day(todayKey())
+  const mode = availability
+    ? availabilityMode
+    : searchParams.get('view') === 'month'
+      ? 'month'
+      : 'week'
   const venue = searchParams.get('venue') || ''
   const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12)
   const start = mode === 'month' ? monday(monthStart) : monday(cursor)
@@ -55,11 +75,20 @@ export default function Calendar({ availability = false }) {
     !availability,
   )
   const venues = useData(availability ? 'venues/' : null, true)
+  function setCursor(date) {
+    if (availability) setAvailabilityCursor(date)
+    else setParams({ view: mode, date: dateKey(date) }, { replace: true })
+  }
   function step(direction) {
+    if (mode === 'week') {
+      setCursor(move(cursor, 7 * direction))
+      return
+    }
+    const nextMonth = cursor.getMonth() + direction
+    const year = cursor.getFullYear()
+    const lastDay = new Date(year, nextMonth + 1, 0).getDate()
     setCursor(
-      mode === 'month'
-        ? new Date(cursor.getFullYear(), cursor.getMonth() + direction, 1, 12)
-        : move(cursor, 7 * direction),
+      new Date(year, nextMonth, Math.min(cursor.getDate(), lastDay), 12),
     )
   }
   return (
@@ -70,7 +99,7 @@ export default function Calendar({ availability = false }) {
         description={
           availability
             ? 'Check bookings and closures before requesting a space.'
-            : 'Explore the DLL Elite schedule, week by week.'
+            : 'Browse the schedule by week or select a date on the monthly calendar.'
         }
       >
         {(availability ? user : manager) && (
@@ -83,14 +112,58 @@ export default function Calendar({ availability = false }) {
           </Link>
         )}
       </Heading>
+      {!availability && (
+        <div
+          className="filter-switch"
+          role="group"
+          aria-label="Event calendar view"
+        >
+          <button
+            type="button"
+            aria-pressed={mode === 'week'}
+            onClick={() =>
+              setParams(
+                { view: 'week', date: dateKey(cursor) },
+                { replace: true },
+              )
+            }
+          >
+            <List size={17} /> Weekly View
+          </button>
+          <button
+            type="button"
+            aria-pressed={mode === 'month'}
+            onClick={() =>
+              setParams(
+                { view: 'month', date: dateKey(cursor) },
+                { replace: true },
+              )
+            }
+          >
+            <CalendarDays size={17} /> Monthly Calendar View
+          </button>
+        </div>
+      )}
       <div className="panel calendar">
         <div className="calendar-tools">
           <div className="actions">
-            <button aria-label="Previous period" onClick={() => step(-1)}>
+            <button
+              aria-label={
+                mode === 'month' && !availability
+                  ? 'Previous month'
+                  : 'Previous period'
+              }
+              onClick={() => step(-1)}
+            >
               <ChevronLeft size={16} />
             </button>
             <button onClick={() => setCursor(day(todayKey()))}>Today</button>
-            <button aria-label="Next period" onClick={() => step(1)}>
+            <button
+              aria-label={
+                mode === 'month' && !availability ? 'Next month' : 'Next period'
+              }
+              onClick={() => step(1)}
+            >
               <ChevronRight size={16} />
             </button>
           </div>
@@ -117,7 +190,7 @@ export default function Calendar({ availability = false }) {
               <select
                 aria-label="Calendar view"
                 value={mode}
-                onChange={(e) => setMode(e.target.value)}
+                onChange={(e) => setAvailabilityMode(e.target.value)}
               >
                 <option value="week">Week</option>
                 <option value="month">Month</option>
@@ -139,16 +212,28 @@ export default function Calendar({ availability = false }) {
               </select>
             </>
           ) : (
-            manager && (
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={all}
-                  onChange={(e) => setAll(e.target.checked)}
-                />
-                Include drafts
-              </label>
-            )
+            <>
+              {mode === 'week' && (
+                <select
+                  aria-label="Show dates"
+                  value={eventsOnly ? 'events' : 'all'}
+                  onChange={(e) => setEventsOnly(e.target.value === 'events')}
+                >
+                  <option value="all">All Dates</option>
+                  <option value="events">Dates With Events Only</option>
+                </select>
+              )}
+              {manager && (
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={all}
+                    onChange={(e) => setAll(e.target.checked)}
+                  />
+                  Include drafts
+                </label>
+              )}
+            </>
           )}
         </div>
         {venues.error && (
@@ -164,11 +249,33 @@ export default function Calendar({ availability = false }) {
           )}
         <State query={q}>
           {(data) => {
-            const rows = availability ? data.slots : data
+            if (!availability && mode === 'month') {
+              return (
+                <MonthlyEventCalendar
+                  dates={dates}
+                  events={data}
+                  selected={dateKey(cursor)}
+                  onSelect={setCursor}
+                />
+              )
+            }
+            const rows = availability
+              ? data.slots
+              : eventsOnly
+                ? data.filter(isActiveEvent)
+                : data
+            const visibleDates =
+              !availability && eventsOnly
+                ? dates.filter((date) =>
+                    rows.some((event) => event.date === date),
+                  )
+                : dates
+            if (!visibleDates.length)
+              return <Empty>No scheduled events this week.</Empty>
             const notices = availability ? data.notices : []
             return (
               <div className={'calendar-days ' + mode}>
-                {dates.map((date) => {
+                {visibleDates.map((date) => {
                   const slot = rows.filter((r) => r.date === date),
                     alerts = notices.filter(
                       (n) =>
@@ -191,9 +298,15 @@ export default function Calendar({ availability = false }) {
                           const info = (
                             <>
                               <strong>{r.title}</strong>
-                              <small>
-                                {formatTime(r.start)} – {formatTime(r.end)} ·{' '}
-                                {r.venue_name}
+                              <small className="slot-info">
+                                <span>
+                                  <Clock3 size={14} /> {formatTime(r.start)} –{' '}
+                                  {formatTime(r.end)}
+                                </span>
+                                <span>
+                                  <MapPin size={14} /> {r.venue_name}
+                                  {r.retired_venue && ' · Retired venue'}
+                                </span>
                               </small>
                               <Badge
                                 value={
@@ -278,7 +391,7 @@ function EventDirectory() {
           rows.length ? (
             rows.map((r) => (
               <Link
-                className="list-row"
+                className="list-row event-management-row"
                 key={r.id}
                 to={'/weekly-events/' + r.id}
               >
@@ -286,7 +399,10 @@ function EventDirectory() {
                   {r.title}
                   <small>{formatDate(r.date)}</small>
                 </span>
-                <Badge value={r.published ? r.status : 'draft'} />
+                <span className="event-management-action">
+                  <Badge value={r.published ? r.status : 'draft'} />
+                  <ChevronRight size={17} aria-hidden="true" />
+                </span>
               </Link>
             ))
           ) : (

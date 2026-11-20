@@ -7,6 +7,7 @@ class Venue(models.Model):
     location = models.CharField(max_length=160)
     capacity = models.PositiveIntegerField()
     available = models.BooleanField(default=True)
+    archived = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["name"]
@@ -21,7 +22,10 @@ class Venue(models.Model):
 
 
 class Notice(models.Model):
-    venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="notices")
+    venue = models.ForeignKey(
+        Venue, on_delete=models.PROTECT, related_name="notices", null=True, blank=True
+    )
+    venue_snapshot = models.CharField(max_length=120, blank=True)
     title = models.CharField(max_length=160)
     description = models.TextField()
     starts_at = models.DateTimeField()
@@ -34,8 +38,16 @@ class Notice(models.Model):
             models.CheckConstraint(
                 condition=models.Q(ends_at__gt=models.F("starts_at")),
                 name="notice_time_order",
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(venue__isnull=False) | ~models.Q(venue_snapshot=""),
+                name="notice_keeps_venue_name",
+            ),
         ]
 
     def __str__(self):
         return self.title
+
+    @property
+    def venue_display_name(self):
+        return self.venue.name if self.venue_id is not None else self.venue_snapshot

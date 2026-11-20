@@ -13,5 +13,5 @@ class TeamSerializer(serializers.ModelSerializer):
         return [
             {"name": str(member), "position": member.position}
             for member in obj.members.all()
-            if member.is_active
+            if member.is_active and member.role == "staff"
         ]

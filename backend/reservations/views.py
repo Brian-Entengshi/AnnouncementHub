@@ -5,10 +5,11 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from config.api import ResourceViewSet
+from audit_logs.models import AuditLog
 from config.permissions import manager
 from .models import Reservation
 from .serializers import ReservationSerializer
-from .services import check_slot, record_status, local_instant
+from .services import approve_booking, record_status, local_instant
 
 
 class ReservationViewSet(ResourceViewSet):
@@ -17,12 +18,16 @@ class ReservationViewSet(ResourceViewSet):
     ).prefetch_related("history__actor")
     serializer_class = ReservationSerializer
     permission_classes = [IsAuthenticated]
-    search_fields = ["title", "venue__name"]
+    search_fields = ["title", "venue__name", "venue_snapshot"]
     http_method_names = ["get", "post", "head", "options"]
     exact_filters = ("status", "venue_id", "date")
 
     def get_queryset(self):
         query = super().get_queryset()
+        if self.action == "list" and self.request.query_params.get("for_event") == "1":
+            query = query.filter(
+                status="approved", venue__archived=False, venue__available=True
+            )
         if (
             not manager(self.request.user)
             or self.request.query_params.get("mine") == "1"
@@ -57,14 +62,8 @@ class ReservationViewSet(ResourceViewSet):
                 {"reason": "Enter the reason for rejection."}
             )
         if target == "approved":
-            check_slot(
-                reservation.venue,
-                reservation.date,
-                reservation.start,
-                reservation.end,
-                reservation.attendees,
-                excluding=reservation.pk,
-            )
+            approve_booking(reservation, request.user, reason)
+            return Response(self.get_serializer(self.get_queryset().get(pk=pk)).data)
         if (
             target == "completed"
             and local_instant(reservation.date, reservation.end) > timezone.now()
@@ -75,4 +74,6 @@ class ReservationViewSet(ResourceViewSet):
         reservation.status = target
         reservation.save(update_fields=["status"])
         record_status(reservation, request.user, reason)
+        if target == "cancelled" and (event := getattr(reservation, "event", None)):
+            AuditLog.record(request.user, "Cancelled", event)
         return Response(self.get_serializer(self.get_queryset().get(pk=pk)).data)

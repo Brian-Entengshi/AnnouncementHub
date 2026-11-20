@@ -1,10 +1,13 @@
 from datetime import date, timedelta
 from django.utils import timezone
-from rest_framework.decorators import api_view, permission_classes
+from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from config.api import ResourceViewSet
-from config.permissions import manager
+from audit_logs.models import AuditLog
+from config.permissions import IsAdviser, manager
 from notifications.models import Notification
 from reservations.models import Reservation
 from .models import Venue, Notice
@@ -16,21 +19,90 @@ class VenueViewSet(ResourceViewSet):
     serializer_class = VenueSerializer
     search_fields = ["name", "location"]
 
+    def get_permissions(self):
+        if self.action in ("create", "destroy", "archive"):
+            return [IsAdviser()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        venues = super().get_queryset()
+        if self.action in (
+            "retrieve",
+            "update",
+            "partial_update",
+            "destroy",
+            "archive",
+        ):
+            return venues
+        params = self.request.query_params
+        if manager(self.request.user) and params.get("bookable") != "1":
+            status = params.get("status")
+            if status == "archived" or params.get("archived") == "1":
+                return venues.filter(archived=True)
+            if status == "inactive":
+                return venues.filter(archived=False, available=False)
+        return venues.filter(archived=False, available=True)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        venue = self.get_object()
+        try:
+            with transaction.atomic():
+                self.perform_destroy(venue)
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": "This venue has linked reservations or notices. Archive it to preserve those records."
+                },
+                status=409,
+            )
+        return Response({"detail": "Venue deleted successfully."})
+
+    def perform_destroy(self, instance):
+        AuditLog.record(self.request.user, "Deleted", instance)
+        instance.delete()
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def archive(self, request, pk=None):
+        venue = self.get_object()
+        if venue.archived:
+            return Response({"detail": "This venue is already archived."})
+        venue.archived = True
+        venue.available = False
+        venue.save(update_fields=["archived", "available"])
+        AuditLog.record(request.user, "Archived", venue)
+        return Response(
+            {"detail": "Venue archived. Existing reservations and notices were kept."}
+        )
+
+    def perform_update(self, serializer):
+        was_available = serializer.instance.available
+        super().perform_update(serializer)
+        if was_available != serializer.instance.available:
+            action_name = (
+                "Reactivated" if serializer.instance.available else "Deactivated"
+            )
+            AuditLog.record(self.request.user, action_name, serializer.instance)
+
 
 class NoticeViewSet(ResourceViewSet):
     queryset = Notice.objects.select_related("venue")
     serializer_class = NoticeSerializer
-    search_fields = ["title", "venue__name"]
+    search_fields = ["title", "venue__name", "venue_snapshot"]
     exact_filters = ("venue_id",)
 
     def get_queryset(self):
         query = super().get_queryset()
-        if self.action == "retrieve" or (
+        if self.action == "retrieve":
+            return query
+        query = query.filter(venue__isnull=False)
+        if (
             manager(self.request.user)
             and self.request.query_params.get("manage") == "1"
         ):
             return query
-        return query.filter(ends_at__gt=timezone.now())
+        return query.filter(ends_at__gt=timezone.now(), venue__archived=False)
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -56,9 +128,9 @@ def availability(request):
         return Response(
             {"detail": "Choose a valid venue and a range of up to 43 days."}, status=400
         )
-    query = Reservation.objects.filter(date__range=(start, end)).select_related(
-        "venue", "event"
-    )
+    query = Reservation.objects.filter(
+        date__range=(start, end), venue__isnull=False
+    ).select_related("venue", "event")
     visible = ["approved", "completed"]
     if manager(request.user):
         visible.append("pending")
@@ -69,7 +141,7 @@ def availability(request):
         scope |= Q(requester=request.user, status="pending")
     query = query.filter(scope)
     notices = Notice.objects.filter(
-        starts_at__date__lte=end, ends_at__date__gte=start
+        starts_at__date__lte=end, ends_at__date__gte=start, venue__isnull=False
     ).select_related("venue")
     if venue_id:
         query = query.filter(venue_id=venue_id)

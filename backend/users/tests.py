@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from secrets import token_urlsafe
 from teams.models import Team
+from audit_logs.models import AuditLog
 
 User = get_user_model()
 
@@ -13,7 +14,7 @@ class AccountTests(APITestCase):
         self.adviser = User.objects.create_superuser("adviser")
         self.officer = User.objects.create_user("officer", role="officer")
         self.staff = User.objects.create_user("staff", role="staff", team=self.team)
-        self.initial = token_urlsafe()
+        self.initial = "123"
         self.data = dict(
             full_name="New Member",
             username="new.member",
@@ -33,6 +34,8 @@ class AccountTests(APITestCase):
             self.assertNotIn("password", response.data)
             user = User.objects.get(pk=response.data["id"])
             self.assertTrue(user.check_password(self.initial))
+            self.assertNotEqual(user.password, self.initial)
+            self.assertEqual(user.team, self.team if role == "staff" else None)
             self.assertTrue(user.must_change_password)
             self.assertEqual(user.created_by, self.adviser)
 
@@ -91,3 +94,132 @@ class AccountTests(APITestCase):
         self.staff.is_active = False
         self.staff.save(update_fields=["is_active"])
         self.assertEqual(client.get("/api/reservations/").status_code, 403)
+
+    def test_replacement_accepts_short_password_and_keeps_permanent_policy(self):
+        self.client.force_authenticate(self.officer)
+        path = reverse("accounts-detail", args=[self.staff.pk])
+        original = self.staff.password
+        self.assertEqual(
+            self.client.patch(path, {"password": ""}, format="json").status_code, 200
+        )
+        self.staff.refresh_from_db()
+        self.assertEqual(self.staff.password, original)
+        self.assertFalse(AuditLog.objects.filter(action="Password replaced").exists())
+        result = self.client.patch(path, {"password": "123"})
+        self.assertEqual(result.status_code, 200, result.data)
+        self.staff.refresh_from_db()
+        self.assertTrue(self.staff.check_password("123"))
+        self.assertNotEqual(self.staff.password, "123")
+        self.assertTrue(self.staff.must_change_password)
+        self.assertTrue(
+            AuditLog.objects.filter(
+                actor=self.officer,
+                resource="account",
+                action="Password replaced",
+                object_id=self.staff.pk,
+            ).exists()
+        )
+
+        client = APIClient()
+        self.assertEqual(
+            client.post(
+                "/api/login/", {"username": self.staff.username, "password": "123"}
+            ).status_code,
+            200,
+        )
+        self.assertEqual(client.get("/api/reservations/").status_code, 403)
+        weak = client.post(
+            "/api/password/", {"current_password": "123", "new_password": "1234"}
+        )
+        self.assertEqual(weak.status_code, 400)
+        changed = client.post(
+            "/api/password/",
+            {"current_password": "123", "new_password": token_urlsafe()},
+        )
+        self.assertEqual(changed.status_code, 200)
+        self.assertFalse(changed.data["user"]["must_change_password"])
+        self.assertEqual(client.get("/api/reservations/").status_code, 200)
+
+    def test_role_change_clears_team_and_noncore_team_is_rejected(self):
+        self.client.force_authenticate(self.adviser)
+        result = self.client.patch(
+            reverse("accounts-detail", args=[self.staff.pk]), {"role": "officer"}
+        )
+        self.assertEqual(result.status_code, 200)
+        self.assertIsNone(result.data["team"])
+        extra = Team.objects.create(name="Non-core team")
+        result = self.client.post(self.url, {**self.data, "team": extra.pk})
+        self.assertEqual(result.status_code, 400)
+
+    def test_temporary_passwords_create_and_replace_without_normalization(self):
+        self.client.force_authenticate(self.adviser)
+        examples = (
+            "1",
+            "12",
+            "123",
+            "1234",
+            "a",
+            "abc",
+            "password",
+            "elite",
+            "elite123",
+            "A",
+            "a1",
+            "  Ab1  ",
+            " ",
+        )
+        for role in ("staff", "officer"):
+            for index, password in enumerate(examples):
+                with self.subTest(role=role, index=index):
+                    result = self.client.post(
+                        self.url,
+                        {
+                            **self.data,
+                            "username": f"{role}-{index}",
+                            "role": role,
+                            "password": password,
+                        },
+                        format="json",
+                    )
+                    self.assertEqual(result.status_code, 201, result.data)
+                    self.assertNotIn("password", result.data)
+                    account = User.objects.get(pk=result.data["id"])
+                    self.assertTrue(account.check_password(password))
+                    changed = self.client.patch(
+                        reverse("accounts-detail", args=[account.pk]),
+                        {"password": examples[(index + 2) % len(examples)]},
+                        format="json",
+                    )
+                    self.assertEqual(changed.status_code, 200, changed.data)
+                    account.refresh_from_db()
+                    self.assertTrue(
+                        account.check_password(examples[(index + 2) % len(examples)])
+                    )
+                    self.assertTrue(account.must_change_password)
+
+        payload = {**self.data, "password": ""}
+        self.assertEqual(
+            self.client.post(self.url, payload, format="json").status_code, 400
+        )
+        payload.pop("password")
+        self.assertEqual(
+            self.client.post(self.url, payload, format="json").status_code, 400
+        )
+
+    def test_ordinary_account_edit_preserves_hash_with_multipart_or_json(self):
+        self.client.force_authenticate(self.adviser)
+        self.staff.set_password("  a  ")
+        self.staff.save()
+        original = self.staff.password
+        path = reverse("accounts-detail", args=[self.staff.pk])
+        for payload, encoding in [
+            ({"position": "Coordinator"}, "json"),
+            ({"position": "Committee lead", "password": ""}, "multipart"),
+            ({"position": "Member", "password": ""}, "json"),
+        ]:
+            self.assertEqual(
+                self.client.patch(path, payload, format=encoding).status_code, 200
+            )
+        self.staff.refresh_from_db()
+        self.assertEqual(self.staff.password, original)
+        self.assertFalse(AuditLog.objects.filter(action="Password replaced").exists())

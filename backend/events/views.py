@@ -7,7 +7,12 @@ from .serializers import EventSerializer
 class EventViewSet(ResourceViewSet):
     queryset = Event.objects.select_related("reservation__venue", "activity")
     serializer_class = EventSerializer
-    search_fields = ["title", "description", "reservation__venue__name"]
+    search_fields = [
+        "title",
+        "description",
+        "reservation__venue__name",
+        "reservation__venue_snapshot",
+    ]
 
     def get_queryset(self):
         query = super().get_queryset()

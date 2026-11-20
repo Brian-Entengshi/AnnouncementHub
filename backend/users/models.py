@@ -39,7 +39,11 @@ class User(AbstractUser):
             models.CheckConstraint(
                 condition=~models.Q(role="staff") | models.Q(team__isnull=False),
                 name="staff_has_team",
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(role="staff") | models.Q(team__isnull=True),
+                name="only_staff_have_team",
+            ),
         ]
 
     def __str__(self):

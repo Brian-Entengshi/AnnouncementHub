@@ -48,4 +48,9 @@ class AnnouncementViewSet(ResourceViewSet):
             serializer.instance.published_at = timezone.now()
         super().perform_update(serializer)
         if previous != serializer.instance.status:
-            self.notify(serializer.instance)
+            record = serializer.instance
+            if record.status == "published":
+                self.notify(record)
+            else:
+                action = "Archived" if record.status == "archived" else "Unpublished"
+                AuditLog.record(self.request.user, action, record)

@@ -12,3 +12,8 @@ class RecordsAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class HubAdminSite(admin.AdminSite):
+    def has_permission(self, request):
+        return super().has_permission(request) and not request.user.must_change_password

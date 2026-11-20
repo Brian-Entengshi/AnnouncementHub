@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import {
   Link,
   NavLink,
@@ -55,7 +55,7 @@ const admin = [
   ['Account Management', '/accounts', ShieldCheck],
 ]
 const adviserNav = [
-  ['Activity Records', '/audit', History],
+  ['Audit Logs', '/audit', History],
   ['Settings', '/settings', Settings],
 ]
 function Group({ title, items }) {
@@ -72,7 +72,7 @@ function Group({ title, items }) {
   )
 }
 function Help({ close }) {
-  const q = useData('settings/'),
+  const q = useData('help/'),
     ref = useRef(null)
   useEffect(() => {
     ref.current.showModal()
@@ -90,23 +90,36 @@ function Help({ close }) {
       </p>
       <State query={q}>
         {(r) => (
-          <>
+          <div
+            className={
+              r.contact_email || r.office_hours ? 'help-contact' : undefined
+            }
+          >
             {r.contact_email && (
               <p>
                 <a href={'mailto:' + r.contact_email}>{r.contact_email}</a>
               </p>
             )}
             {r.office_hours && <p>Office hours · {r.office_hours}</p>}
-          </>
+          </div>
         )}
       </State>
     </dialog>
   )
 }
 export default function Layout() {
-  const { user, manager, adviser, logout } = useAuth(),
+  const {
+      user,
+      loading,
+      error: sessionError,
+      manager,
+      adviser,
+      logout,
+      setSession,
+    } = useAuth(),
     location = useLocation(),
     navigate = useNavigate()
+  const studentAccess = !user && !loading && !sessionError
   const [drawer, setDrawer] = useState(false),
     [help, setHelp] = useState(false),
     [error, setError] = useState(''),
@@ -183,8 +196,11 @@ export default function Layout() {
     )?.[0] || 'Dashboard'
   async function leave() {
     try {
-      await logout()
-      navigate('/dashboard')
+      const next = await logout()
+      startTransition(() => {
+        navigate('/dashboard', { replace: true })
+        setSession(next)
+      })
       setDrawer(false)
     } catch (err) {
       setError(err.message)
@@ -234,15 +250,17 @@ export default function Layout() {
           )}
         </nav>
         <div className="sidebar-bottom">
-          <button
-            onClick={() => {
-              setDrawer(false)
-              setHelp(true)
-            }}
-          >
-            <CircleHelp size={17} />
-            Hub help
-          </button>
+          {studentAccess && (
+            <button
+              onClick={() => {
+                setDrawer(false)
+                setHelp(true)
+              }}
+            >
+              <CircleHelp size={17} />
+              Hub help
+            </button>
+          )}
           <div className="identity">
             <span className="avatar">
               {user ? (
@@ -317,7 +335,14 @@ export default function Layout() {
             )}
           </div>
         </header>
-        <main id="content">
+        <main
+          id="content"
+          className={
+            location.pathname === '/dashboard' || location.pathname === '/'
+              ? undefined
+              : 'inner-page'
+          }
+        >
           {offline && (
             <p className="offline">
               <Radio size={16} />
@@ -328,7 +353,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
-      {help && <Help close={() => setHelp(false)} />}
+      {studentAccess && help && <Help close={() => setHelp(false)} />}
     </div>
   )
 }

@@ -64,11 +64,7 @@ export const catalog = {
     fields: [
       title,
       text,
-      source(
-        'reservation',
-        'Approved booking',
-        'reservations/?status=approved',
-      ),
+      source('reservation', 'Approved booking', 'reservations/?for_event=1'),
       source('activity', 'Related activity', 'activities/?manage=1', optional),
       flag('published', 'Publish event'),
       image,
@@ -140,7 +136,7 @@ export const catalog = {
       input('title', 'Event title'),
       text,
       source('team', 'Requesting team', 'teams/', optional),
-      source('venue', 'Venue', 'venues/'),
+      source('venue', 'Venue', 'venues/?bookable=1'),
       input('date', 'Reservation date', 'date'),
       input('start', 'Start time', 'time'),
       input('end', 'End time', 'time'),
@@ -163,7 +159,7 @@ export const catalog = {
       input('email', 'Email', 'email', optional),
       options('role', 'Organization role', ['staff', 'officer']),
       input('position', 'Position', 'text', optional),
-      source('team', 'Assigned team', 'teams/', optional),
+      source('team', 'Assigned team', 'teams/?core=1', optional),
       input('contact', 'Contact information', 'text', optional),
       flag('is_active', 'Account active'),
       input(

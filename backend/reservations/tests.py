@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from audit_logs.models import AuditLog
 from datetime import time, timedelta
 from threading import Barrier
 from django.db import connections
@@ -139,6 +140,17 @@ class BookingTests(BookingFixture, APITestCase):
             400,
         )
         self.assertEqual(self.change(pk, "cancelled").status_code, 200)
+        self.assertEqual(
+            set(
+                AuditLog.objects.filter(
+                    resource="reservation", object_id=pk
+                ).values_list("action", flat=True)
+            ),
+            {"Submitted", "Approved", "Cancelled"},
+        )
+        self.assertTrue(
+            AuditLog.objects.filter(resource="event", action="Cancelled").exists()
+        )
         self.client.force_authenticate(None)
         self.assertEqual(
             self.client.get("/api/events/").data["results"][0]["status"], "cancelled"

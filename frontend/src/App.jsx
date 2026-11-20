@@ -106,11 +106,13 @@ function HubRoutes() {
               const role =
                 c.path === 'manage-announcements' || c.api === 'accounts'
                   ? 'manager'
-                  : c.api === 'reservations'
-                    ? 'member'
-                    : s === '/new' || s.endsWith('edit')
-                      ? 'manager'
-                      : null
+                  : c.api === 'venues' && s === '/new'
+                    ? 'adviser'
+                    : c.api === 'reservations'
+                      ? 'member'
+                      : s === '/new' || s.endsWith('edit')
+                        ? 'manager'
+                        : null
               return (
                 <Route
                   key={c.path + s}

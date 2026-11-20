@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Save, X } from 'lucide-react'
 import { api } from '../services/api'
 import { managePath } from '../services/catalog'
@@ -8,8 +8,9 @@ import { useAuth } from '../context/auth'
 import { draftKey, loadDraft, saveDraft, clearDraft } from '../hooks/drafts'
 import { Heading, State } from './Common'
 import { human } from '../utils/format'
+import PasswordInput from './PasswordInput'
 
-function SelectField({ field, value, onChange, disabled }) {
+function SelectField({ field, value, onChange, disabled, currentLabel }) {
   const query = useData(field.endpoint, true)
   const options = field.endpoint
     ? (query.data || []).map((item) => [
@@ -18,6 +19,13 @@ function SelectField({ field, value, onChange, disabled }) {
           (item.date ? ' · ' + item.date + ' · ' + item.start.slice(0, 5) : ''),
       ])
     : field.choices.map((v) => [v, human(v)])
+  if (
+    value &&
+    currentLabel &&
+    !options.some(([id]) => String(id) === String(value))
+  ) {
+    options.unshift([value, currentLabel])
+  }
   return (
     <>
       <select
@@ -47,6 +55,7 @@ function SelectField({ field, value, onChange, disabled }) {
 function Editor({ config: c, initial, id }) {
   const { user, adviser } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const key = draftKey(user.id, c.api + '/' + (id || 'new'))
   let fields = c.fields
   if (c.api === 'accounts')
@@ -78,6 +87,13 @@ function Editor({ config: c, initial, id }) {
     }
     return { ...defaults, ...loadDraft(key) }
   })
+  const visibleFields = fields.filter((field) => {
+    if (c.api === 'accounts' && field.name === 'team')
+      return values.role === 'staff'
+    if (c.api === 'venues' && field.name === 'available')
+      return !initial?.archived
+    return true
+  })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const back = '/' + managePath(c) + (id ? '/' + id : '')
@@ -91,7 +107,7 @@ function Editor({ config: c, initial, id }) {
     setError('')
     setBusy(true)
     const data = new FormData()
-    for (const f of fields) {
+    for (const f of visibleFields) {
       const v = values[f.name]
       if (f.type === 'file') {
         if (v instanceof File) data.append(f.name, v)
@@ -108,9 +124,16 @@ function Editor({ config: c, initial, id }) {
       )
     }
     try {
+      const body =
+        c.api === 'accounts'
+          ? {
+              ...Object.fromEntries(data),
+              team: values.role === 'staff' ? values.team || null : null,
+            }
+          : data
       const item = await api(c.api + '/' + (id ? id + '/' : '') + '?manage=1', {
         method: id ? 'PATCH' : 'POST',
-        body: data,
+        body,
       })
       clearDraft(key)
       navigate('/' + managePath(c) + '/' + item.id, { replace: true })
@@ -133,7 +156,7 @@ function Editor({ config: c, initial, id }) {
             booking times are in Manila.
           </p>
         )}
-        {fields.map((f) => {
+        {visibleFields.map((f) => {
           const required =
             f.required ||
             (c.api === 'accounts' &&
@@ -156,6 +179,16 @@ function Editor({ config: c, initial, id }) {
                 <SelectField
                   field={{ ...f, required }}
                   value={values[f.name]}
+                  currentLabel={
+                    f.name === 'venue' &&
+                    String(initial?.venue) === String(values.venue)
+                      ? initial?.venue_name
+                      : f.name === 'reservation' &&
+                          String(initial?.reservation) ===
+                            String(values.reservation)
+                        ? initial?.venue_name
+                        : undefined
+                  }
                   disabled={user.role === 'staff' && f.name === 'team'}
                   onChange={(v) => change(f.name, v)}
                 />
@@ -183,11 +216,27 @@ function Editor({ config: c, initial, id }) {
                   />
                   <small>Reselect files after refreshing.</small>
                 </>
+              ) : f.type === 'password' ? (
+                <>
+                  <PasswordInput
+                    label={f.label}
+                    autoComplete="new-password"
+                    autoFocus={params.get('password') === '1'}
+                    required={required}
+                    value={values[f.name] ?? ''}
+                    onChange={(e) => change(f.name, e.target.value)}
+                  />
+                  <small>
+                    {id
+                      ? 'Leave blank to keep the current password.'
+                      : 'The member will choose a permanent password at first sign-in.'}
+                  </small>
+                </>
               ) : (
                 <input
                   type={f.type}
                   min={f.type === 'number' ? 1 : undefined}
-                  autoComplete={f.type === 'password' ? 'new-password' : 'off'}
+                  autoComplete="off"
                   required={required}
                   value={values[f.name] ?? ''}
                   onChange={(e) => change(f.name, e.target.value)}

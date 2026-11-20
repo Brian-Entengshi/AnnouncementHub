@@ -24,7 +24,6 @@ class Command(BaseCommand):
                 model.objects.exists()
                 for model in (
                     Event,
-                    Venue,
                     Reservation,
                     Announcement,
                     Notice,
@@ -46,33 +45,8 @@ class Command(BaseCommand):
             is_active=False,
         )
         venues = [
-            Venue.objects.create(name=n, location=l, capacity=c, description=d)
-            for n, l, c, d in [
-                (
-                    "Innovation Lab",
-                    "Technology Building · Level 2",
-                    40,
-                    "A collaborative laboratory for practical workshops and small-group projects.",
-                ),
-                (
-                    "College Auditorium",
-                    "Main Building · Ground floor",
-                    220,
-                    "A presentation venue for organization assemblies and student showcases.",
-                ),
-                (
-                    "Media Studio",
-                    "Arts Building · Level 1",
-                    25,
-                    "A production space for editing, recording and documentation sessions.",
-                ),
-                (
-                    "Seminar Room",
-                    "Main Building · Level 2",
-                    60,
-                    "A flexible meeting room for briefings and training.",
-                ),
-            ]
+            Venue.objects.get(name=name)
+            for name in ("Audio-Visual Room (AVR)", "DLL Grounds", "ComLab 1")
         ]
         activity = Activity.objects.create(
             title="Student leadership development",
@@ -172,8 +146,8 @@ class Command(BaseCommand):
         )
         Notice.objects.create(
             venue=venues[2],
-            title="Media Studio equipment maintenance",
-            description="Studio bookings pause during the scheduled equipment inspection.",
+            title="ComLab 1 equipment maintenance",
+            description="Lab bookings pause during the scheduled equipment inspection.",
             starts_at=starts,
             ends_at=starts + timedelta(hours=4),
             blocks_bookings=True,

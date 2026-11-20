@@ -6,23 +6,34 @@ from .models import Notice, Venue
 
 
 class VenueSerializer(serializers.ModelSerializer):
+    available = serializers.BooleanField(default=True)
+
     class Meta:
         model = Venue
         fields = "__all__"
+        read_only_fields = ("archived",)
+
+    def validate_name(self, name):
+        venues = Venue.objects.filter(name__iexact=name)
+        if self.instance:
+            venues = venues.exclude(pk=self.instance.pk)
+        if venues.exists():
+            raise serializers.ValidationError("A venue with this name already exists.")
+        return name
 
     def validate(self, attrs):
-        if self.instance:
-            booked = self.instance.reservations.filter(
-                status="approved", date__gte=timezone.localdate()
-            )
-            if booked.exists() and (
-                attrs.get("available") is False
-                or booked.filter(
-                    attendees__gt=attrs.get("capacity", self.instance.capacity)
-                ).exists()
-            ):
+        if self.instance and self.instance.archived and attrs.get("available"):
+            raise serializers.ValidationError({"available": "This venue is archived."})
+        if self.instance and "capacity" in attrs:
+            if self.instance.reservations.filter(
+                status="approved",
+                date__gte=timezone.localdate(),
+                attendees__gt=attrs["capacity"],
+            ).exists():
                 raise serializers.ValidationError(
-                    "Resolve affected approved bookings before changing venue availability or capacity."
+                    {
+                        "capacity": "The new capacity is below attendance for an approved booking."
+                    }
                 )
         if attrs.get("capacity", 1) < 1:
             raise serializers.ValidationError(
@@ -32,15 +43,26 @@ class VenueSerializer(serializers.ModelSerializer):
 
 
 class NoticeSerializer(serializers.ModelSerializer):
-    venue_name = serializers.StringRelatedField(source="venue")
+    venue_name = serializers.CharField(source="venue_display_name", read_only=True)
 
     class Meta:
         model = Notice
-        fields = "__all__"
+        exclude = ("venue_snapshot",)
+        extra_kwargs = {"venue": {"required": True, "allow_null": False}}
 
     def validate(self, attrs):
         def value(name):
             return attrs.get(name, getattr(self.instance, name, None))
+
+        venue = value("venue")
+        if venue is None:
+            raise serializers.ValidationError(
+                {"venue": "This notice belongs to a retired venue."}
+            )
+        if venue.archived and (
+            self.instance is None or venue.pk != self.instance.venue_id
+        ):
+            raise serializers.ValidationError({"venue": "This venue is archived."})
 
         start, end = value("starts_at"), value("ends_at")
         if end <= start:

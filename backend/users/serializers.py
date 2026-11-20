@@ -1,4 +1,4 @@
-from django.contrib.auth.password_validation import validate_password
+from teams.models import CORE_TEAM_NAMES
 from rest_framework import serializers
 from .models import User
 
@@ -6,9 +6,16 @@ from .models import User
 class AccountSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="first_name", max_length=150)
     password = serializers.CharField(
-        write_only=True, required=False, trim_whitespace=False
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
     )
     team_name = serializers.StringRelatedField(source="team", read_only=True)
+    can_change_status = serializers.SerializerMethodField()
+
+    def get_can_change_status(self, target):
+        request = self.context.get("request")
+        return bool(
+            request and not target.is_superuser and request.user.pk != target.pk
+        )
 
     class Meta:
         model = User
@@ -25,8 +32,10 @@ class AccountSerializer(serializers.ModelSerializer):
             "is_active",
             "password",
             "must_change_password",
+            "date_joined",
+            "can_change_status",
         )
-        read_only_fields = ("must_change_password",)
+        read_only_fields = ("must_change_password", "date_joined")
 
     def validate(self, attrs):
         actor = self.context["request"].user
@@ -53,22 +62,20 @@ class AccountSerializer(serializers.ModelSerializer):
                 "This administrative account must stay active with its current role."
             )
         team = attrs.get("team", getattr(target, "team", None))
-        if role == "staff" and not team:
+        if role != "staff":
+            attrs["team"] = None
+        elif not team or team.name not in CORE_TEAM_NAMES:
             raise serializers.ValidationError(
-                {"team": "Assign a team to this staff member."}
+                {"team": "Assign this staff member to one of the four core teams."}
             )
         if not target and not attrs.get("password"):
             raise serializers.ValidationError(
                 {"password": "An initial password is required."}
             )
-        if "password" in attrs:
-            validate_password(
-                attrs["password"],
-                User(
-                    username=attrs.get("username", ""),
-                    first_name=attrs.get("first_name", ""),
-                ),
-            )
+        # A blank replacement is an ordinary profile edit. Retain all
+        # non-empty input verbatim and validate permanent passwords separately.
+        if target and attrs.get("password") == "":
+            attrs.pop("password")
         return attrs
 
     def create(self, validated_data):
@@ -80,7 +87,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
-        if password:
+        if password is not None:
             instance.set_password(password)
             instance.must_change_password = True
         return super().update(instance, validated_data)

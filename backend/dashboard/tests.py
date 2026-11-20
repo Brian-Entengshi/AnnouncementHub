@@ -94,3 +94,49 @@ class ContentTests(APITestCase):
         self.assertEqual(
             self.client.delete(f"/api/links/{link.data['id']}/").status_code, 204
         )
+
+
+class DemoProgramTests(APITestCase):
+    def test_seed_program_is_idempotent_and_public(self):
+        from django.core.management import call_command
+        from activities.models import Activity
+        from events.models import Event
+        from .models import DemoProgramEntry
+
+        adviser = User.objects.create_superuser("program-adviser")
+        call_command("seed_program", adviser=adviser.username, verbosity=0)
+        self.assertEqual(DemoProgramEntry.objects.count(), 7)
+        event = Event.objects.get(title="Campus organization briefing")
+        self.assertTrue(event.published)
+        self.assertEqual(event.reservation.status, "approved")
+        self.assertEqual(event.reservation.history.count(), 2)
+        self.assertFalse(event.reservation.venue.archived)
+        event.activity.title = "Edited orientation"
+        event.activity.save(update_fields=["title"])
+        call_command("seed_program", adviser=adviser.username, verbosity=0)
+        self.assertEqual(Event.objects.count(), 7)
+        self.assertEqual(Activity.objects.count(), 7)
+        self.assertTrue(Activity.objects.filter(title="Edited orientation").exists())
+        self.assertEqual(self.client.get("/api/events/").data["count"], 7)
+        self.assertEqual(self.client.get("/api/activities/").data["count"], 7)
+
+    def test_help_is_only_available_to_student_access(self):
+        self.assertEqual(self.client.get("/api/help/").status_code, 200)
+        self.assertEqual(self.client.get("/api/settings/").status_code, 403)
+        self.client.force_authenticate(
+            User.objects.create_user("officer", role="officer")
+        )
+        self.assertEqual(self.client.get("/api/help/").status_code, 403)
+        self.assertEqual(self.client.get("/api/settings/").status_code, 403)
+        self.client.force_authenticate(User.objects.create_superuser("help-adviser"))
+        self.assertEqual(
+            self.client.patch(
+                "/api/settings/", {"office_hours": "Monday, 09:00–12:00"}
+            ).status_code,
+            200,
+        )
+        self.assertEqual(self.client.get("/api/help/").status_code, 403)
+        self.client.force_authenticate(None)
+        self.assertEqual(
+            self.client.get("/api/help/").data["office_hours"], "Monday, 09:00–12:00"
+        )

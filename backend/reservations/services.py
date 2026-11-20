@@ -16,7 +16,7 @@ def check_slot(venue, date, start, end, attendees, excluding=None):
         raise ValidationError({"end": "End time must be after start time."})
     if local_instant(date, start) <= timezone.now():
         raise ValidationError({"date": "Select a future start time."})
-    if not venue.available:
+    if venue is None or venue.archived or not venue.available:
         raise ValidationError({"venue": "This venue is unavailable."})
     if not 0 < attendees <= venue.capacity:
         raise ValidationError(
@@ -63,4 +63,22 @@ def record_status(reservation, actor, reason=""):
                 for u in reviewers
             ]
         )
-    AuditLog.record(actor, reservation.status.title(), reservation)
+    action = (
+        "Submitted" if reservation.status == "pending" else reservation.status.title()
+    )
+    AuditLog.record(actor, action, reservation)
+
+
+def approve_booking(reservation, actor, reason=""):
+    """Validate the slot inside the caller's write transaction before approving it."""
+    check_slot(
+        reservation.venue,
+        reservation.date,
+        reservation.start,
+        reservation.end,
+        reservation.attendees,
+        excluding=reservation.pk,
+    )
+    reservation.status = "approved"
+    reservation.save(update_fields=["status"])
+    record_status(reservation, actor, reason)

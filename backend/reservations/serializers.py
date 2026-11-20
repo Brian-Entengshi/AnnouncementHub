@@ -14,13 +14,14 @@ class HistorySerializer(serializers.ModelSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     requester_name = serializers.StringRelatedField(source="requester")
     team_name = serializers.StringRelatedField(source="team")
-    venue_name = serializers.StringRelatedField(source="venue")
+    venue_name = serializers.CharField(source="venue_display_name", read_only=True)
     history = HistorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Reservation
-        fields = "__all__"
+        exclude = ("venue_snapshot",)
         read_only_fields = ("requester", "status")
+        extra_kwargs = {"venue": {"required": True, "allow_null": False}}
 
     def validate(self, attrs):
         user = self.context["request"].user
