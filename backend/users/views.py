@@ -6,7 +6,9 @@ from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
 from config.api import ResourceViewSet
+from audit_logs.models import AuditLog
 from config.permissions import IsManager, adviser
 from .models import User
 from .serializers import AccountSerializer
@@ -19,14 +21,32 @@ class AccountViewSet(ResourceViewSet):
     http_method_names = ["get", "post", "patch", "head", "options"]
     search_fields = ["username", "first_name", "position"]
 
+    def perform_update(self, serializer):
+        previous = serializer.instance.is_active
+        super().perform_update(serializer)
+        updated = serializer.instance
+        if previous != updated.is_active:
+            AuditLog.record(
+                self.request.user,
+                "Activated" if updated.is_active else "Deactivated",
+                updated,
+            )
+
     def get_queryset(self):
         users = super().get_queryset()
-        return users if adviser(self.request.user) else users.filter(role="staff", is_superuser=False)
+        return (
+            users
+            if adviser(self.request.user)
+            else users.filter(role="staff", is_superuser=False)
+        )
 
 
 def session_data(request):
     user = request.user
-    return {"user": AccountSerializer(user).data if user.is_authenticated else None, "csrf": get_token(request)}
+    return {
+        "user": AccountSerializer(user).data if user.is_authenticated else None,
+        "csrf": get_token(request),
+    }
 
 
 @api_view(["GET"])
@@ -39,9 +59,17 @@ def session(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def sign_in(request):
-    user = authenticate(request, username=request.data.get("username"), password=request.data.get("password"))
+    SessionAuthentication().enforce_csrf(request)
+    user = authenticate(
+        request,
+        username=request.data.get("username"),
+        password=request.data.get("password"),
+    )
     if user is None:
-        return Response({"detail": "Check your username and password or contact your adviser."}, status=400)
+        return Response(
+            {"detail": "Check your username and password or contact your adviser."},
+            status=400,
+        )
     login(request, user)
     return Response(session_data(request))
 
@@ -57,6 +85,10 @@ def password(request):
     if not request.user.check_password(request.data.get("current_password", "")):
         return Response({"detail": "The current password is incorrect."}, status=400)
     new = request.data.get("new_password", "")
+    if request.user.check_password(new):
+        return Response(
+            {"detail": "Choose a password different from your current one."}, status=400
+        )
     try:
         validate_password(new, request.user)
     except ValidationError as exc:

@@ -11,7 +11,12 @@ class Activity(models.Model):
 
     class Meta:
         ordering = ["start_date", "pk"]
-        constraints = [models.CheckConstraint(condition=models.Q(end_date__gte=models.F("start_date")), name="activity_date_order")]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(end_date__gte=models.F("start_date")),
+                name="activity_date_order",
+            )
+        ]
 
     def __str__(self):
         return self.title

@@ -10,7 +10,11 @@ class Venue(models.Model):
 
     class Meta:
         ordering = ["name"]
-        constraints = [models.CheckConstraint(condition=models.Q(capacity__gt=0), name="positive_venue_capacity")]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(capacity__gt=0), name="positive_venue_capacity"
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -26,7 +30,12 @@ class Notice(models.Model):
 
     class Meta:
         ordering = ["starts_at", "id"]
-        constraints = [models.CheckConstraint(condition=models.Q(ends_at__gt=models.F("starts_at")), name="notice_time_order")]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(ends_at__gt=models.F("starts_at")),
+                name="notice_time_order",
+            )
+        ]
 
     def __str__(self):
         return self.title

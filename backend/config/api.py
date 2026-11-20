@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.core.exceptions import ValidationError as FieldError
 from django.db.models.deletion import ProtectedError
 from rest_framework import serializers, viewsets
 from rest_framework.filters import SearchFilter
@@ -16,7 +17,10 @@ class ResourceViewSet(viewsets.ModelViewSet):
         for name in self.exact_filters:
             value = self.request.query_params.get(name)
             if value:
-                query = query.filter(**{name: value})
+                try:
+                    query = query.filter(**{name: value})
+                except (FieldError, ValueError, TypeError):
+                    raise serializers.ValidationError({name: "Invalid filter value."})
         return query
 
     @transaction.atomic
@@ -41,5 +45,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
         try:
             instance.delete()
         except ProtectedError:
-            raise serializers.ValidationError("This record is in use. Update its status or reassign its related records first.")
-
+            raise serializers.ValidationError(
+                "This record is in use. Update its status or reassign its related records first."
+            )

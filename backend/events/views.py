@@ -11,11 +11,18 @@ class EventViewSet(ResourceViewSet):
 
     def get_queryset(self):
         query = super().get_queryset()
-        if not (manager(self.request.user) and self.request.query_params.get("manage") == "1"):
+        if not (
+            manager(self.request.user)
+            and self.request.query_params.get("manage") == "1"
+        ):
             query = query.filter(published=True)
         from datetime import date
         from rest_framework.exceptions import ValidationError
-        for param, lookup in [("from", "reservation__date__gte"), ("to", "reservation__date__lte")]:
+
+        for param, lookup in [
+            ("from", "reservation__date__gte"),
+            ("to", "reservation__date__lte"),
+        ]:
             if value := self.request.query_params.get(param):
                 try:
                     query = query.filter(**{lookup: date.fromisoformat(value)})

@@ -27,10 +27,20 @@ class EventSerializer(ValidatedUploads):
         now = timezone.now()
         if local_instant(booking.date, booking.end) <= now:
             return "completed"
-        return "ongoing" if local_instant(booking.date, booking.start) <= now else "scheduled"
+        return (
+            "ongoing"
+            if local_instant(booking.date, booking.start) <= now
+            else "scheduled"
+        )
 
     def validate(self, attrs):
         booking = attrs.get("reservation", getattr(self.instance, "reservation", None))
-        if booking.status != "approved" and not (self.instance and booking == self.instance.reservation and booking.status == "completed"):
-            raise serializers.ValidationError({"reservation": "Select an approved reservation."})
+        if booking.status != "approved" and not (
+            self.instance
+            and booking == self.instance.reservation
+            and booking.status == "completed"
+        ):
+            raise serializers.ValidationError(
+                {"reservation": "Select an approved reservation."}
+            )
         return attrs

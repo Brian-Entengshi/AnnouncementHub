@@ -1,0 +1,268 @@
+.shell {
+  min-height: 100vh;
+}
+.sidebar {
+  width: 244px;
+  position: fixed;
+  inset: 0 auto 0 0;
+  background: #1a272f;
+  color: #f5f8f5;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+.brand {
+  min-height: 92px;
+  margin: 0 19px;
+  border-bottom: 1px solid #ffffff20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+}
+.brand strong {
+  display: block;
+  letter-spacing: 0.065em;
+  font-size: 1.22rem;
+}
+.brand span,
+.identity small {
+  font-size: 0.78rem;
+  color: #b6c2c6;
+}
+.sidebar nav {
+  padding: 6px 14px 20px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.nav-group {
+  margin-top: 24px;
+}
+.nav-group h2 {
+  margin: 0 0 10px 13px;
+  color: #b2bdbf;
+  font-size: 0.68rem;
+}
+.nav-group a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  min-height: 40px;
+  color: #dce3e4;
+  font-size: 0.87rem;
+  font-weight: 500;
+  margin: 2px 0;
+}
+.nav-group a:hover,
+.sidebar-bottom button:hover {
+  background: #ffffff12;
+}
+.nav-group a.active {
+  background: #d7eaa4;
+  color: #203025;
+  font-weight: 650;
+}
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px 18px 17px;
+}
+.sidebar-bottom button,
+.close-menu {
+  background: transparent;
+  color: #dce3e4;
+  border: 0;
+  justify-content: flex-start;
+}
+.identity {
+  border-top: 1px solid #ffffff22;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 15px;
+  margin-top: 8px;
+}
+.identity div {
+  min-width: 0;
+  flex: 1;
+}
+.identity strong,
+.identity small {
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.identity strong {
+  font-size: 0.87rem;
+}
+.identity small {
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+.avatar {
+  background: #34454d;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 650;
+}
+.workspace {
+  margin-left: 244px;
+}
+.topbar {
+  height: 68px;
+  background: #fff;
+  border-bottom: 1px solid #dce1df;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 clamp(18px, 3vw, 44px);
+}
+.crumb,
+.top-actions,
+.header-date,
+.sign-in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.crumb {
+  font-size: 0.85rem;
+  color: #6b7675;
+}
+.crumb b {
+  color: #233638;
+  font-weight: 600;
+}
+.header-date {
+  color: #576562;
+  font-size: 0.82rem;
+  padding-right: 13px;
+  border-right: 1px solid #dce1df;
+}
+.sign-in {
+  font-size: 0.82rem;
+  font-weight: 650;
+  min-height: 38px;
+}
+.top-actions .icon {
+  border: 0;
+}
+.notification {
+  position: relative;
+}
+.notification i {
+  position: absolute;
+  right: 9px;
+  top: 8px;
+  border-radius: 50%;
+  background: #5f822c;
+  width: 6px;
+  height: 6px;
+}
+.workspace main {
+  padding: 28px clamp(18px, 3vw, 44px) 44px;
+  max-width: 1640px;
+  margin: auto;
+}
+.mobile,
+.scrim {
+  display: none !important;
+}
+.help-dialog,
+dialog[open] {
+  max-width: min(450px, 92vw);
+  padding: 28px;
+  border: 1px solid #dce1df;
+  border-radius: 12px;
+  color: #1a272f;
+  box-shadow: 0 10px 44px #1220282c;
+}
+.help-dialog::backdrop {
+  background: #12202880;
+}
+.help-dialog h2,
+.help-dialog p {
+  margin: 12px 0;
+}
+.help-dialog .close {
+  float: right;
+}
+@media (max-width: 1024px) {
+  .workspace {
+    margin-left: 0;
+  }
+  .mobile {
+    display: inline-flex !important;
+  }
+  .sidebar {
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition:
+      transform 0.2s,
+      visibility 0.2s;
+    width: min(285px, 85vw);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .scrim {
+    display: block !important;
+    background: #17282f78;
+    position: fixed;
+    inset: 0;
+    border: 0;
+    border-radius: 0;
+    z-index: 19;
+  }
+  .close-menu {
+    margin-left: auto;
+    padding: 6px;
+  }
+  .topbar {
+    justify-content: flex-start;
+  }
+  .top-actions {
+    margin-left: auto;
+  }
+  .nav-group a {
+    min-height: 44px;
+  }
+  .workspace main {
+    padding-top: 20px;
+  }
+}
+@media (max-width: 620px) {
+  .header-date,
+  .crumb span,
+  .crumb > svg {
+    display: none;
+  }
+  .topbar {
+    height: 58px;
+  }
+  .workspace main {
+    padding: 16px 14px 32px;
+  }
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .top-actions {
+    gap: 6px;
+  }
+  .sign-in {
+    font-size: 0.78rem;
+  }
+}

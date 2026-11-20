@@ -8,7 +8,11 @@ class Announcement(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=60)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    status = models.CharField(max_length=12, choices=[(s, s.title()) for s in ("draft", "published", "archived")], default="draft")
+    status = models.CharField(
+        max_length=12,
+        choices=[(s, s.title()) for s in ("draft", "published", "archived")],
+        default="draft",
+    )
     pinned = models.BooleanField(default=False)
     published_at = models.DateTimeField(default=timezone.now)
     expires = models.DateField(null=True, blank=True)

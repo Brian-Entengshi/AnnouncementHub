@@ -16,6 +16,10 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return Notification.objects.filter(recipient=self.request.user)
 
+    @action(detail=False, methods=["get"])
+    def unread(self, request):
+        return Response({"unread": self.get_queryset().filter(read=False).count()})
+
     @action(detail=True, methods=["post"])
     def read(self, request, pk=None):
         obj = self.get_object()
@@ -25,4 +29,6 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["post"])
     def read_all(self, request):
-        return Response({"updated": self.get_queryset().filter(read=False).update(read=True)})
+        return Response(
+            {"updated": self.get_queryset().filter(read=False).update(read=True)}
+        )

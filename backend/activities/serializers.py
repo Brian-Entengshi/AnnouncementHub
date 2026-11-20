@@ -18,6 +18,10 @@ class ActivitySerializer(ValidatedUploads):
         return "completed" if obj.end_date < today else "ongoing"
 
     def validate(self, attrs):
-        if attrs.get("end_date", getattr(self.instance, "end_date", None)) < attrs.get("start_date", getattr(self.instance, "start_date", None)):
-            raise serializers.ValidationError({"end_date": "Select an end date on or after the start date."})
+        if attrs.get("end_date", getattr(self.instance, "end_date", None)) < attrs.get(
+            "start_date", getattr(self.instance, "start_date", None)
+        ):
+            raise serializers.ValidationError(
+                {"end_date": "Select an end date on or after the start date."}
+            )
         return attrs

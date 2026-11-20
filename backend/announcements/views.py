@@ -9,8 +9,9 @@ from .serializers import AnnouncementSerializer
 
 
 def published_announcements():
-    return Announcement.objects.filter(status="published", published_at__lte=timezone.now()).filter(
-        Q(expires__isnull=True) | Q(expires__gte=timezone.localdate()))
+    return Announcement.objects.filter(
+        status="published", published_at__lte=timezone.now()
+    ).filter(Q(expires__isnull=True) | Q(expires__gte=timezone.localdate()))
 
 
 class AnnouncementViewSet(ResourceViewSet):
@@ -21,7 +22,10 @@ class AnnouncementViewSet(ResourceViewSet):
 
     def get_queryset(self):
         query = super().get_queryset()
-        if manager(self.request.user) and self.request.query_params.get("manage") == "1":
+        if (
+            manager(self.request.user)
+            and self.request.query_params.get("manage") == "1"
+        ):
             return query
         return query.filter(pk__in=published_announcements().values("pk"))
 
@@ -37,7 +41,10 @@ class AnnouncementViewSet(ResourceViewSet):
 
     def perform_update(self, serializer):
         previous = serializer.instance.status
-        if previous != "published" and serializer.validated_data.get("status") == "published":
+        if (
+            previous != "published"
+            and serializer.validated_data.get("status") == "published"
+        ):
             serializer.instance.published_at = timezone.now()
         super().perform_update(serializer)
         if previous != serializer.instance.status:

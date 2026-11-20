@@ -3,6 +3,7 @@ from django.contrib import admin
 
 class RecordsAdmin(admin.ModelAdmin):
     """Read-only inspection keeps workflow changes inside the transactional API."""
+
     def has_add_permission(self, request):
         return False
 

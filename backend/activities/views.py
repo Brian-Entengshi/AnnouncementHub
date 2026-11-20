@@ -11,4 +11,9 @@ class ActivityViewSet(ResourceViewSet):
 
     def get_queryset(self):
         query = super().get_queryset()
-        return query if manager(self.request.user) and self.request.query_params.get("manage") == "1" else query.filter(published=True)
+        return (
+            query
+            if manager(self.request.user)
+            and self.request.query_params.get("manage") == "1"
+            else query.filter(published=True)
+        )

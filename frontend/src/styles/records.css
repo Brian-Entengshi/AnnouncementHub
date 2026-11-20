@@ -1,0 +1,359 @@
+.toolbar,
+.calendar-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 17px;
+}
+.toolbar .search {
+  min-width: 200px;
+  flex: 1;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #cbd2cf;
+  border-radius: 7px;
+  padding: 0 12px;
+}
+.search input {
+  border: 0;
+  padding-left: 0;
+}
+.toolbar input,
+.toolbar select,
+.calendar select,
+.form input,
+.form textarea,
+.form select,
+.detail textarea {
+  max-width: 100%;
+  min-height: 42px;
+  border: 1px solid #c3cbc7;
+  border-radius: 6px;
+  padding: 9px 11px;
+  background: white;
+  color: #1a272f;
+}
+.toolbar .search input {
+  border: 0;
+  width: 100%;
+}
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+  gap: 16px;
+}
+.record-card {
+  padding: 19px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.record-card h2 {
+  margin: 12px 0 8px;
+  line-height: 1.32;
+}
+.record-card p,
+.body-copy {
+  color: #4a5a58;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.record-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-meta,
+.record-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #586a61;
+}
+.card-meta .badge {
+  margin-left: auto;
+}
+.record-foot {
+  margin-top: auto;
+  padding-top: 17px;
+}
+.record-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.card-image,
+.record-image {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 290px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+.form,
+.detail {
+  padding: 24px;
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  max-width: 900px;
+}
+.form label,
+.detail label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.form textarea,
+.detail textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  font-weight: 400;
+}
+.form .full {
+  grid-column: 1/-1;
+}
+.check,
+.form .check {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.88rem;
+}
+.check input,
+.form .check input {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  accent-color: #345443;
+}
+.form small {
+  font-weight: 400;
+}
+.form .actions {
+  border-top: 1px solid #dce1df;
+  padding-top: 17px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+}
+.detail {
+  margin-bottom: 18px;
+  overflow-wrap: anywhere;
+}
+.detail h2 {
+  margin-bottom: 10px;
+}
+.detail .body-copy {
+  margin: 15px 0;
+}
+.detail dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.detail dt,
+.list-row small,
+.history small {
+  color: #5b6866;
+  font-size: 0.8rem;
+}
+.detail dd {
+  margin: 4px 0;
+  font-weight: 550;
+}
+.detail-footer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #dce1df;
+}
+.danger {
+  color: #903d35;
+}
+.history,
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid #e5e9e6;
+  padding: 13px 0;
+}
+.history {
+  justify-content: flex-start;
+}
+.list-row small {
+  display: block;
+  margin-top: 3px;
+}
+.detail form {
+  margin: 20px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.detail form > button {
+  justify-self: start;
+}
+.calendar-tools {
+  padding: 15px 17px;
+  border-bottom: 1px solid #dce1df;
+  margin: 0;
+}
+.calendar-tools .actions {
+  gap: 4px;
+}
+.calendar-tools button {
+  min-height: 37px;
+  padding: 7px 10px;
+}
+.calendar-tools b {
+  margin-right: auto;
+}
+.calendar-days > section {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  border-bottom: 1px solid #e5e9e6;
+  min-width: 0;
+}
+.calendar-days > section:last-child {
+  border: 0;
+}
+.calendar-days h3 {
+  padding: 13px 15px;
+  font-size: 0.75rem;
+  color: #617068;
+}
+.calendar-days h3 b {
+  display: block;
+  color: #21342c;
+  font-size: 0.9rem;
+  margin-top: 3px;
+}
+.calendar-days > section > div {
+  padding: 9px 14px;
+  min-width: 0;
+  align-self: center;
+}
+.calendar-days .today {
+  background: #f7faef;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 9px 12px;
+  border-left: 3px solid #8ca660;
+  background: #f0f4e9;
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+  margin: 3px 0;
+}
+.slot.closure {
+  background: #fbf0e5;
+  border-color: #b5855f;
+}
+.slot small {
+  font-size: 0.8rem;
+}
+.month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.month > section {
+  display: block;
+  min-height: 106px;
+  border-right: 1px solid #e5e9e6;
+}
+.month h3,
+.month > section > div {
+  padding: 5px 7px;
+}
+.month .slot {
+  font-size: 0.75rem;
+  padding: 5px;
+}
+.month .slot small {
+  font-size: 0.72rem;
+}
+.calendar + .panel,
+.calendar-links {
+  margin-top: 18px;
+}
+.calendar-links a {
+  font-size: 0.86rem;
+}
+@media (max-width: 760px) {
+  .month {
+    display: block;
+  }
+  .month > section {
+    display: grid;
+    min-height: 44px;
+  }
+  .month > section:has(.quiet):not(.today) {
+    display: none;
+  }
+  .calendar-tools b {
+    width: 100%;
+    order: -1;
+  }
+  .calendar-days > section {
+    grid-template-columns: 84px 1fr;
+  }
+  .form {
+    grid-template-columns: 1fr;
+  }
+  .form,
+  .detail {
+    padding: 17px;
+  }
+  .calendar-tools select {
+    min-width: 100px;
+  }
+  .list-row {
+    align-items: flex-start;
+  }
+  .toolbar select {
+    max-width: 100%;
+  }
+  .history {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+.calendar-tools input[type='date'] {
+  max-width: 100%;
+  padding: 7px 9px;
+  min-height: 38px;
+  border: 1px solid #c3cbc7;
+  border-radius: 6px;
+  background: white;
+  color: var(--ink);
+}
+dialog::backdrop {
+  background: #17282f78;
+}
+dialog .actions {
+  margin-top: 17px;
+}

@@ -12,13 +12,24 @@ from .permissions import manager
 @permission_classes([AllowAny])
 def media(request, name):
     privileged = manager(request.user)
-    for model, field in [(Announcement, "image"), (Announcement, "attachment"), (Activity, "image"), (Event, "image")]:
+    for model, field in [
+        (Announcement, "image"),
+        (Announcement, "attachment"),
+        (Activity, "image"),
+        (Event, "image"),
+    ]:
         query = model.objects.filter(**{field: name})
         if not privileged:
-            query = query.filter(pk__in=published_announcements()) if model is Announcement else query.filter(published=True)
+            query = (
+                query.filter(pk__in=published_announcements())
+                if model is Announcement
+                else query.filter(published=True)
+            )
         obj = query.first()
         if obj:
-            response = FileResponse(getattr(obj, field).open("rb"), as_attachment=field == "attachment")
+            response = FileResponse(
+                getattr(obj, field).open("rb"), as_attachment=field == "attachment"
+            )
             response["Cache-Control"] = "private, no-store"
             return response
     raise Http404

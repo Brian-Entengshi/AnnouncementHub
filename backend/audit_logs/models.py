@@ -3,7 +3,9 @@ from django.db import models
 
 
 class AuditLog(models.Model):
-    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL
+    )
     action = models.CharField(max_length=80)
     resource = models.CharField(max_length=80)
     label = models.CharField(max_length=200)
@@ -15,5 +17,10 @@ class AuditLog(models.Model):
 
     @classmethod
     def record(cls, actor, action, obj):
-        cls.objects.create(actor=actor, action=action, resource=obj._meta.verbose_name,
-                           label=str(obj)[:200], object_id=obj.pk)
+        cls.objects.create(
+            actor=actor,
+            action=action,
+            resource=obj._meta.verbose_name,
+            label=str(obj)[:200],
+            object_id=obj.pk,
+        )

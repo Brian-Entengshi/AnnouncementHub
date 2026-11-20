@@ -26,5 +26,10 @@ class ReservationSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if user.role == "staff":
             attrs["team"] = user.team
-        check_slot(**{key: attrs[key] for key in ("venue", "date", "start", "end", "attendees")})
+        check_slot(
+            **{
+                key: attrs[key]
+                for key in ("venue", "date", "start", "end", "attendees")
+            }
+        )
         return attrs

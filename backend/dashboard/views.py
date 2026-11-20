@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -41,21 +42,42 @@ def settings_view(request):
 @permission_classes([AllowAny])
 def dashboard(request):
     today = timezone.localdate()
-    events = Event.objects.filter(published=True, reservation__status="approved", reservation__date__gte=today).select_related("reservation__venue", "activity")
+    events = (
+        Event.objects.filter(
+            published=True, reservation__status="approved", reservation__date__gte=today
+        )
+        .filter(
+            Q(reservation__date__gt=today)
+            | Q(reservation__end__gt=timezone.localtime().time())
+        )
+        .select_related("reservation__venue", "activity")
+    )
     announcements = published_announcements().select_related("author")
     activities = Activity.objects.filter(published=True, end_date__gte=today)
     notices = Notice.objects.filter(ends_at__gt=timezone.now()).select_related("venue")
     reservations = Reservation.objects.filter(status="pending")
     if not manager(request.user):
         reservations = reservations.filter(requester_id=request.user.pk)
-    return Response({
-        "today": today,
-        "counts": {"events": events.filter(reservation__date__lt=today+timedelta(days=7)).count(),
-                   "announcements": announcements.count(), "venues": Venue.objects.filter(available=True).count(),
-                   "teams": Team.objects.count(), "pending": reservations.count() if request.user.is_authenticated else None},
-        "events": EventSerializer(events[:4], many=True).data,
-        "announcements": AnnouncementSerializer(announcements[:3], many=True).data,
-        "activities": ActivitySerializer(activities[:3], many=True).data,
-        "notices": NoticeSerializer(notices[:3], many=True).data,
-        "unread": request.user.notifications.filter(read=False).count() if request.user.is_authenticated else 0,
-    })
+    return Response(
+        {
+            "today": today,
+            "counts": {
+                "events": events.filter(
+                    reservation__date__lt=today + timedelta(days=7)
+                ).count(),
+                "announcements": announcements.count(),
+                "venues": Venue.objects.filter(available=True).count(),
+                "teams": Team.objects.count(),
+                "pending": reservations.count()
+                if request.user.is_authenticated
+                else None,
+            },
+            "events": EventSerializer(events[:4], many=True).data,
+            "announcements": AnnouncementSerializer(announcements[:3], many=True).data,
+            "activities": ActivitySerializer(activities[:3], many=True).data,
+            "notices": NoticeSerializer(notices[:3], many=True).data,
+            "unread": request.user.notifications.filter(read=False).count()
+            if request.user.is_authenticated
+            else 0,
+        }
+    )

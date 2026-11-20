@@ -2,7 +2,9 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 def manager(user):
-    return user.is_authenticated and (user.is_superuser or user.role in ("adviser", "officer"))
+    return user.is_authenticated and (
+        user.is_superuser or user.role in ("adviser", "officer")
+    )
 
 
 def adviser(user):
