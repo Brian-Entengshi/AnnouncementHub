@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.utils import timezone
 from audit_logs.models import AuditLog
 from config.api import ResourceViewSet
+from config.filters import CategoryFacetMixin, filter_date_range
 from config.permissions import manager
 from notifications.models import Notification
 from .models import Announcement
@@ -14,7 +15,7 @@ def published_announcements():
     ).filter(Q(expires__isnull=True) | Q(expires__gte=timezone.localdate()))
 
 
-class AnnouncementViewSet(ResourceViewSet):
+class AnnouncementViewSet(CategoryFacetMixin, ResourceViewSet):
     queryset = Announcement.objects.select_related("author")
     serializer_class = AnnouncementSerializer
     search_fields = ["title", "description", "category"]
@@ -22,6 +23,10 @@ class AnnouncementViewSet(ResourceViewSet):
 
     def get_queryset(self):
         query = super().get_queryset()
+        if self.action == "list":
+            query = filter_date_range(
+                query, self.request.query_params, "published_at__date"
+            )
         if (
             manager(self.request.user)
             and self.request.query_params.get("manage") == "1"

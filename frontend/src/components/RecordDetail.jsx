@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Archive, Pencil, Trash2, ExternalLink, Paperclip } from 'lucide-react'
 import { useData } from '../hooks/useData'
 import { useAuth } from '../context/auth'
 import { api } from '../services/api'
-import { managePath } from '../services/catalog'
 import { Badge, Heading, State } from './Common'
 import { formatDate, formatTime, human, stamp } from '../utils/format'
 import ReservationActions from './ReservationActions'
@@ -27,6 +26,7 @@ const metadata = [
   'attendees',
   'requester_name',
   'team_name',
+  'assigned_teams',
   'responsible',
   'contact',
   'notes',
@@ -44,6 +44,10 @@ const metadata = [
   'published',
 ]
 function display(k, v) {
+  if (k === 'assigned_teams')
+    return v
+      .map(({ name, is_active }) => name + (is_active ? '' : ' (inactive)'))
+      .join(', ')
   if (typeof v === 'boolean') return v ? 'Yes' : 'No'
   if (['start', 'end'].includes(k)) return formatTime(v)
   if (k.endsWith('_at')) return stamp(v)
@@ -51,20 +55,15 @@ function display(k, v) {
     return formatDate(v)
   return v
 }
-export default function RecordDetail({ config: c, id, managed }) {
+export default function RecordDetail({ config: c, id }) {
   const { manager, adviser } = useAuth(),
     navigate = useNavigate()
-  const q = useData(
-    c.api +
-      '/' +
-      id +
-      '/' +
-      (managed || (manager && c.api !== 'announcements') ? '?manage=1' : ''),
-  )
+  const { state } = useLocation()
+  const q = useData(c.api + '/' + id + '/' + (manager ? '?manage=1' : ''))
   const [error, setError] = useState(''),
     [confirm, setConfirm] = useState(''),
     [busy, setBusy] = useState(false)
-  const path = '/' + managePath(c)
+  const path = '/' + c.path
   async function remove() {
     setBusy(true)
     setError('')
@@ -102,6 +101,11 @@ export default function RecordDetail({ config: c, id, managed }) {
                 </Link>
               )}
           </Heading>
+          {state?.notice && (
+            <p className="success-notice" role="status">
+              {state.notice}
+            </p>
+          )}
           <section className="panel detail">
             {(item.retired_venue ||
               (['reservations', 'notices'].includes(c.api) &&
@@ -123,6 +127,11 @@ export default function RecordDetail({ config: c, id, managed }) {
               />
             )}
             {item.status && <Badge value={item.status} />}{' '}
+            {c.api === 'teams' && (
+              <Link className="text-link" to={path}>
+                Back to organization teams
+              </Link>
+            )}
             {item.image && (
               <img className="record-image" src={item.image} alt={item.title} />
             )}
@@ -133,7 +142,10 @@ export default function RecordDetail({ config: c, id, managed }) {
               {metadata
                 .filter(
                   (k) =>
-                    item[k] !== undefined && item[k] !== null && item[k] !== '',
+                    item[k] !== undefined &&
+                    item[k] !== null &&
+                    item[k] !== '' &&
+                    (!Array.isArray(item[k]) || item[k].length > 0),
                 )
                 .map((k) => (
                   <div key={k}>
@@ -158,21 +170,6 @@ export default function RecordDetail({ config: c, id, managed }) {
                 <ExternalLink size={16} />
                 Open resource
               </a>
-            )}
-            {item.members && (
-              <>
-                <h2>Team members</h2>
-                {item.members.length ? (
-                  item.members.map((m, i) => (
-                    <p key={i}>
-                      {m.name} · {m.position || 'Staff member'}
-                    </p>
-                  ))
-                ) : (
-                  <p>No active members assigned.</p>
-                )}
-                {manager && <Link to="/accounts">Manage assignments</Link>}
-              </>
             )}
             {c.api === 'venues' && (
               <div className="actions">

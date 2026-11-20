@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-from venues.models import Notice
+from venues.models import Notice, Venue
 from audit_logs.models import AuditLog
 from notifications.models import Notification
 from .models import Reservation, StatusChange
@@ -11,11 +11,14 @@ def local_instant(date, time):
     return timezone.make_aware(datetime.combine(date, time))
 
 
-def check_slot(venue, date, start, end, attendees, excluding=None):
+def check_slot(venue, date, start, end, attendees, excluding=None, *, lock_venue=False):
     if end <= start:
         raise ValidationError({"end": "End time must be after start time."})
     if local_instant(date, start) <= timezone.now():
         raise ValidationError({"date": "Select a future start time."})
+    if lock_venue and venue is not None:
+        # Hold the venue lock through the availability check and status write.
+        venue = Venue.objects.select_for_update().filter(pk=venue.pk).first()
     if venue is None or venue.archived or not venue.available:
         raise ValidationError({"venue": "This venue is unavailable."})
     if not 0 < attendees <= venue.capacity:
@@ -39,7 +42,9 @@ def check_slot(venue, date, start, end, attendees, excluding=None):
         raise ValidationError({"venue": "An approved reservation overlaps this time."})
 
 
-def record_status(reservation, actor, reason=""):
+def record_status(reservation, actor, reason="", *, automatic=False):
+    if automatic:
+        reason = "Automatically approved on submission by the adviser."
     StatusChange.objects.create(
         reservation=reservation, actor=actor, status=reservation.status, reason=reason
     )
@@ -66,7 +71,7 @@ def record_status(reservation, actor, reason=""):
     action = (
         "Submitted" if reservation.status == "pending" else reservation.status.title()
     )
-    AuditLog.record(actor, action, reservation)
+    AuditLog.record(actor, action, reservation, description=reason if automatic else "")
 
 
 def approve_booking(reservation, actor, reason=""):
@@ -78,6 +83,7 @@ def approve_booking(reservation, actor, reason=""):
         reservation.end,
         reservation.attendees,
         excluding=reservation.pk,
+        lock_venue=True,
     )
     reservation.status = "approved"
     reservation.save(update_fields=["status"])

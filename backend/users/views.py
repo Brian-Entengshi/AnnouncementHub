@@ -5,44 +5,41 @@ from django.middleware.csrf import get_token
 from django.db import transaction
 from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError as APIValidationError
 from rest_framework.permissions import AllowAny
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
-from config.api import ResourceViewSet
+from config.api import DirectoryPagination, ResourceViewSet
 from audit_logs.models import AuditLog
 from config.permissions import IsManager, adviser
 from .models import User
 from .serializers import AccountSerializer
 
 
-class AccountPagination(PageNumberPagination):
-    page_size = 20
-
-
 class AccountViewSet(ResourceViewSet):
-    pagination_class = AccountPagination
-    exact_filters = ("role", "team_id")
-    queryset = User.objects.select_related("team").order_by("username")
+    pagination_class = DirectoryPagination
+    exact_filters = ("role",)
+    queryset = User.objects.prefetch_related("teams").order_by("username")
     serializer_class = AccountSerializer
     permission_classes = [IsManager]
     http_method_names = ["get", "post", "patch", "head", "options"]
-    search_fields = ["username", "first_name", "position"]
+    search_fields = ["username", "first_name", "last_name", "position"]
 
     def perform_create(self, serializer):
         account = serializer.save()
-        team = f" on {account.team}" if account.team else ""
+        names = ", ".join(team.name for team in account.teams.all())
+        assignment = f" on {names}" if names else ""
         AuditLog.record(
             self.request.user,
             "Created",
             account,
             resource="account",
-            description=f"Created {account.get_role_display().lower()} account “{account}”{team}.",
+            description=f"Created {account.get_role_display().lower()} account “{account}”{assignment}.",
         )
 
     def perform_update(self, serializer):
         previous = serializer.instance.is_active
-        previous_team = serializer.instance.team_id
+        previous_teams = {team.pk for team in serializer.instance.teams.all()}
         password_replaced = "password" in serializer.validated_data
         updated = serializer.save()
         actor = self.request.user
@@ -55,10 +52,11 @@ class AccountViewSet(ResourceViewSet):
                 resource="account",
                 description="Assigned a temporary password and required a password change.",
             )
-        if previous_team != updated.team_id:
+        teams = list(updated.teams.all())
+        if previous_teams != {team.pk for team in teams}:
             description = (
-                f"Assigned to {updated.team}."
-                if updated.team
+                "Assigned to " + ", ".join(team.name for team in teams) + "."
+                if teams
                 else "Cleared team assignment."
             )
             AuditLog.record(
@@ -78,10 +76,17 @@ class AccountViewSet(ResourceViewSet):
 
     def get_queryset(self):
         users = super().get_queryset()
+        if self.action == "partial_update":
+            users = users.select_for_update()
         if self.action == "list":
             status = self.request.query_params.get("status")
             if status in ("active", "inactive"):
                 users = users.filter(is_active=status == "active")
+            if team_id := self.request.query_params.get("team_id"):
+                try:
+                    users = users.filter(teams=int(team_id))
+                except ValueError:
+                    raise APIValidationError({"team_id": "Invalid filter value."})
         return (
             users
             if adviser(self.request.user)

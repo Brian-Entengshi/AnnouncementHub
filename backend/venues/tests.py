@@ -13,7 +13,7 @@ class VenueTests(APITestCase):
         self.adviser = User.objects.create_superuser("adviser")
         self.officer = User.objects.create_user("officer", role="officer")
         self.staff = User.objects.create_user(
-            "staff", role="staff", team=Team.objects.get(name="Technical Team")
+            "staff", role="staff", teams=[Team.objects.get(name="Technical Team")]
         )
 
     def test_default_venues_and_creation_permissions(self):
@@ -92,6 +92,7 @@ class VenueTests(APITestCase):
             self.client.get(f"/api/reservations/{booking.pk}/").data["venue_name"],
             legacy.name,
         )
+        self.client.force_authenticate(self.adviser)
         result = self.client.post(
             "/api/reservations/",
             {

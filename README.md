@@ -35,21 +35,27 @@ Open [the local dashboard](http://localhost:5173/dashboard) using the port print
 
 To add the extended demonstration program to an existing local database, run `python manage.py seed_program --adviser <existing-adviser-username>` from `backend/`. It schedules seven activities and related events from tomorrow in Philippine time. Each booking goes through the same availability, capacity and overlap checks as a normal approval. The command preserves existing content and records each installed item so it can be rerun safely.
 
+Run `python manage.py seed_venue_notices` to install the demonstration notices. It adds ten records across the seven default venues when all venues are active and suitable windows are available. Current advisories leave existing bookings open. Upcoming maintenance windows go through the normal overlap checks, and managers can filter **Venue Notices** to see the expired example. The command skips records already installed, including records edited since seeding.
+
+Run `python manage.py seed_demo_staff` to bring each active team to 17 active Staff members. It uses fictional names and `@example.test` addresses, leaves existing accounts and assignments intact, and gives some members a second team. Demo accounts have unusable passwords.
+
 ## Accounts and access
 
 | Role | Access |
 | --- | --- |
-| Visitor | Open Hub Help and view published announcements, activities, events, team directory, useful links, venues, notices and the availability calendar. Private bookings appear as reserved slots. |
-| Staff | Public features, personal reservation requests, status history and notifications. The server assigns the requester’s team. |
-| Officer | Manage organization content, edit existing venues, and manage notices and reservations. Provision and manage staff accounts and team assignments. |
-| Adviser | Officer capabilities, venue creation, archiving and deletion, officer account management, audit logs and organization settings. |
+| Visitor | Open Hub Help and view published announcements, activities, events, public team information, useful links, venues, notices and the availability calendar. Private bookings appear as reserved slots. |
+| Staff | Public features, team rosters, access to their historical reservations, status history and notifications. |
+| Officer | Submit venue requests for review, manage organization content, edit existing venues and teams, and manage notices, staff accounts and assignments. |
+| Adviser | Officer capabilities, automatic approval for their own valid venue requests, creation of teams and venues, venue archiving and deletion, officer account management, audit logs and organization settings. |
 
 The first adviser signs in using the username and password entered at `createsuperuser`. Repeat that command to provision another adviser. There is no public registration endpoint. The Django admin at `/admin/` provides superusers with read-only inspection of hub records. The web workspace handles changes and records their history.
 
-1. An adviser opens **Account Management → New account**, enters the member’s full name and username, selects Officer or Staff, and supplies an initial password. Staff require one of the four core teams. Officer and adviser accounts have no team.
+1. An adviser opens **Account Management → New account**, enters the member’s full name and username, selects Officer or Staff, and supplies an initial password. Staff require at least one team and can have multiple assignments. Officer and adviser accounts have no Staff assignments.
 2. An officer follows the same process for Staff. The API also checks the requested role and prevents promotion through an edit.
 3. Initial and replacement passwords may be any non-empty value. Leave the replacement field blank to keep the current password. Deliver temporary passwords privately. The member must choose a permanent password that passes Django validation before accessing protected pages. Subsequent sessions use an HTTP-only Django session cookie, with CSRF checks on writes.
-4. Use the Account Management table to search and filter accounts by role, status or team. Open the row actions to edit details, replace a temporary password, activate or deactivate access. Deactivated members disappear from the active team directory.
+4. Use the Account Management table to search and filter accounts by role, status or team. Open the row actions to edit details, replace a temporary password, activate or deactivate access. Deactivation preserves team memberships and the roster shows the account as inactive.
+
+The account API returns 15 accounts per page. Scroll inside the table to reach the rest of a page. The column headers stay visible on desktop, and the pager sits below the scroll area.
 
 ## Reserving a venue and publishing an event
 
@@ -62,23 +68,43 @@ The migration for Seminar Room, Media Studio, Innovation Lab, and College Audito
 In **Weekly Events**, use **Weekly View** or **Monthly Calendar View**. The month view highlights dates with scheduled or ongoing events. Select a date to see all its events, including cancellations. **Dates With Events Only** remains available in Weekly View.
 
 1. Open **Venue Availability**, select a venue and inspect the week or month. Notices identify maintenance and other closure periods.
-2. Sign in and open **Reservations → New reservation**. Enter a future date, start and end times, attendance, responsible person and contact details. All schedules use Philippine time.
-3. The request is recorded as **Pending**. Pending requests can compete for a slot. The requester and reviewers receive notifications.
-4. An officer or adviser opens the request and confirms approval or rejection. Rejection requires a reason. Staff can cancel their own pending or approved bookings. Reviewers can mark approved bookings completed once their scheduled time has elapsed.
+2. Sign in as an officer or adviser and open **Reservations → Request reservation**. Enter a future date, start and end times, attendance, responsible person and contact details. All schedules use Philippine time.
+3. Adviser requests are approved immediately after validation. Officer requests remain **Pending** and notify reviewers. Pending requests can compete for a slot.
+4. An adviser or another officer can approve or reject an officer's request. Rejection requires a reason. Staff can view and cancel their own existing pending or approved bookings. Reviewers can mark approved bookings completed once their scheduled time has elapsed.
 5. To publish a scheduled event, open **Weekly Events → New event**, choose an approved reservation, optionally link an organization activity, and select **Publish event**. The booking supplies date, time and venue. Cancelling the booking marks the linked event cancelled on the public schedule.
 
 Approvals recheck capacity, venue availability, closure periods and overlapping approved bookings inside a database transaction. Two intervals overlap when the existing start precedes the proposed end and the existing end follows the proposed start. Back-to-back bookings are allowed. New closures and capacity reductions are also checked against approved bookings.
 
-SQLite uses `BEGIN IMMEDIATE` for these transactions. Writers take turns across the entire database, including when two reviewers approve simultaneously. A writer can time out under heavy contention. For a multi-instance deployment, move the schedule transactions to a shared database and implement venue-level locking or a database-enforced exclusion constraint. Re-run the competing-approval test when changing database engines.
+SQLite uses `BEGIN IMMEDIATE` for these transactions. Writers take turns across the entire database, including when two reviewers approve simultaneously. A writer can time out under heavy contention. The validation path also acquires a venue row lock on databases that support it. Re-run the competing-approval and submission tests against the configured database engine before deploying.
 
 ## Content, drafts and privacy
 
-- **Manage Announcements** supports drafts, publication, pinning, expiration, archiving, images and optional PDF attachments. Every public list excludes expired and unpublished announcements.
+- **Apply filters** runs the selected search and filters together. **Clear** removes the search and filters and returns paginated lists to page one. In Venue Availability, Clear returns the schedule to the current period while keeping the chosen calendar view.
+- The current tab remembers the last applied filters, search, list page, venue status tab and calendar preferences separately for each signed-in account. Student Access has its own saved state. Browser history retains each visited view, and Account Management restores the internal scroll position when reopening the same results. Search terms stay out of URLs.
+- **Announcements** includes draft management, publication, pinning, expiration, archiving, images and optional PDF attachments for advisers and officers. Student Access and Staff see published, current announcements. Existing `/manage-announcements` links redirect to the equivalent `/announcements` route.
 - **Organization Activities** tracks date-based upcoming, ongoing and completed initiatives. Multiple scheduled events can link to one activity.
-- **Organization Teams** displays current members and roles. The four core teams keep their names. Managers can edit descriptions, add other teams, and move staff through Account Management.
+- **Organization Teams** shows paginated rosters to signed-in members and informational cards to Student Access. Tabs come from the active teams in Django and remember the selected team and roster page. Advisers can create teams. Advisers and officers can edit teams, remove individual memberships, and assign Staff through Account Management. Inactive teams remain available for managers to review and are removed from the public directory and new assignment choices. The four core teams keep their names and stay active.
 - **Notifications** contains read status, links and reservation decisions. **Audit Logs** gives advisers a searchable, paginated history of sign-ins, sign-outs and administrative changes. A failed sign-in records the failure without the submitted credentials. Settings controls the contact details shown in Student Access Hub Help.
 - Resource forms save drafts per account, form and record in the current tab’s session storage. Drafts expire after seven days and clear on successful save, cancellation or sign-out. Passwords and uploaded file contents are excluded. Reselect a file after refreshing.
 - File uploads support JPEG, PNG and WebP images and PDF announcement attachments, up to 5 MB each. Django checks access when serving uploaded files.
+
+## Database backup and restore
+
+From `backend/`, run `python manage.py export_hub_fixture` to regenerate `backup.json`. The fixture preserves accounts, roles, groups, permissions, team memberships, booking history and the rest of the application's database records. Account passwords in the export are unusable, and active sessions are excluded. The fixture contains private application data.
+
+To restore to a new database:
+
+1. Create an empty target database and configure Django to use it. Local development uses SQLite in `config/settings.py`. For a cloud database, install the target driver, such as Psycopg for PostgreSQL, and define its connection in a deployment settings module using environment variables for credentials.
+2. With Django pointed at the target, run the following commands from `backend/`. Use the same settings module for each command. Run `flush` only against the dedicated new target. It removes the default rows inserted by migrations so the fixture can restore the original venue and team IDs.
+
+   ```bash
+   python manage.py migrate
+   python manage.py flush --noinput
+   python manage.py loaddata backup.json
+   ```
+
+3. Verify restored users, teams, memberships, venues, reservations, and audit history before opening the new database to users. Run `python manage.py changepassword <adviser-username>` to recover adviser access, then issue temporary passwords to members who need sign-in. Demo accounts can stay disabled for sign-in.
+4. Back up and restore `backend/media/` or your deployed media storage separately. The fixture stores paths for uploads. Copy the files into the target media storage with the same paths.
 
 ## Project structure
 
@@ -159,7 +185,7 @@ The optional `tests/local-regression.spec.js` test takes a disposable, migrated 
 | Dashboard cannot reach the hub | Start Django, check the Vite proxy target, and reload the same frontend origin. |
 | Login or write returns a CSRF error | Open the app through Vite or the same-origin production proxy. Check the public host, protocol and cookie settings. |
 | A booking cannot be approved | Check the latest venue availability, capacity, closure notices and approved slots. The request must still be pending and start in the future. |
-| A team or venue cannot be deleted | Review linked records. Reassign team members where appropriate, or archive a linked venue to retain booking history. |
+| A team or venue cannot be deleted | Review linked records. Make a team inactive or archive a venue to retain its history. |
 | Recent operations are missing from Audit Logs, or writes fail immediately after migrating | Restart any Django process still serving older code and check that Vite proxies to the restarted process. Confirm the target database with `manage.py migrate --check`. |
 | A page works by clicking but fails on refresh | Check the frontend host’s SPA fallback and API route precedence. |
 | Install option is missing | Use the production preview or HTTPS deployment, check browser support, and confirm the manifest and service worker load. |

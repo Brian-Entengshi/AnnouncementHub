@@ -1,0 +1,5810 @@
+[
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "users",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "teams",
+    "model": "team"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "venues",
+    "model": "notice"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "venues",
+    "model": "venue"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "reservations",
+    "model": "reservation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "reservations",
+    "model": "statuschange"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "events",
+    "model": "event"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "activities",
+    "model": "activity"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "announcements",
+    "model": "announcement"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "useful_links",
+    "model": "usefullink"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "notifications",
+    "model": "notification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "dashboard",
+    "model": "hubsettings"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "audit_logs",
+    "model": "auditlog"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "dashboard",
+    "model": "demoprogramentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "users",
+    "model": "teammembership"
+  }
+},
+{
+  "model": "teams.team",
+  "pk": 1,
+  "fields": {
+    "name": "Technical Team",
+    "description": "Coordinates equipment, technical support and event setup.",
+    "is_active": true
+  }
+},
+{
+  "model": "teams.team",
+  "pk": 2,
+  "fields": {
+    "name": "Documentation Team",
+    "description": "Maintains activity records and documents campus events.",
+    "is_active": true
+  }
+},
+{
+  "model": "teams.team",
+  "pk": 3,
+  "fields": {
+    "name": "Editing Team",
+    "description": "Prepares and edits publication materials for the organization.",
+    "is_active": true
+  }
+},
+{
+  "model": "teams.team",
+  "pk": 4,
+  "fields": {
+    "name": "Videographer Team",
+    "description": "Captures and produces video coverage of club activities.",
+    "is_active": true
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 5,
+  "fields": {
+    "name": "Audio-Visual Room (AVR)",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 60,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 6,
+  "fields": {
+    "name": "DLL Grounds",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 220,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 7,
+  "fields": {
+    "name": "ComLab 1",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 40,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 8,
+  "fields": {
+    "name": "ComLab 2",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 40,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 9,
+  "fields": {
+    "name": "ComLab 3",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 40,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 10,
+  "fields": {
+    "name": "ComLab 4",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 40,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.venue",
+  "pk": 11,
+  "fields": {
+    "name": "ComLab 5",
+    "description": "",
+    "location": "DLL campus",
+    "capacity": 40,
+    "available": true,
+    "archived": false
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 1,
+  "fields": {
+    "venue": null,
+    "venue_snapshot": "Media Studio",
+    "title": "Media Studio equipment maintenance",
+    "description": "Studio bookings pause during the scheduled equipment inspection.",
+    "starts_at": "2026-11-24T00:00:00Z",
+    "ends_at": "2026-11-24T04:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 2,
+  "fields": {
+    "venue": 5,
+    "venue_snapshot": "",
+    "title": "AVR equipment checkout guidelines",
+    "description": "Request wireless microphones from the venue desk before your session. List the equipment on your booking and return it to the cabinet after use.",
+    "starts_at": "2026-11-20T00:00:00Z",
+    "ends_at": "2026-11-25T00:00:00Z",
+    "blocks_bookings": false
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 3,
+  "fields": {
+    "venue": 6,
+    "venue_snapshot": "",
+    "title": "Keep the east walkway clear",
+    "description": "Campus crews are marking event setup zones beside the east walkway. Keep the marked pedestrian route clear of tables, signs, and event supplies. Regular bookings can continue.",
+    "starts_at": "2026-11-20T00:00:00Z",
+    "ends_at": "2026-11-24T00:00:00Z",
+    "blocks_bookings": false
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 4,
+  "fields": {
+    "venue": 9,
+    "venue_snapshot": "",
+    "title": "Report loose cables before using ComLab 3",
+    "description": "For the current inspection period, report loose network or power cables at the lab desk. Staff will tag affected workstations. Bookings can proceed with the remaining workstations.",
+    "starts_at": "2026-11-20T00:00:00Z",
+    "ends_at": "2026-11-23T00:00:00Z",
+    "blocks_bookings": false
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 5,
+  "fields": {
+    "venue": 5,
+    "venue_snapshot": "",
+    "title": "AVR projector and audio servicing",
+    "description": "Technicians will clean the projector filters, check the HDMI inputs, and calibrate the room speakers. Booking requests that overlap the service window are blocked.",
+    "starts_at": "2026-11-23T00:00:00Z",
+    "ends_at": "2026-11-23T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 6,
+  "fields": {
+    "venue": 6,
+    "venue_snapshot": "",
+    "title": "DLL Grounds drainage inspection",
+    "description": "Facilities staff will inspect drainage covers and mark any areas that need repair. The grounds are closed to new bookings during the inspection.",
+    "starts_at": "2026-11-24T00:00:00Z",
+    "ends_at": "2026-11-24T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 7,
+  "fields": {
+    "venue": 7,
+    "venue_snapshot": "",
+    "title": "ComLab 1 image and software update",
+    "description": "The lab team will install security updates and refresh the workstation image. Save work to your organization drive before the maintenance window.",
+    "starts_at": "2026-11-25T00:00:00Z",
+    "ends_at": "2026-11-25T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 8,
+  "fields": {
+    "venue": 8,
+    "venue_snapshot": "",
+    "title": "ComLab 2 power outlet testing",
+    "description": "Facilities staff will test the desk outlets and label the circuits. The lab cannot accept reservations during this work.",
+    "starts_at": "2026-11-26T00:00:00Z",
+    "ends_at": "2026-11-26T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 9,
+  "fields": {
+    "venue": 10,
+    "venue_snapshot": "",
+    "title": "ComLab 4 workstation inventory",
+    "description": "The technical team will verify equipment tags and test loaned peripherals. Leave all monitors and adapters at their assigned stations until the inventory is complete.",
+    "starts_at": "2026-11-27T00:00:00Z",
+    "ends_at": "2026-11-27T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 10,
+  "fields": {
+    "venue": 11,
+    "venue_snapshot": "",
+    "title": "ComLab 5 network maintenance",
+    "description": "The campus IT team will replace a network switch and test access to the learning portal. The lab is closed to bookings during the work.",
+    "starts_at": "2026-11-28T00:00:00Z",
+    "ends_at": "2026-11-28T02:00:00Z",
+    "blocks_bookings": true
+  }
+},
+{
+  "model": "venues.notice",
+  "pk": 11,
+  "fields": {
+    "venue": 9,
+    "venue_snapshot": "",
+    "title": "ComLab 3 workstation cleaning completed",
+    "description": "The cleaning period has ended. Keyboards and work surfaces were cleaned, and the lab returned to its normal reservation schedule.",
+    "starts_at": "2026-11-14T00:00:00Z",
+    "ends_at": "2026-11-14T04:00:00Z",
+    "blocks_bookings": false
+  }
+},
+{
+  "model": "events.event",
+  "pk": 1,
+  "fields": {
+    "title": "Leadership skills workshop",
+    "description": "Practice facilitation and team decision-making through small-group exercises.",
+    "reservation": 1,
+    "activity": 1,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 2,
+  "fields": {
+    "title": "General assembly",
+    "description": "Meet the officers and teams, review upcoming initiatives and share your questions.",
+    "reservation": 2,
+    "activity": 1,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 3,
+  "fields": {
+    "title": "Creative media lab",
+    "description": "Explore a collaborative workflow for documenting student events.",
+    "reservation": 3,
+    "activity": 1,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 4,
+  "fields": {
+    "title": "Campus organization briefing",
+    "description": "The officers introduce new students to campus committees, walk through event sign-up, and explain how to request a venue.",
+    "reservation": 4,
+    "activity": 3,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 5,
+  "fields": {
+    "title": "Clean-up kickoff and team briefing",
+    "description": "The Technical Team sets collection points and distributes equipment. Volunteers work in zones and record the materials collected.",
+    "reservation": 5,
+    "activity": 4,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 6,
+  "fields": {
+    "title": "Small-group facilitation lab",
+    "description": "Organization officers lead short exercises on meeting facilitation, delegation, and resolving disagreements in project teams.",
+    "reservation": 6,
+    "activity": 5,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 7,
+  "fields": {
+    "title": "Caption and layout clinic",
+    "description": "The Editing Team prepares a campus feature and reviews captions, readable typography, and accessible layouts in pairs.",
+    "reservation": 7,
+    "activity": 6,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 8,
+  "fields": {
+    "title": "Photo documentation workflow",
+    "description": "The Documentation Team practices documenting campus events, organizing consent forms, and preparing a shareable photo archive.",
+    "reservation": 8,
+    "activity": 7,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 9,
+  "fields": {
+    "title": "Storyboarding and video editing lab",
+    "description": "The Videographer Team develops a short campus story and edits footage into a one-minute recap with captions.",
+    "reservation": 9,
+    "activity": 8,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "events.event",
+  "pk": 10,
+  "fields": {
+    "title": "Committee project planning session",
+    "description": "The officers and team leads agree on milestones, assign owners, and draft the resource requests for the next student engagement project.",
+    "reservation": 10,
+    "activity": 9,
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 1,
+  "fields": {
+    "title": "Student leadership development",
+    "description": "A term-long series of workshops for student organizers and emerging leaders.",
+    "start_date": "2026-11-15",
+    "end_date": "2026-12-18",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 2,
+  "fields": {
+    "title": "Campus stories project",
+    "description": "Student teams document the people and projects shaping campus life.",
+    "start_date": "2026-11-22",
+    "end_date": "2026-12-22",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 3,
+  "fields": {
+    "title": "DLL Elite member orientation",
+    "description": "The officers introduce new students to campus committees, walk through event sign-up, and explain how to request a venue.",
+    "start_date": "2026-11-21",
+    "end_date": "2026-11-24",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 4,
+  "fields": {
+    "title": "Campus care and clean-up drive",
+    "description": "The Technical Team sets collection points and distributes equipment. Volunteers work in zones and record the materials collected.",
+    "start_date": "2026-11-22",
+    "end_date": "2026-11-25",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 5,
+  "fields": {
+    "title": "Peer leadership and facilitation",
+    "description": "Organization officers lead short exercises on meeting facilitation, delegation, and resolving disagreements in project teams.",
+    "start_date": "2026-11-24",
+    "end_date": "2026-11-27",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 6,
+  "fields": {
+    "title": "Student publication workshop",
+    "description": "The Editing Team prepares a campus feature and reviews captions, readable typography, and accessible layouts in pairs.",
+    "start_date": "2026-11-24",
+    "end_date": "2026-11-27",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 7,
+  "fields": {
+    "title": "Campus documentation skills series",
+    "description": "The Documentation Team practices documenting campus events, organizing consent forms, and preparing a shareable photo archive.",
+    "start_date": "2026-11-26",
+    "end_date": "2026-11-29",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 8,
+  "fields": {
+    "title": "Multimedia production practicum",
+    "description": "The Videographer Team develops a short campus story and edits footage into a one-minute recap with captions.",
+    "start_date": "2026-11-29",
+    "end_date": "2026-12-02",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "activities.activity",
+  "pk": 9,
+  "fields": {
+    "title": "Student engagement project planning",
+    "description": "The officers and team leads agree on milestones, assign owners, and draft the resource requests for the next student engagement project.",
+    "start_date": "2026-12-01",
+    "end_date": "2026-12-04",
+    "image": "",
+    "published": true
+  }
+},
+{
+  "model": "useful_links.usefullink",
+  "pk": 1,
+  "fields": {
+    "title": "Google Scholar",
+    "description": "Find research for workshops and organization projects.",
+    "url": "https://scholar.google.com",
+    "category": "Research"
+  }
+},
+{
+  "model": "dashboard.hubsettings",
+  "pk": 1,
+  "fields": {
+    "contact_email": "encinabrian@gmail.com",
+    "office_hours": "8am-8pm"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 1,
+  "fields": {
+    "key": "orientation"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 2,
+  "fields": {
+    "key": "campus-care"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 3,
+  "fields": {
+    "key": "leadership"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 4,
+  "fields": {
+    "key": "editorial"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 5,
+  "fields": {
+    "key": "documentation"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 6,
+  "fields": {
+    "key": "production"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 7,
+  "fields": {
+    "key": "planning"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 8,
+  "fields": {
+    "key": "notice-avr-guidelines"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 9,
+  "fields": {
+    "key": "notice-grounds-preparation"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 10,
+  "fields": {
+    "key": "notice-lab3-inspection"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 11,
+  "fields": {
+    "key": "notice-avr-maintenance"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 12,
+  "fields": {
+    "key": "notice-grounds-restriction"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 13,
+  "fields": {
+    "key": "notice-lab1-update"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 14,
+  "fields": {
+    "key": "notice-lab2-closure"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 15,
+  "fields": {
+    "key": "notice-lab4-inspection"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 16,
+  "fields": {
+    "key": "notice-lab5-network"
+  }
+},
+{
+  "model": "dashboard.demoprogramentry",
+  "pk": 17,
+  "fields": {
+    "key": "notice-lab3-safety-history"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user",
+    "content_type": [
+      "users",
+      "user"
+    ],
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user",
+    "content_type": [
+      "users",
+      "user"
+    ],
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user",
+    "content_type": [
+      "users",
+      "user"
+    ],
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user",
+    "content_type": [
+      "users",
+      "user"
+    ],
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add team",
+    "content_type": [
+      "teams",
+      "team"
+    ],
+    "codename": "add_team"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change team",
+    "content_type": [
+      "teams",
+      "team"
+    ],
+    "codename": "change_team"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete team",
+    "content_type": [
+      "teams",
+      "team"
+    ],
+    "codename": "delete_team"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view team",
+    "content_type": [
+      "teams",
+      "team"
+    ],
+    "codename": "view_team"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add venue",
+    "content_type": [
+      "venues",
+      "venue"
+    ],
+    "codename": "add_venue"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change venue",
+    "content_type": [
+      "venues",
+      "venue"
+    ],
+    "codename": "change_venue"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete venue",
+    "content_type": [
+      "venues",
+      "venue"
+    ],
+    "codename": "delete_venue"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view venue",
+    "content_type": [
+      "venues",
+      "venue"
+    ],
+    "codename": "view_venue"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add notice",
+    "content_type": [
+      "venues",
+      "notice"
+    ],
+    "codename": "add_notice"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change notice",
+    "content_type": [
+      "venues",
+      "notice"
+    ],
+    "codename": "change_notice"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete notice",
+    "content_type": [
+      "venues",
+      "notice"
+    ],
+    "codename": "delete_notice"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view notice",
+    "content_type": [
+      "venues",
+      "notice"
+    ],
+    "codename": "view_notice"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add reservation",
+    "content_type": [
+      "reservations",
+      "reservation"
+    ],
+    "codename": "add_reservation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change reservation",
+    "content_type": [
+      "reservations",
+      "reservation"
+    ],
+    "codename": "change_reservation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete reservation",
+    "content_type": [
+      "reservations",
+      "reservation"
+    ],
+    "codename": "delete_reservation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view reservation",
+    "content_type": [
+      "reservations",
+      "reservation"
+    ],
+    "codename": "view_reservation"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add status change",
+    "content_type": [
+      "reservations",
+      "statuschange"
+    ],
+    "codename": "add_statuschange"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change status change",
+    "content_type": [
+      "reservations",
+      "statuschange"
+    ],
+    "codename": "change_statuschange"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete status change",
+    "content_type": [
+      "reservations",
+      "statuschange"
+    ],
+    "codename": "delete_statuschange"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view status change",
+    "content_type": [
+      "reservations",
+      "statuschange"
+    ],
+    "codename": "view_statuschange"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add event",
+    "content_type": [
+      "events",
+      "event"
+    ],
+    "codename": "add_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change event",
+    "content_type": [
+      "events",
+      "event"
+    ],
+    "codename": "change_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete event",
+    "content_type": [
+      "events",
+      "event"
+    ],
+    "codename": "delete_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view event",
+    "content_type": [
+      "events",
+      "event"
+    ],
+    "codename": "view_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add activity",
+    "content_type": [
+      "activities",
+      "activity"
+    ],
+    "codename": "add_activity"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change activity",
+    "content_type": [
+      "activities",
+      "activity"
+    ],
+    "codename": "change_activity"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete activity",
+    "content_type": [
+      "activities",
+      "activity"
+    ],
+    "codename": "delete_activity"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view activity",
+    "content_type": [
+      "activities",
+      "activity"
+    ],
+    "codename": "view_activity"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add announcement",
+    "content_type": [
+      "announcements",
+      "announcement"
+    ],
+    "codename": "add_announcement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change announcement",
+    "content_type": [
+      "announcements",
+      "announcement"
+    ],
+    "codename": "change_announcement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete announcement",
+    "content_type": [
+      "announcements",
+      "announcement"
+    ],
+    "codename": "delete_announcement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view announcement",
+    "content_type": [
+      "announcements",
+      "announcement"
+    ],
+    "codename": "view_announcement"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add useful link",
+    "content_type": [
+      "useful_links",
+      "usefullink"
+    ],
+    "codename": "add_usefullink"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change useful link",
+    "content_type": [
+      "useful_links",
+      "usefullink"
+    ],
+    "codename": "change_usefullink"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete useful link",
+    "content_type": [
+      "useful_links",
+      "usefullink"
+    ],
+    "codename": "delete_usefullink"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view useful link",
+    "content_type": [
+      "useful_links",
+      "usefullink"
+    ],
+    "codename": "view_usefullink"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add notification",
+    "content_type": [
+      "notifications",
+      "notification"
+    ],
+    "codename": "add_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change notification",
+    "content_type": [
+      "notifications",
+      "notification"
+    ],
+    "codename": "change_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete notification",
+    "content_type": [
+      "notifications",
+      "notification"
+    ],
+    "codename": "delete_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view notification",
+    "content_type": [
+      "notifications",
+      "notification"
+    ],
+    "codename": "view_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add hub settings",
+    "content_type": [
+      "dashboard",
+      "hubsettings"
+    ],
+    "codename": "add_hubsettings"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change hub settings",
+    "content_type": [
+      "dashboard",
+      "hubsettings"
+    ],
+    "codename": "change_hubsettings"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete hub settings",
+    "content_type": [
+      "dashboard",
+      "hubsettings"
+    ],
+    "codename": "delete_hubsettings"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view hub settings",
+    "content_type": [
+      "dashboard",
+      "hubsettings"
+    ],
+    "codename": "view_hubsettings"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add audit log",
+    "content_type": [
+      "audit_logs",
+      "auditlog"
+    ],
+    "codename": "add_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change audit log",
+    "content_type": [
+      "audit_logs",
+      "auditlog"
+    ],
+    "codename": "change_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete audit log",
+    "content_type": [
+      "audit_logs",
+      "auditlog"
+    ],
+    "codename": "delete_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view audit log",
+    "content_type": [
+      "audit_logs",
+      "auditlog"
+    ],
+    "codename": "view_auditlog"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add demo program entry",
+    "content_type": [
+      "dashboard",
+      "demoprogramentry"
+    ],
+    "codename": "add_demoprogramentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change demo program entry",
+    "content_type": [
+      "dashboard",
+      "demoprogramentry"
+    ],
+    "codename": "change_demoprogramentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete demo program entry",
+    "content_type": [
+      "dashboard",
+      "demoprogramentry"
+    ],
+    "codename": "delete_demoprogramentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view demo program entry",
+    "content_type": [
+      "dashboard",
+      "demoprogramentry"
+    ],
+    "codename": "view_demoprogramentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add team membership",
+    "content_type": [
+      "users",
+      "teammembership"
+    ],
+    "codename": "add_teammembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change team membership",
+    "content_type": [
+      "users",
+      "teammembership"
+    ],
+    "codename": "change_teammembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete team membership",
+    "content_type": [
+      "users",
+      "teammembership"
+    ],
+    "codename": "delete_teammembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view team membership",
+    "content_type": [
+      "users",
+      "teammembership"
+    ],
+    "codename": "view_teammembership"
+  }
+},
+{
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "sample-editor",
+    "first_name": "DLL Elite Secretariat",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2026-11-20T12:04:29.060Z",
+    "role": "staff",
+    "position": "",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 2,
+  "fields": {
+    "password": "!",
+    "last_login": "2026-11-20T19:26:08.366Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-11-20T12:17:46.201Z",
+    "role": "adviser",
+    "position": "",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 3,
+  "fields": {
+    "password": "!",
+    "last_login": "2026-11-20T19:20:20.492Z",
+    "is_superuser": false,
+    "username": "tengshi",
+    "first_name": "Brian Encina",
+    "last_name": "",
+    "email": "encinabrian@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T12:28:58.470Z",
+    "role": "officer",
+    "position": "President",
+    "contact": "09947046214",
+    "must_change_password": false,
+    "created_by": [
+      "admin"
+    ],
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 4,
+  "fields": {
+    "password": "!",
+    "last_login": "2026-11-20T19:16:28.114Z",
+    "is_superuser": false,
+    "username": "elvincent",
+    "first_name": "Elvira Pialane",
+    "last_name": "",
+    "email": "elvincent@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T17:13:12.131Z",
+    "role": "staff",
+    "position": "",
+    "contact": "09073775492",
+    "must_change_password": false,
+    "created_by": [
+      "admin"
+    ],
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 5,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_001",
+    "first_name": "Alina",
+    "last_name": "Aguilar",
+    "email": "demo_team_1_001@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.295Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 6,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_002",
+    "first_name": "Belen",
+    "last_name": "Bautista",
+    "email": "demo_team_1_002@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.300Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 7,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_003",
+    "first_name": "Celia",
+    "last_name": "Cruz",
+    "email": "demo_team_1_003@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.301Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 8,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_004",
+    "first_name": "Dario",
+    "last_name": "Dalisay",
+    "email": "demo_team_1_004@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.303Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 9,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_005",
+    "first_name": "Elian",
+    "last_name": "Estrella",
+    "email": "demo_team_1_005@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.305Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 10,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_006",
+    "first_name": "Faye",
+    "last_name": "Flores",
+    "email": "demo_team_1_006@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.306Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 11,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_007",
+    "first_name": "Gio",
+    "last_name": "Garcia",
+    "email": "demo_team_1_007@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.308Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 12,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_008",
+    "first_name": "Hana",
+    "last_name": "Hilario",
+    "email": "demo_team_1_008@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.309Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 13,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_009",
+    "first_name": "Ivo",
+    "last_name": "Ilagan",
+    "email": "demo_team_1_009@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.311Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 14,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_010",
+    "first_name": "Jana",
+    "last_name": "Javier",
+    "email": "demo_team_1_010@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.313Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 15,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_011",
+    "first_name": "Kian",
+    "last_name": "Luna",
+    "email": "demo_team_1_011@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.314Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 16,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_012",
+    "first_name": "Lara",
+    "last_name": "Mendoza",
+    "email": "demo_team_1_012@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.316Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 17,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_013",
+    "first_name": "Miko",
+    "last_name": "Navarro",
+    "email": "demo_team_1_013@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.317Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 18,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_014",
+    "first_name": "Nena",
+    "last_name": "Ocampo",
+    "email": "demo_team_1_014@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.319Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 19,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_015",
+    "first_name": "Orin",
+    "last_name": "Pascual",
+    "email": "demo_team_1_015@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.320Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 20,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_1_016",
+    "first_name": "Pia",
+    "last_name": "Quinto",
+    "email": "demo_team_1_016@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.322Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 21,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_001",
+    "first_name": "Sela",
+    "last_name": "Santos",
+    "email": "demo_team_2_001@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.324Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 22,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_002",
+    "first_name": "Tala",
+    "last_name": "Villanueva",
+    "email": "demo_team_2_002@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.326Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 23,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_003",
+    "first_name": "Alina",
+    "last_name": "Bautista",
+    "email": "demo_team_2_003@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.327Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 24,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_004",
+    "first_name": "Belen",
+    "last_name": "Cruz",
+    "email": "demo_team_2_004@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.329Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 25,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_005",
+    "first_name": "Celia",
+    "last_name": "Dalisay",
+    "email": "demo_team_2_005@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.330Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 26,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_006",
+    "first_name": "Dario",
+    "last_name": "Estrella",
+    "email": "demo_team_2_006@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.332Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 27,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_007",
+    "first_name": "Elian",
+    "last_name": "Flores",
+    "email": "demo_team_2_007@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.333Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 28,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_008",
+    "first_name": "Faye",
+    "last_name": "Garcia",
+    "email": "demo_team_2_008@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.335Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 29,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_009",
+    "first_name": "Gio",
+    "last_name": "Hilario",
+    "email": "demo_team_2_009@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.336Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 30,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_010",
+    "first_name": "Hana",
+    "last_name": "Ilagan",
+    "email": "demo_team_2_010@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.338Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 31,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_011",
+    "first_name": "Ivo",
+    "last_name": "Javier",
+    "email": "demo_team_2_011@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.340Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 32,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_012",
+    "first_name": "Jana",
+    "last_name": "Luna",
+    "email": "demo_team_2_012@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.341Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 33,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_013",
+    "first_name": "Kian",
+    "last_name": "Mendoza",
+    "email": "demo_team_2_013@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.342Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 34,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_014",
+    "first_name": "Lara",
+    "last_name": "Navarro",
+    "email": "demo_team_2_014@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.344Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 35,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_015",
+    "first_name": "Miko",
+    "last_name": "Ocampo",
+    "email": "demo_team_2_015@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.345Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 36,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_2_016",
+    "first_name": "Nena",
+    "last_name": "Pascual",
+    "email": "demo_team_2_016@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.347Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 37,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_001",
+    "first_name": "Pia",
+    "last_name": "Reyes",
+    "email": "demo_team_3_001@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.349Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 38,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_002",
+    "first_name": "Rian",
+    "last_name": "Santos",
+    "email": "demo_team_3_002@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.350Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 39,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_003",
+    "first_name": "Sela",
+    "last_name": "Villanueva",
+    "email": "demo_team_3_003@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.352Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 40,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_004",
+    "first_name": "Tala",
+    "last_name": "Aguilar",
+    "email": "demo_team_3_004@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.353Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 41,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_005",
+    "first_name": "Alina",
+    "last_name": "Cruz",
+    "email": "demo_team_3_005@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.355Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 42,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_006",
+    "first_name": "Belen",
+    "last_name": "Dalisay",
+    "email": "demo_team_3_006@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.356Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 43,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_007",
+    "first_name": "Celia",
+    "last_name": "Estrella",
+    "email": "demo_team_3_007@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.358Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 44,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_008",
+    "first_name": "Dario",
+    "last_name": "Flores",
+    "email": "demo_team_3_008@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.359Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 45,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_009",
+    "first_name": "Elian",
+    "last_name": "Garcia",
+    "email": "demo_team_3_009@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.360Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 46,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_010",
+    "first_name": "Faye",
+    "last_name": "Hilario",
+    "email": "demo_team_3_010@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.362Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 47,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_011",
+    "first_name": "Gio",
+    "last_name": "Ilagan",
+    "email": "demo_team_3_011@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.363Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 48,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_012",
+    "first_name": "Hana",
+    "last_name": "Javier",
+    "email": "demo_team_3_012@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.365Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 49,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_013",
+    "first_name": "Ivo",
+    "last_name": "Luna",
+    "email": "demo_team_3_013@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.366Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 50,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_014",
+    "first_name": "Jana",
+    "last_name": "Mendoza",
+    "email": "demo_team_3_014@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.368Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 51,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_015",
+    "first_name": "Kian",
+    "last_name": "Navarro",
+    "email": "demo_team_3_015@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.370Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 52,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_3_016",
+    "first_name": "Lara",
+    "last_name": "Ocampo",
+    "email": "demo_team_3_016@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.371Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 53,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_001",
+    "first_name": "Nena",
+    "last_name": "Quinto",
+    "email": "demo_team_4_001@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.373Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 54,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_002",
+    "first_name": "Orin",
+    "last_name": "Reyes",
+    "email": "demo_team_4_002@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.374Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 55,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_003",
+    "first_name": "Pia",
+    "last_name": "Santos",
+    "email": "demo_team_4_003@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.376Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 56,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_004",
+    "first_name": "Rian",
+    "last_name": "Villanueva",
+    "email": "demo_team_4_004@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.377Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 57,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_005",
+    "first_name": "Sela",
+    "last_name": "Aguilar",
+    "email": "demo_team_4_005@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.379Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 58,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_006",
+    "first_name": "Tala",
+    "last_name": "Bautista",
+    "email": "demo_team_4_006@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.380Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 59,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_007",
+    "first_name": "Alina",
+    "last_name": "Dalisay",
+    "email": "demo_team_4_007@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.382Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 60,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_008",
+    "first_name": "Belen",
+    "last_name": "Estrella",
+    "email": "demo_team_4_008@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.384Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 61,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_009",
+    "first_name": "Celia",
+    "last_name": "Flores",
+    "email": "demo_team_4_009@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.385Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 62,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_010",
+    "first_name": "Dario",
+    "last_name": "Garcia",
+    "email": "demo_team_4_010@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.387Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 63,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_011",
+    "first_name": "Elian",
+    "last_name": "Hilario",
+    "email": "demo_team_4_011@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.388Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 64,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_012",
+    "first_name": "Faye",
+    "last_name": "Ilagan",
+    "email": "demo_team_4_012@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.390Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 65,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_013",
+    "first_name": "Gio",
+    "last_name": "Javier",
+    "email": "demo_team_4_013@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.391Z",
+    "role": "staff",
+    "position": "Workshop aide",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 66,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_014",
+    "first_name": "Hana",
+    "last_name": "Luna",
+    "email": "demo_team_4_014@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.393Z",
+    "role": "staff",
+    "position": "Team support",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 67,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_015",
+    "first_name": "Ivo",
+    "last_name": "Mendoza",
+    "email": "demo_team_4_015@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.394Z",
+    "role": "staff",
+    "position": "Production assistant",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 68,
+  "fields": {
+    "password": "!",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "demo_team_4_016",
+    "first_name": "Jana",
+    "last_name": "Navarro",
+    "email": "demo_team_4_016@example.test",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-20T19:41:11.396Z",
+    "role": "staff",
+    "position": "Project volunteer",
+    "contact": "",
+    "must_change_password": false,
+    "created_by": null,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "sample-editor"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 2,
+  "fields": {
+    "user": [
+      "elvincent"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 3,
+  "fields": {
+    "user": [
+      "demo_team_1_001"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 4,
+  "fields": {
+    "user": [
+      "demo_team_1_001"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 5,
+  "fields": {
+    "user": [
+      "demo_team_1_002"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 6,
+  "fields": {
+    "user": [
+      "demo_team_1_003"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 7,
+  "fields": {
+    "user": [
+      "demo_team_1_004"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 8,
+  "fields": {
+    "user": [
+      "demo_team_1_005"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 9,
+  "fields": {
+    "user": [
+      "demo_team_1_006"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 10,
+  "fields": {
+    "user": [
+      "demo_team_1_007"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 11,
+  "fields": {
+    "user": [
+      "demo_team_1_008"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 12,
+  "fields": {
+    "user": [
+      "demo_team_1_009"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 13,
+  "fields": {
+    "user": [
+      "demo_team_1_010"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 14,
+  "fields": {
+    "user": [
+      "demo_team_1_011"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 15,
+  "fields": {
+    "user": [
+      "demo_team_1_012"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 16,
+  "fields": {
+    "user": [
+      "demo_team_1_013"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 17,
+  "fields": {
+    "user": [
+      "demo_team_1_014"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 18,
+  "fields": {
+    "user": [
+      "demo_team_1_015"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 19,
+  "fields": {
+    "user": [
+      "demo_team_1_016"
+    ],
+    "team": 1
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 20,
+  "fields": {
+    "user": [
+      "demo_team_2_001"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 21,
+  "fields": {
+    "user": [
+      "demo_team_2_001"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 22,
+  "fields": {
+    "user": [
+      "demo_team_2_002"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 23,
+  "fields": {
+    "user": [
+      "demo_team_2_003"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 24,
+  "fields": {
+    "user": [
+      "demo_team_2_004"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 25,
+  "fields": {
+    "user": [
+      "demo_team_2_005"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 26,
+  "fields": {
+    "user": [
+      "demo_team_2_006"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 27,
+  "fields": {
+    "user": [
+      "demo_team_2_007"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 28,
+  "fields": {
+    "user": [
+      "demo_team_2_008"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 29,
+  "fields": {
+    "user": [
+      "demo_team_2_009"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 30,
+  "fields": {
+    "user": [
+      "demo_team_2_010"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 31,
+  "fields": {
+    "user": [
+      "demo_team_2_011"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 32,
+  "fields": {
+    "user": [
+      "demo_team_2_012"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 33,
+  "fields": {
+    "user": [
+      "demo_team_2_013"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 34,
+  "fields": {
+    "user": [
+      "demo_team_2_014"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 35,
+  "fields": {
+    "user": [
+      "demo_team_2_015"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 36,
+  "fields": {
+    "user": [
+      "demo_team_2_016"
+    ],
+    "team": 2
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 37,
+  "fields": {
+    "user": [
+      "demo_team_3_001"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 38,
+  "fields": {
+    "user": [
+      "demo_team_3_001"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 39,
+  "fields": {
+    "user": [
+      "demo_team_3_002"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 40,
+  "fields": {
+    "user": [
+      "demo_team_3_003"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 41,
+  "fields": {
+    "user": [
+      "demo_team_3_004"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 42,
+  "fields": {
+    "user": [
+      "demo_team_3_005"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 43,
+  "fields": {
+    "user": [
+      "demo_team_3_006"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 44,
+  "fields": {
+    "user": [
+      "demo_team_3_007"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 45,
+  "fields": {
+    "user": [
+      "demo_team_3_008"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 46,
+  "fields": {
+    "user": [
+      "demo_team_3_009"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 47,
+  "fields": {
+    "user": [
+      "demo_team_3_010"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 48,
+  "fields": {
+    "user": [
+      "demo_team_3_011"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 49,
+  "fields": {
+    "user": [
+      "demo_team_3_012"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 50,
+  "fields": {
+    "user": [
+      "demo_team_3_013"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 51,
+  "fields": {
+    "user": [
+      "demo_team_3_014"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 52,
+  "fields": {
+    "user": [
+      "demo_team_3_015"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 53,
+  "fields": {
+    "user": [
+      "demo_team_3_016"
+    ],
+    "team": 3
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 54,
+  "fields": {
+    "user": [
+      "demo_team_4_001"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 55,
+  "fields": {
+    "user": [
+      "demo_team_4_002"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 56,
+  "fields": {
+    "user": [
+      "demo_team_4_003"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 57,
+  "fields": {
+    "user": [
+      "demo_team_4_004"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 58,
+  "fields": {
+    "user": [
+      "demo_team_4_005"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 59,
+  "fields": {
+    "user": [
+      "demo_team_4_006"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 60,
+  "fields": {
+    "user": [
+      "demo_team_4_007"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 61,
+  "fields": {
+    "user": [
+      "demo_team_4_008"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 62,
+  "fields": {
+    "user": [
+      "demo_team_4_009"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 63,
+  "fields": {
+    "user": [
+      "demo_team_4_010"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 64,
+  "fields": {
+    "user": [
+      "demo_team_4_011"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 65,
+  "fields": {
+    "user": [
+      "demo_team_4_012"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 66,
+  "fields": {
+    "user": [
+      "demo_team_4_013"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 67,
+  "fields": {
+    "user": [
+      "demo_team_4_014"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 68,
+  "fields": {
+    "user": [
+      "demo_team_4_015"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "users.teammembership",
+  "pk": 69,
+  "fields": {
+    "user": [
+      "demo_team_4_016"
+    ],
+    "team": 4
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 1,
+  "fields": {
+    "title": "Leadership skills workshop",
+    "description": "Practice facilitation and team decision-making through small-group exercises.",
+    "requester": [
+      "sample-editor"
+    ],
+    "team": 1,
+    "venue": null,
+    "venue_snapshot": "Innovation Lab",
+    "date": "2026-11-21",
+    "start": "09:00:00",
+    "end": "11:00:00",
+    "attendees": 20,
+    "responsible": "DLL Elite Secretariat",
+    "contact": "Organization office",
+    "notes": "",
+    "status": "approved",
+    "created_at": "2026-11-20T12:04:29.063Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 2,
+  "fields": {
+    "title": "General assembly",
+    "description": "Meet the officers and teams, review upcoming initiatives and share your questions.",
+    "requester": [
+      "sample-editor"
+    ],
+    "team": 1,
+    "venue": null,
+    "venue_snapshot": "College Auditorium",
+    "date": "2026-11-23",
+    "start": "13:00:00",
+    "end": "15:00:00",
+    "attendees": 20,
+    "responsible": "DLL Elite Secretariat",
+    "contact": "Organization office",
+    "notes": "",
+    "status": "approved",
+    "created_at": "2026-11-20T12:04:29.065Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 3,
+  "fields": {
+    "title": "Creative media lab",
+    "description": "Explore a collaborative workflow for documenting student events.",
+    "requester": [
+      "sample-editor"
+    ],
+    "team": 1,
+    "venue": null,
+    "venue_snapshot": "Media Studio",
+    "date": "2026-11-25",
+    "start": "10:00:00",
+    "end": "12:00:00",
+    "attendees": 20,
+    "responsible": "DLL Elite Secretariat",
+    "contact": "Organization office",
+    "notes": "",
+    "status": "approved",
+    "created_at": "2026-11-20T12:04:29.065Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 4,
+  "fields": {
+    "title": "Campus organization briefing",
+    "description": "The officers introduce new students to campus committees, walk through event sign-up, and explain how to request a venue.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 5,
+    "venue_snapshot": "",
+    "date": "2026-11-21",
+    "start": "09:00:00",
+    "end": "10:30:00",
+    "attendees": 32,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.081Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 5,
+  "fields": {
+    "title": "Clean-up kickoff and team briefing",
+    "description": "The Technical Team sets collection points and distributes equipment. Volunteers work in zones and record the materials collected.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 6,
+    "venue_snapshot": "",
+    "date": "2026-11-22",
+    "start": "08:00:00",
+    "end": "10:00:00",
+    "attendees": 48,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.095Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 6,
+  "fields": {
+    "title": "Small-group facilitation lab",
+    "description": "Organization officers lead short exercises on meeting facilitation, delegation, and resolving disagreements in project teams.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 7,
+    "venue_snapshot": "",
+    "date": "2026-11-24",
+    "start": "09:00:00",
+    "end": "11:00:00",
+    "attendees": 22,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.109Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 7,
+  "fields": {
+    "title": "Caption and layout clinic",
+    "description": "The Editing Team prepares a campus feature and reviews captions, readable typography, and accessible layouts in pairs.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 8,
+    "venue_snapshot": "",
+    "date": "2026-11-24",
+    "start": "13:30:00",
+    "end": "15:00:00",
+    "attendees": 20,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.123Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 8,
+  "fields": {
+    "title": "Photo documentation workflow",
+    "description": "The Documentation Team practices documenting campus events, organizing consent forms, and preparing a shareable photo archive.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 9,
+    "venue_snapshot": "",
+    "date": "2026-11-26",
+    "start": "10:00:00",
+    "end": "12:00:00",
+    "attendees": 18,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.137Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 9,
+  "fields": {
+    "title": "Storyboarding and video editing lab",
+    "description": "The Videographer Team develops a short campus story and edits footage into a one-minute recap with captions.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 10,
+    "venue_snapshot": "",
+    "date": "2026-11-29",
+    "start": "14:00:00",
+    "end": "16:00:00",
+    "attendees": 20,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.149Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 10,
+  "fields": {
+    "title": "Committee project planning session",
+    "description": "The officers and team leads agree on milestones, assign owners, and draft the resource requests for the next student engagement project.",
+    "requester": [
+      "admin"
+    ],
+    "team": null,
+    "venue": 11,
+    "venue_snapshot": "",
+    "date": "2026-12-01",
+    "start": "10:30:00",
+    "end": "12:00:00",
+    "attendees": 16,
+    "responsible": "DLL Elite demonstration program",
+    "contact": "Organization office",
+    "notes": "Local demonstration booking installed by seed_program.",
+    "status": "approved",
+    "created_at": "2026-11-20T13:31:37.161Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 11,
+  "fields": {
+    "title": "Fourth Sunday",
+    "description": "Mass every fourth Sunday.",
+    "requester": [
+      "tengshi"
+    ],
+    "team": 2,
+    "venue": 5,
+    "venue_snapshot": "",
+    "date": "2026-11-27",
+    "start": "07:00:00",
+    "end": "08:00:00",
+    "attendees": 50,
+    "responsible": "Brian Encina",
+    "contact": "09515583346",
+    "notes": "",
+    "status": "approved",
+    "created_at": "2026-11-20T19:25:55.393Z"
+  }
+},
+{
+  "model": "reservations.reservation",
+  "pk": 12,
+  "fields": {
+    "title": "Third Sunday",
+    "description": "Third Sunday every month",
+    "requester": [
+      "admin"
+    ],
+    "team": 2,
+    "venue": 5,
+    "venue_snapshot": "",
+    "date": "2026-12-18",
+    "start": "07:30:00",
+    "end": "08:30:00",
+    "attendees": 47,
+    "responsible": "Brian Encina",
+    "contact": "09454548236",
+    "notes": "",
+    "status": "approved",
+    "created_at": "2026-11-20T19:29:58.176Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 1,
+  "fields": {
+    "reservation": 1,
+    "actor": [
+      "sample-editor"
+    ],
+    "status": "approved",
+    "reason": "Sample booking",
+    "at": "2026-11-20T12:04:29.064Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 2,
+  "fields": {
+    "reservation": 2,
+    "actor": [
+      "sample-editor"
+    ],
+    "status": "approved",
+    "reason": "Sample booking",
+    "at": "2026-11-20T12:04:29.065Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 3,
+  "fields": {
+    "reservation": 3,
+    "actor": [
+      "sample-editor"
+    ],
+    "status": "approved",
+    "reason": "Sample booking",
+    "at": "2026-11-20T12:04:29.066Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 4,
+  "fields": {
+    "reservation": 4,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.081Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 5,
+  "fields": {
+    "reservation": 4,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.086Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 6,
+  "fields": {
+    "reservation": 5,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.095Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 7,
+  "fields": {
+    "reservation": 5,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.098Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 8,
+  "fields": {
+    "reservation": 6,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.109Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 9,
+  "fields": {
+    "reservation": 6,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.112Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 10,
+  "fields": {
+    "reservation": 7,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.123Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 11,
+  "fields": {
+    "reservation": 7,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.127Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 12,
+  "fields": {
+    "reservation": 8,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.137Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 13,
+  "fields": {
+    "reservation": 8,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.140Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 14,
+  "fields": {
+    "reservation": 9,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.149Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 15,
+  "fields": {
+    "reservation": 9,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.153Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 16,
+  "fields": {
+    "reservation": 10,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T13:31:37.162Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 17,
+  "fields": {
+    "reservation": 10,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "Demonstration booking. Venue and schedule validated.",
+    "at": "2026-11-20T13:31:37.165Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 18,
+  "fields": {
+    "reservation": 11,
+    "actor": [
+      "tengshi"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T19:25:55.395Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 19,
+  "fields": {
+    "reservation": 11,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "",
+    "at": "2026-11-20T19:26:40.942Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 20,
+  "fields": {
+    "reservation": 12,
+    "actor": [
+      "admin"
+    ],
+    "status": "pending",
+    "reason": "",
+    "at": "2026-11-20T19:29:58.178Z"
+  }
+},
+{
+  "model": "reservations.statuschange",
+  "pk": 21,
+  "fields": {
+    "reservation": 12,
+    "actor": [
+      "admin"
+    ],
+    "status": "approved",
+    "reason": "",
+    "at": "2026-11-20T19:30:06.919Z"
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 1,
+  "fields": {
+    "title": "General assembly guidelines",
+    "description": "Bring your student ID and arrive fifteen minutes before the assembly for attendance.",
+    "category": "Organization",
+    "author": [
+      "sample-editor"
+    ],
+    "status": "published",
+    "pinned": true,
+    "published_at": "2026-11-20T12:04:29.067Z",
+    "expires": null,
+    "image": "",
+    "attachment": ""
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 2,
+  "fields": {
+    "title": "Open call for student creatives",
+    "description": "The Editing and Videographer teams welcome student contributors. Visit the organization office to express interest.",
+    "category": "Team update",
+    "author": [
+      "sample-editor"
+    ],
+    "status": "published",
+    "pinned": false,
+    "published_at": "2026-11-19T12:04:29.067Z",
+    "expires": null,
+    "image": "",
+    "attachment": ""
+  }
+},
+{
+  "model": "announcements.announcement",
+  "pk": 3,
+  "fields": {
+    "title": "Workshop materials available",
+    "description": "Members can collect the leadership workshop handouts at the organization office during office hours.",
+    "category": "Resources",
+    "author": [
+      "sample-editor"
+    ],
+    "status": "published",
+    "pinned": false,
+    "published_at": "2026-11-18T12:04:29.067Z",
+    "expires": null,
+    "image": "",
+    "attachment": ""
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 1,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Campus organization briefing: pending",
+    "link": "/reservations/4",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.082Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 2,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Campus organization briefing: pending",
+    "link": "/reservations/4",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.083Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 3,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Campus organization briefing: approved",
+    "link": "/reservations/4",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.086Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 4,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Clean-up kickoff and team briefing: pending",
+    "link": "/reservations/5",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.095Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 5,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Clean-up kickoff and team briefing: pending",
+    "link": "/reservations/5",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.096Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 6,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Clean-up kickoff and team briefing: approved",
+    "link": "/reservations/5",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.099Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 7,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Small-group facilitation lab: pending",
+    "link": "/reservations/6",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.109Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 8,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Small-group facilitation lab: pending",
+    "link": "/reservations/6",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.110Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 9,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Small-group facilitation lab: approved",
+    "link": "/reservations/6",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.112Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 10,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Caption and layout clinic: pending",
+    "link": "/reservations/7",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.123Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 11,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Caption and layout clinic: pending",
+    "link": "/reservations/7",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.124Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 12,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Caption and layout clinic: approved",
+    "link": "/reservations/7",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.127Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 13,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Photo documentation workflow: pending",
+    "link": "/reservations/8",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.137Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 14,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Photo documentation workflow: pending",
+    "link": "/reservations/8",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.138Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 15,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Photo documentation workflow: approved",
+    "link": "/reservations/8",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.141Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 16,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Storyboarding and video editing lab: pending",
+    "link": "/reservations/9",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.149Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 17,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Storyboarding and video editing lab: pending",
+    "link": "/reservations/9",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.151Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 18,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Storyboarding and video editing lab: approved",
+    "link": "/reservations/9",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.153Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 19,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Committee project planning session: pending",
+    "link": "/reservations/10",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.162Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 20,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Committee project planning session: pending",
+    "link": "/reservations/10",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.163Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 21,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Committee project planning session: approved",
+    "link": "/reservations/10",
+    "read": false,
+    "created_at": "2026-11-20T13:31:37.165Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 22,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Fourth Sunday: pending",
+    "link": "/reservations/11",
+    "read": false,
+    "created_at": "2026-11-20T19:25:55.395Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 23,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Fourth Sunday: pending",
+    "link": "/reservations/11",
+    "read": false,
+    "created_at": "2026-11-20T19:25:55.396Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 24,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Fourth Sunday: approved",
+    "link": "/reservations/11",
+    "read": false,
+    "created_at": "2026-11-20T19:26:40.942Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 25,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Third Sunday: pending",
+    "link": "/reservations/12",
+    "read": false,
+    "created_at": "2026-11-20T19:29:58.178Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 26,
+  "fields": {
+    "recipient": [
+      "tengshi"
+    ],
+    "message": "Third Sunday: pending",
+    "link": "/reservations/12",
+    "read": false,
+    "created_at": "2026-11-20T19:29:58.179Z"
+  }
+},
+{
+  "model": "notifications.notification",
+  "pk": 27,
+  "fields": {
+    "recipient": [
+      "admin"
+    ],
+    "message": "Third Sunday: approved",
+    "link": "/reservations/12",
+    "read": false,
+    "created_at": "2026-11-20T19:30:06.920Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 1,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "",
+    "actor_role": "",
+    "action": "Created",
+    "resource": "user",
+    "label": "Brian Encina",
+    "object_id": 3,
+    "description": "",
+    "at": "2026-11-20T12:28:59.651Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 2,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "DLL Elite member orientation",
+    "object_id": 3,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.080Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 3,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Campus organization briefing",
+    "object_id": 4,
+    "description": "Submitted reservation “Campus organization briefing”.",
+    "at": "2026-11-20T13:31:37.083Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 4,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Campus organization briefing",
+    "object_id": 4,
+    "description": "Approved reservation “Campus organization briefing”.",
+    "at": "2026-11-20T13:31:37.086Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 5,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Campus organization briefing",
+    "object_id": 4,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.087Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 6,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Campus care and clean-up drive",
+    "object_id": 4,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.094Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 7,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Clean-up kickoff and team briefing",
+    "object_id": 5,
+    "description": "Submitted reservation “Clean-up kickoff and team briefing”.",
+    "at": "2026-11-20T13:31:37.097Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 8,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Clean-up kickoff and team briefing",
+    "object_id": 5,
+    "description": "Approved reservation “Clean-up kickoff and team briefing”.",
+    "at": "2026-11-20T13:31:37.099Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 9,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Clean-up kickoff and team briefing",
+    "object_id": 5,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.100Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 10,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Peer leadership and facilitation",
+    "object_id": 5,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.108Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 11,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Small-group facilitation lab",
+    "object_id": 6,
+    "description": "Submitted reservation “Small-group facilitation lab”.",
+    "at": "2026-11-20T13:31:37.111Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 12,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Small-group facilitation lab",
+    "object_id": 6,
+    "description": "Approved reservation “Small-group facilitation lab”.",
+    "at": "2026-11-20T13:31:37.113Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 13,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Small-group facilitation lab",
+    "object_id": 6,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.113Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 14,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Student publication workshop",
+    "object_id": 6,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.122Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 15,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Caption and layout clinic",
+    "object_id": 7,
+    "description": "Submitted reservation “Caption and layout clinic”.",
+    "at": "2026-11-20T13:31:37.125Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 16,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Caption and layout clinic",
+    "object_id": 7,
+    "description": "Approved reservation “Caption and layout clinic”.",
+    "at": "2026-11-20T13:31:37.127Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 17,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Caption and layout clinic",
+    "object_id": 7,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.128Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 18,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Campus documentation skills series",
+    "object_id": 7,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.136Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 19,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Photo documentation workflow",
+    "object_id": 8,
+    "description": "Submitted reservation “Photo documentation workflow”.",
+    "at": "2026-11-20T13:31:37.139Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 20,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Photo documentation workflow",
+    "object_id": 8,
+    "description": "Approved reservation “Photo documentation workflow”.",
+    "at": "2026-11-20T13:31:37.141Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 21,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Photo documentation workflow",
+    "object_id": 8,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.141Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 22,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Multimedia production practicum",
+    "object_id": 8,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.148Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 23,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Storyboarding and video editing lab",
+    "object_id": 9,
+    "description": "Submitted reservation “Storyboarding and video editing lab”.",
+    "at": "2026-11-20T13:31:37.151Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 24,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Storyboarding and video editing lab",
+    "object_id": 9,
+    "description": "Approved reservation “Storyboarding and video editing lab”.",
+    "at": "2026-11-20T13:31:37.154Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 25,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Storyboarding and video editing lab",
+    "object_id": 9,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.154Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 26,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "activity",
+    "label": "Student engagement project planning",
+    "object_id": 9,
+    "description": "Installed a demonstration activity.",
+    "at": "2026-11-20T13:31:37.161Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 27,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Committee project planning session",
+    "object_id": 10,
+    "description": "Submitted reservation “Committee project planning session”.",
+    "at": "2026-11-20T13:31:37.163Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 28,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Committee project planning session",
+    "object_id": 10,
+    "description": "Approved reservation “Committee project planning session”.",
+    "at": "2026-11-20T13:31:37.166Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 29,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "event",
+    "label": "Committee project planning session",
+    "object_id": 10,
+    "description": "Published a demonstration event for the validated booking.",
+    "at": "2026-11-20T13:31:37.166Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 30,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T13:42:00.495Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 31,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T13:42:00.558Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 32,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T13:42:01.919Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 33,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T13:42:01.936Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 34,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T16:38:21.055Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 35,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T16:39:15.773Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 36,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Created",
+    "resource": "account",
+    "label": "Elvira Pialane",
+    "object_id": 4,
+    "description": "Created staff account “Elvira Pialane” on Technical Team.",
+    "at": "2026-11-20T17:13:13.298Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 37,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T18:34:14.860Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 38,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T18:51:35.439Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 39,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:10:08.178Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 40,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:10:38.964Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 41,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:15:38.409Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 42,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:15:51.019Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 43,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:16:19.302Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 44,
+  "fields": {
+    "actor": [
+      "elvincent"
+    ],
+    "actor_name": "Elvira Pialane",
+    "actor_role": "staff",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:16:28.114Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 45,
+  "fields": {
+    "actor": [
+      "elvincent"
+    ],
+    "actor_name": "Elvira Pialane",
+    "actor_role": "staff",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:18:44.982Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 46,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:18:52.227Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 47,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:19:35.258Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 48,
+  "fields": {
+    "actor": null,
+    "actor_name": "",
+    "actor_role": "",
+    "action": "FAILED_LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "A sign-in attempt was rejected.",
+    "at": "2026-11-20T19:19:44.912Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 49,
+  "fields": {
+    "actor": null,
+    "actor_name": "",
+    "actor_role": "",
+    "action": "FAILED_LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "A sign-in attempt was rejected.",
+    "at": "2026-11-20T19:19:59.306Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 50,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:20:20.493Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 51,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Fourth Sunday",
+    "object_id": 11,
+    "description": "Submitted reservation “Fourth Sunday”.",
+    "at": "2026-11-20T19:25:55.396Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 52,
+  "fields": {
+    "actor": [
+      "tengshi"
+    ],
+    "actor_name": "Brian Encina",
+    "actor_role": "officer",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-20T19:26:02.933Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 53,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-20T19:26:08.367Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 54,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Fourth Sunday",
+    "object_id": 11,
+    "description": "Approved reservation “Fourth Sunday”.",
+    "at": "2026-11-20T19:26:40.943Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 55,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Submitted",
+    "resource": "reservation",
+    "label": "Third Sunday",
+    "object_id": 12,
+    "description": "Submitted reservation “Third Sunday”.",
+    "at": "2026-11-20T19:29:58.180Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 56,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "Approved",
+    "resource": "reservation",
+    "label": "Third Sunday",
+    "object_id": 12,
+    "description": "Approved reservation “Third Sunday”.",
+    "at": "2026-11-20T19:30:06.920Z"
+  }
+}
+]

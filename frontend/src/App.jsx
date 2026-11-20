@@ -17,7 +17,6 @@ import Notifications from './pages/Notifications'
 import Audit from './pages/Audit'
 import Settings from './pages/Settings'
 import Announcements from './pages/Announcements'
-import ManageAnnouncements from './pages/ManageAnnouncements'
 import Activities from './pages/Activities'
 import WeeklyEvents from './pages/WeeklyEvents'
 import Teams from './pages/Teams'
@@ -47,7 +46,11 @@ function Guard({ role, children }) {
       <Navigate
         replace
         to="/login"
-        state={{ from: location.pathname + location.search }}
+        state={{
+          from:
+            location.pathname +
+            (location.state?.hubView ? '' : location.search),
+        }}
       />
     )
   if (
@@ -81,11 +84,22 @@ const pages = [
   [catalog.notices, VenueNotices],
   [catalog.reservations, Reservations],
   [catalog.accounts, Accounts],
-  [
-    { ...catalog.announcements, path: 'manage-announcements' },
-    ManageAnnouncements,
-  ],
 ]
+
+function LegacyAnnouncementRoute() {
+  const { pathname, search } = useLocation()
+  return (
+    <Navigate
+      replace
+      to={
+        '/announcements' +
+        pathname.slice('/manage-announcements'.length) +
+        search
+      }
+    />
+  )
+}
+
 function HubRoutes() {
   return (
     <Routes>
@@ -99,16 +113,20 @@ function HubRoutes() {
             </Guard>
           }
         />
+        <Route
+          path="manage-announcements/*"
+          element={<LegacyAnnouncementRoute />}
+        />
         {pages.flatMap(([c, Page]) =>
           ['', '/:id', '/new', '/:id/edit']
             .filter((s) => !(c.api === 'reservations' && s.endsWith('edit')))
             .map((s) => {
               const role =
-                c.path === 'manage-announcements' || c.api === 'accounts'
+                c.api === 'accounts'
                   ? 'manager'
-                  : c.api === 'venues' && s === '/new'
+                  : ['venues', 'teams'].includes(c.api) && s === '/new'
                     ? 'adviser'
-                    : c.api === 'reservations'
+                    : c.api === 'reservations' && s !== '/new'
                       ? 'member'
                       : s === '/new' || s.endsWith('edit')
                         ? 'manager'

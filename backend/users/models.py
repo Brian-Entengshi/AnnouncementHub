@@ -1,8 +1,22 @@
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.db import models
+from django.db import models, transaction
 
 
 class HubUserManager(UserManager):
+    @transaction.atomic
+    def create_user(
+        self, username, email=None, password=None, *, teams=(), **extra_fields
+    ):
+        staff = extra_fields.get("role", "staff") == "staff"
+        if staff and not teams:
+            raise ValueError("A staff account requires at least one team.")
+        if not staff and teams:
+            raise ValueError("Only staff accounts can be assigned to teams.")
+        user = super().create_user(username, email, password, **extra_fields)
+        if staff:
+            user.teams.set(teams)
+        return user
+
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         extra_fields["role"] = "adviser"
         return super().create_superuser(username, email, password, **extra_fields)
@@ -16,12 +30,11 @@ class User(AbstractUser):
         choices=[(r, r.title()) for r in ("adviser", "officer", "staff")],
         default="staff",
     )
-    team = models.ForeignKey(
+    teams = models.ManyToManyField(
         "teams.Team",
-        null=True,
         blank=True,
-        on_delete=models.PROTECT,
-        related_name="members",
+        through="TeamMembership",
+        related_name="staff_members",
     )
     position = models.CharField(max_length=100, blank=True)
     contact = models.CharField(max_length=100, blank=True)
@@ -34,17 +47,15 @@ class User(AbstractUser):
         related_name="created_accounts",
     )
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                condition=~models.Q(role="staff") | models.Q(team__isnull=False),
-                name="staff_has_team",
-            ),
-            models.CheckConstraint(
-                condition=models.Q(role="staff") | models.Q(team__isnull=True),
-                name="only_staff_have_team",
-            ),
-        ]
-
     def __str__(self):
         return self.get_full_name() or self.username
+
+
+class TeamMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    team = models.ForeignKey("teams.Team", on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("user", "team"), name="unique_staff_team")
+        ]

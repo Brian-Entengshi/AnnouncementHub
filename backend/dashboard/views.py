@@ -93,7 +93,7 @@ def dashboard(request):
                 ).count(),
                 "announcements": announcements.count(),
                 "venues": Venue.objects.filter(archived=False, available=True).count(),
-                "teams": Team.objects.count(),
+                "teams": Team.objects.filter(is_active=True).count(),
                 "pending": reservations.count()
                 if request.user.is_authenticated
                 else None,

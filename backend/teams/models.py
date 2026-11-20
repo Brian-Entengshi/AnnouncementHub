@@ -12,6 +12,7 @@ CORE_TEAM_NAMES = (
 class Team(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["id"]

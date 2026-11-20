@@ -39,6 +39,38 @@ async function logout(page) {
   await expect(page.getByRole('link', { name: 'Member sign in' })).toBeVisible()
 }
 
+test('the seeded working rosters and account directory paginate', async ({
+  page,
+}) => {
+  await login(page, 'ADMIN')
+  await page.goto('/accounts')
+  await page.getByLabel('Search accounts').fill('demo_team_')
+  await page.getByRole('button', { name: 'Apply filters' }).click()
+  const accounts = page.getByRole('table', { name: 'Accounts' })
+  const accountPages = page.getByRole('navigation', { name: 'Account pages' })
+  await expect(accounts.getByRole('row')).toHaveCount(16)
+  await expect(accounts.getByText(/demo_team_/)).toHaveCount(15)
+  await accountPages.getByRole('button', { name: 'Next' }).click()
+  await expect(accountPages.getByText(/Page 2/)).toBeVisible()
+  await expect(accounts.getByText(/demo_team_/)).toHaveCount(15)
+
+  await page.goto('/organization-teams')
+  const tabs = page.getByRole('tablist').getByRole('tab')
+  await expect(tabs.first()).toBeVisible()
+  const roster = page.getByRole('table', { name: 'Team members' })
+  const teamPages = page.getByRole('navigation', { name: 'Team member pages' })
+  for (const tab of await tabs.all()) {
+    await tab.click()
+    await expect(teamPages.getByText(/Page 1/)).toBeVisible()
+    await expect(roster.getByRole('row')).toHaveCount(16)
+    await expect(roster.getByText(/demo_team_/).first()).toBeVisible()
+    await teamPages.getByRole('button', { name: 'Next' }).click()
+    await expect(teamPages.getByText(/Page 2/)).toBeVisible()
+    await expect(roster.getByRole('row').nth(1)).toBeVisible()
+  }
+  await logout(page)
+})
+
 test('existing adviser and officer complete the audit, venue, and account workflows on a copy', async ({
   page,
 }) => {
@@ -130,7 +162,9 @@ test('existing adviser and officer complete the audit, venue, and account workfl
   await page.getByLabel('Full name').fill('QA officer ' + tag)
   await page.getByLabel('Username').fill('qa-officer-' + tag)
   await page.getByLabel('Organization role').selectOption('officer')
-  await expect(page.getByLabel('Assigned team')).toHaveCount(0)
+  await expect(page.getByRole('group', { name: 'Assigned teams' })).toHaveCount(
+    0,
+  )
   await page
     .getByLabel('Initial or replacement password', { exact: true })
     .fill(randomBytes(16).toString('hex'))
@@ -141,7 +175,7 @@ test('existing adviser and officer complete the audit, venue, and account workfl
   await logout(page)
 
   const officer = await login(page, 'OFFICER')
-  expect(officer.team).toBeNull()
+  expect(officer.teams).toEqual([])
   await expect(page.getByRole('button', { name: 'Hub help' })).toHaveCount(0)
   const { csrf } = await (await page.request.get('/api/session/')).json()
   const headers = { 'X-CSRFToken': csrf }
@@ -171,15 +205,15 @@ test('existing adviser and officer complete the audit, venue, and account workfl
   await page.goto('/accounts/new')
   await page.getByLabel('Full name').fill(staffName)
   await page.getByLabel('Username').fill('qa-staff-' + tag)
-  await page
-    .getByLabel('Assigned team')
-    .selectOption({ label: 'Documentation Team' })
+  await page.getByRole('checkbox', { name: 'Documentation Team' }).check()
   await page
     .getByLabel('Initial or replacement password', { exact: true })
     .fill(randomBytes(16).toString('hex'))
   await page.getByRole('button', { name: 'Save account' }).click()
   await expect(page.getByRole('heading', { name: staffName })).toBeVisible()
   await page.goto('/accounts')
+  await page.getByLabel('Search accounts').fill(staffName)
+  await page.getByRole('button', { name: 'Apply filters' }).click()
   await page.getByRole('button', { name: 'Deactivate ' + staffName }).click()
   await page.getByRole('button', { name: 'Deactivate account' }).click()
   await expect(

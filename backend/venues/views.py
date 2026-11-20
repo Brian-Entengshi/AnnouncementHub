@@ -17,7 +17,7 @@ from .serializers import VenueSerializer, NoticeSerializer
 class VenueViewSet(ResourceViewSet):
     queryset = Venue.objects.all()
     serializer_class = VenueSerializer
-    search_fields = ["name", "location"]
+    search_fields = ["name", "location", "description"]
 
     def get_permissions(self):
         if self.action in ("create", "destroy", "archive"):
@@ -89,7 +89,7 @@ class VenueViewSet(ResourceViewSet):
 class NoticeViewSet(ResourceViewSet):
     queryset = Notice.objects.select_related("venue")
     serializer_class = NoticeSerializer
-    search_fields = ["title", "venue__name", "venue_snapshot"]
+    search_fields = ["title", "description", "venue__name", "venue_snapshot"]
     exact_filters = ("venue_id",)
 
     def get_queryset(self):
@@ -97,6 +97,16 @@ class NoticeViewSet(ResourceViewSet):
         if self.action == "retrieve":
             return query
         query = query.filter(venue__isnull=False)
+        if self.action == "list":
+            now = timezone.now()
+            statuses = {
+                "current": {"starts_at__lte": now, "ends_at__gt": now},
+                "upcoming": {"starts_at__gt": now},
+                "expired": {"ends_at__lte": now},
+            }
+            query = query.filter(
+                **statuses.get(self.request.query_params.get("status"), {})
+            )
         if (
             manager(self.request.user)
             and self.request.query_params.get("manage") == "1"
@@ -146,6 +156,12 @@ def availability(request):
     if venue_id:
         query = query.filter(venue_id=venue_id)
         notices = notices.filter(venue_id=venue_id)
+    status = request.query_params.get("status")
+    if status == "notices":
+        query = query.none()
+    elif status in ("approved", "pending", "completed"):
+        query = query.filter(status=status)
+        notices = notices.none()
     slots = []
     for booking in query.order_by("date", "start"):
         private = manager(request.user) or request.user.pk == booking.requester_id

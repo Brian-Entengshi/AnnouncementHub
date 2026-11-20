@@ -13,13 +13,13 @@ class AccountTests(APITestCase):
         self.team = Team.objects.get(name="Technical Team")
         self.adviser = User.objects.create_superuser("adviser")
         self.officer = User.objects.create_user("officer", role="officer")
-        self.staff = User.objects.create_user("staff", role="staff", team=self.team)
+        self.staff = User.objects.create_user("staff", role="staff", teams=[self.team])
         self.initial = "123"
         self.data = dict(
             full_name="New Member",
             username="new.member",
             role="staff",
-            team=self.team.pk,
+            teams=[self.team.pk],
             password=self.initial,
         )
         self.url = reverse("accounts-list")
@@ -35,7 +35,9 @@ class AccountTests(APITestCase):
             user = User.objects.get(pk=response.data["id"])
             self.assertTrue(user.check_password(self.initial))
             self.assertNotEqual(user.password, self.initial)
-            self.assertEqual(user.team, self.team if role == "staff" else None)
+            self.assertEqual(
+                list(user.teams.all()), [self.team] if role == "staff" else []
+            )
             self.assertTrue(user.must_change_password)
             self.assertEqual(user.created_by, self.adviser)
 
@@ -68,10 +70,42 @@ class AccountTests(APITestCase):
         self.client.force_authenticate(self.adviser)
         self.assertEqual(
             self.client.post(
-                self.url, {k: v for k, v in self.data.items() if k != "team"}
+                self.url, {k: v for k, v in self.data.items() if k != "teams"}
             ).status_code,
             400,
         )
+
+    def test_multiple_assignments_are_unique_and_updates_preserve_existing_memberships(
+        self,
+    ):
+        self.client.force_authenticate(self.adviser)
+        extra = Team.objects.create(name="Campus communications")
+        inactive = Team.objects.create(name="Retired crew", is_active=False)
+        result = self.client.post(
+            self.url, {**self.data, "teams": [self.team.pk, extra.pk]}, format="json"
+        )
+        self.assertEqual(result.status_code, 201, result.data)
+        self.assertEqual(set(result.data["teams"]), {self.team.pk, extra.pk})
+        self.assertEqual(
+            {item["name"] for item in result.data["assigned_teams"]},
+            {self.team.name, extra.name},
+        )
+        path = reverse("accounts-detail", args=[result.data["id"]])
+        for invalid in ([], [self.team.pk, self.team.pk], [inactive.pk]):
+            result = self.client.patch(path, {"teams": invalid}, format="json")
+            self.assertEqual(result.status_code, 400, result.data)
+        updated = self.client.patch(path, {"is_active": False}, format="json")
+        self.assertEqual(updated.status_code, 200)
+        self.assertEqual(set(updated.data["teams"]), {self.team.pk, extra.pk})
+        result = self.client.get(self.url, {"team_id": extra.pk, "status": "inactive"})
+        self.assertEqual(
+            [user["username"] for user in result.data["results"]], ["new.member"]
+        )
+        extra.is_active = False
+        extra.save()
+        updated = self.client.patch(path, {"teams": [extra.pk]}, format="json")
+        self.assertEqual(updated.status_code, 200, updated.data)
+        self.assertEqual(updated.data["teams"], [extra.pk])
 
     def test_login_csrf_rotation_password_change_and_deactivation(self):
         self.staff.set_password(self.initial)
@@ -140,16 +174,19 @@ class AccountTests(APITestCase):
         self.assertFalse(changed.data["user"]["must_change_password"])
         self.assertEqual(client.get("/api/reservations/").status_code, 200)
 
-    def test_role_change_clears_team_and_noncore_team_is_rejected(self):
+    def test_role_change_clears_staff_assignments_and_active_new_team_is_allowed(self):
         self.client.force_authenticate(self.adviser)
         result = self.client.patch(
             reverse("accounts-detail", args=[self.staff.pk]), {"role": "officer"}
         )
         self.assertEqual(result.status_code, 200)
-        self.assertIsNone(result.data["team"])
+        self.assertEqual(result.data["teams"], [])
         extra = Team.objects.create(name="Non-core team")
-        result = self.client.post(self.url, {**self.data, "team": extra.pk})
-        self.assertEqual(result.status_code, 400)
+        result = self.client.post(
+            self.url, {**self.data, "teams": [extra.pk]}, format="json"
+        )
+        self.assertEqual(result.status_code, 201, result.data)
+        self.assertEqual(result.data["teams"], [extra.pk])
 
     def test_temporary_passwords_create_and_replace_without_normalization(self):
         self.client.force_authenticate(self.adviser)

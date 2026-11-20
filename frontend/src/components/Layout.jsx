@@ -26,7 +26,6 @@ import {
   CircleHelp,
   BookOpen,
   Building2,
-  PencilLine,
   ShieldCheck,
   History,
   KeyRound,
@@ -50,10 +49,7 @@ const venue = [
   ['Venues', '/venues', Building2],
   ['Venue Notices', '/venue-notices', MapPin],
 ]
-const admin = [
-  ['Manage Announcements', '/manage-announcements', PencilLine],
-  ['Account Management', '/accounts', ShieldCheck],
-]
+const admin = [['Account Management', '/accounts', ShieldCheck]]
 const adviserNav = [
   ['Audit Logs', '/audit', History],
   ['Settings', '/settings', Settings],

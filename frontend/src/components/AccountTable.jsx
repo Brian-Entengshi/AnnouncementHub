@@ -43,7 +43,12 @@ export default function AccountTable({ accounts, onStatus }) {
               {roleNames[account.role]}
             </span>,
             account.role === 'staff'
-              ? account.team_name || '—'
+              ? account.assigned_teams
+                  .map(
+                    ({ name, is_active }) =>
+                      name + (is_active ? '' : ' (inactive)'),
+                  )
+                  .join(', ') || '—'
               : account.position || '—',
             <Badge
               key="status"

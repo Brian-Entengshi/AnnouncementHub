@@ -1,44 +1,41 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { Search, UserRoundPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { UserRoundPlus } from 'lucide-react'
 import ResourcePage from '../components/ResourcePage'
 import { Heading, State, Empty } from '../components/Common'
 import AccountTable from '../components/AccountTable'
 import ConfirmAction from '../components/ConfirmAction'
 import PageControls from '../components/PageControls'
+import AccountScroll from '../components/AccountScroll'
+import FilterForm, { SearchField } from '../components/FilterForm'
 import { catalog } from '../services/catalog'
 import { api } from '../services/api'
 import { useData } from '../hooks/useData'
+import { usePageState } from '../hooks/usePageState'
+import { usePageResults, useValidFilter } from '../hooks/usePageResults'
 import { useAuth } from '../context/auth'
 
 function AccountList() {
   const { adviser } = useAuth()
-  const [params, setParams] = useSearchParams()
-  const filters = Object.fromEntries(
-    ['search', 'role', 'status', 'team_id'].map((key) => [
-      key,
-      params.get(key) || '',
-    ]),
+  const { params, setParams, scope, entryKey } = usePageState(['page'])
+  const { query, page, setPage } = usePageResults(
+    'accounts/?' + params,
+    params,
+    setParams,
   )
-  const page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1)
-  const query = useData(
-    'accounts/?' + new URLSearchParams({ ...filters, page }),
+  const teams = useData('teams/?include_inactive=1', true)
+  const team = useValidFilter(
+    params,
+    setParams,
+    'team_id',
+    teams.data,
+    (item) => String(item.id),
   )
-  const teams = useData('teams/?core=1', true)
   const [target, setTarget] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const verb = target?.is_active ? 'Deactivate' : 'Activate'
-
-  function changePage(next) {
-    setParams({
-      ...Object.fromEntries(
-        Object.entries(filters).filter(([, value]) => value),
-      ),
-      page: next,
-    })
-  }
 
   async function changeStatus() {
     setBusy(true)
@@ -53,8 +50,8 @@ function AccountList() {
           (target.is_active ? ' was deactivated.' : ' was activated.'),
       )
       setTarget(null)
-      if (page > 1 && filters.status && query.data?.results.length === 1)
-        changePage(page - 1)
+      if (page > 1 && params.has('status') && query.data?.results.length === 1)
+        setPage(page - 1)
       else query.reload()
     } catch (err) {
       setError(err.message)
@@ -75,35 +72,21 @@ function AccountList() {
           New account
         </Link>
       </Heading>
-      <form
-        className="toolbar workspace-filters"
-        key={JSON.stringify(filters)}
-        onSubmit={(event) => {
-          event.preventDefault()
-          const form = new FormData(event.currentTarget)
-          setParams(
-            Object.fromEntries(
-              [...form]
-                .map(([key, value]) => [key, value.trim()])
-                .filter(([, value]) => value),
-            ),
-          )
-        }}
+      <FilterForm
+        key={entryKey}
+        onApply={setParams}
+        onClear={() => setParams({})}
       >
-        <label className="search">
-          <Search size={17} />
-          <input
-            name="search"
-            aria-label="Search accounts"
-            placeholder="Search name or username"
-            defaultValue={filters.search}
-          />
-        </label>
+        <SearchField
+          label="Search accounts"
+          placeholder="Search name or username"
+          value={params.get('search')}
+        />
         {adviser && (
           <select
             name="role"
             aria-label="Account role"
-            defaultValue={filters.role}
+            defaultValue={params.get('role') || ''}
           >
             <option value="">All roles</option>
             <option value="adviser">Admin / Adviser</option>
@@ -114,7 +97,7 @@ function AccountList() {
         <select
           name="status"
           aria-label="Account status"
-          defaultValue={filters.status}
+          defaultValue={params.get('status') || ''}
         >
           <option value="">All statuses</option>
           <option value="active">Active</option>
@@ -123,22 +106,17 @@ function AccountList() {
         <select
           name="team_id"
           aria-label="Account team"
-          defaultValue={filters.team_id}
+          key={teams.data ? 'ready' : 'loading'}
+          defaultValue={team}
         >
           <option value="">All teams</option>
           {teams.data?.map((team) => (
             <option key={team.id} value={team.id}>
-              {team.name}
+              {team.name + (team.is_active ? '' : ' (inactive)')}
             </option>
           ))}
         </select>
-        <button className="primary">Apply filters</button>
-        {Object.values(filters).some(Boolean) && (
-          <button type="button" onClick={() => setParams({})}>
-            Clear
-          </button>
-        )}
-      </form>
+      </FilterForm>
       {message && (
         <p role="status" className="success-notice">
           {message}
@@ -148,23 +126,25 @@ function AccountList() {
         <State query={query}>
           {({ results, count, next, previous }) => (
             <>
-              {results.length ? (
-                <AccountTable
-                  accounts={results}
-                  onStatus={(account) => {
-                    setError('')
-                    setTarget(account)
-                  }}
-                />
-              ) : (
-                <Empty>No accounts match these filters.</Empty>
-              )}
+              <AccountScroll scope={scope} resultKey={params.toString()}>
+                {results.length ? (
+                  <AccountTable
+                    accounts={results}
+                    onStatus={(account) => {
+                      setError('')
+                      setTarget(account)
+                    }}
+                  />
+                ) : (
+                  <Empty>No accounts match these filters.</Empty>
+                )}
+              </AccountScroll>
               <PageControls
                 page={page}
                 count={count}
                 next={next}
                 previous={previous}
-                onPage={changePage}
+                onPage={setPage}
                 resource="Account"
               />
             </>

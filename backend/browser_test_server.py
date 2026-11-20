@@ -39,28 +39,32 @@ def main():
         from audit_logs.models import AuditLog
         from events.models import Event
         from reservations.models import Reservation
+        from useful_links.models import UsefulLink
         from venues.models import Venue
 
         call_command("migrate", interactive=False, verbosity=0)
         call_command("seed_demo")
+        call_command("seed_venue_notices")
+        UsefulLink.objects.create(
+            title="Campus library guide",
+            description="Opening hours",
+            category="Campus",
+            url="https://example.org/",
+        )
         secret = os.environ["ELITE_BROWSER_TEST_PASSWORD"]
         adviser = User.objects.create_superuser("test-adviser", password=secret)
         User.objects.create_user("test-officer", password=secret, role="officer")
         User.objects.create_user(
-            "test-staff", password=secret, role="staff", team=Team.objects.first()
+            "test-staff", password=secret, role="staff", teams=[Team.objects.first()]
         )
         team = Team.objects.get(name="Technical Team")
-        User.objects.bulk_create(
-            [
-                User(
-                    username=f"directory-{index:02}",
-                    first_name=f"Directory member {index:02}",
-                    team=team,
-                    role="staff",
-                )
-                for index in range(21)
-            ]
-        )
+        for index in range(21):
+            User.objects.create_user(
+                username=f"directory-{index:02}",
+                first_name=f"Directory member {index:02}",
+                role="staff",
+                teams=[team],
+            )
         for _ in range(21):
             AuditLog.authentication(adviser, "LOGIN")
 

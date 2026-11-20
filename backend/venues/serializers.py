@@ -44,17 +44,26 @@ class VenueSerializer(serializers.ModelSerializer):
 
 class NoticeSerializer(serializers.ModelSerializer):
     venue_name = serializers.CharField(source="venue_display_name", read_only=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Notice
         exclude = ("venue_snapshot",)
         extra_kwargs = {"venue": {"required": True, "allow_null": False}}
 
+    def get_status(self, obj):
+        now = timezone.now()
+        if obj.ends_at <= now:
+            return "expired"
+        return "upcoming" if obj.starts_at > now else "current"
+
     def validate(self, attrs):
         def value(name):
             return attrs.get(name, getattr(self.instance, name, None))
 
         venue = value("venue")
+        if venue is not None and value("blocks_bookings"):
+            venue = Venue.objects.select_for_update().filter(pk=venue.pk).first()
         if venue is None:
             raise serializers.ValidationError(
                 {"venue": "This notice belongs to a retired venue."}
@@ -69,7 +78,7 @@ class NoticeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"ends_at": "End must follow start."})
         if value("blocks_bookings"):
             bookings = Reservation.objects.filter(
-                venue=value("venue"),
+                venue=venue,
                 status="approved",
                 date__range=(
                     timezone.localtime(start).date(),

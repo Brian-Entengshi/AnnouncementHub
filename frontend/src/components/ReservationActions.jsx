@@ -5,14 +5,14 @@ import { Badge } from './Common'
 import { stamp } from '../utils/format'
 
 export default function ReservationActions({ item, reload }) {
-  const { manager } = useAuth()
+  const { adviser, manager, user } = useAuth()
   const [status, setStatus] = useState(''),
     [reason, setReason] = useState(''),
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false)
   const allowed =
     item.status === 'pending'
-      ? manager
+      ? manager && (adviser || item.requester !== user.id)
         ? ['approved', 'rejected', 'cancelled']
         : ['cancelled']
       : item.status === 'approved'

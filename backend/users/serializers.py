@@ -1,6 +1,20 @@
-from teams.models import CORE_TEAM_NAMES
 from rest_framework import serializers
+from teams.models import Team
 from .models import User
+
+
+class AssignedTeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = ("id", "name", "is_active")
+
+
+class TeamMemberSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="get_full_name")
+
+    class Meta:
+        model = User
+        fields = ("id", "full_name", "username", "position", "is_active", "date_joined")
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -8,8 +22,16 @@ class AccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True, required=False, allow_blank=True, trim_whitespace=False
     )
-    team_name = serializers.StringRelatedField(source="team", read_only=True)
+    teams = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Team.objects.all(), required=False
+    )
+    assigned_teams = AssignedTeamSerializer(source="teams", many=True, read_only=True)
     can_change_status = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["full_name"] = instance.get_full_name()
+        return data
 
     def get_can_change_status(self, target):
         request = self.context.get("request")
@@ -26,8 +48,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "email",
             "role",
             "position",
-            "team",
-            "team_name",
+            "teams",
+            "assigned_teams",
             "contact",
             "is_active",
             "password",
@@ -61,13 +83,28 @@ class AccountSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "This administrative account must stay active with its current role."
             )
-        team = attrs.get("team", getattr(target, "team", None))
+        assigned = {team.pk for team in target.teams.all()} if target else set()
+        teams = attrs.get("teams")
         if role != "staff":
-            attrs["team"] = None
-        elif not team or team.name not in CORE_TEAM_NAMES:
-            raise serializers.ValidationError(
-                {"team": "Assign this staff member to one of the four core teams."}
-            )
+            attrs["teams"] = []
+        elif teams is None:
+            if not assigned:
+                raise serializers.ValidationError(
+                    {"teams": "Choose at least one team."}
+                )
+        else:
+            if not teams:
+                raise serializers.ValidationError(
+                    {"teams": "Choose at least one team."}
+                )
+            if len({team.pk for team in teams}) != len(teams):
+                raise serializers.ValidationError(
+                    {"teams": "Select each team only once."}
+                )
+            if any(not team.is_active and team.pk not in assigned for team in teams):
+                raise serializers.ValidationError(
+                    {"teams": "Choose active teams for new assignments."}
+                )
         if not target and not attrs.get("password"):
             raise serializers.ValidationError(
                 {"password": "An initial password is required."}
@@ -86,6 +123,12 @@ class AccountSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
+        if instance.last_name and "first_name" in validated_data:
+            name = validated_data.pop("first_name")
+            if name != instance.get_full_name():
+                first, separator, last = name.rpartition(" ")
+                validated_data["first_name"] = first if separator else name
+                validated_data["last_name"] = last if separator else ""
         password = validated_data.pop("password", None)
         if password is not None:
             instance.set_password(password)

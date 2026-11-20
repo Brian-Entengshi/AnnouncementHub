@@ -1,9 +1,10 @@
-import { useSearchParams } from 'react-router-dom'
-import { Search } from 'lucide-react'
 import { useData } from '../hooks/useData'
+import { usePageState } from '../hooks/usePageState'
+import { usePageResults, useValidFilter } from '../hooks/usePageResults'
 import { State, Empty, Heading } from '../components/Common'
 import { human, stamp } from '../utils/format'
 import PageControls from '../components/PageControls'
+import FilterForm, { DateFilters, SearchField } from '../components/FilterForm'
 
 const headings = [
   'User',
@@ -74,15 +75,14 @@ function AuditTable({ records }) {
 }
 
 export default function Audit() {
-  const [params, setParams] = useSearchParams()
-  const page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1)
-  const search = params.get('search') || ''
-  const role = params.get('role') || ''
-  const query = useData('audit/?' + new URLSearchParams({ page, search, role }))
-
-  function setPage(next) {
-    setParams({ ...(search && { search }), ...(role && { role }), page: next })
-  }
+  const { params, setParams, entryKey } = usePageState(['page'])
+  const { query, page, setPage } = usePageResults(
+    'audit/?' + params,
+    params,
+    setParams,
+  )
+  const actions = useData('audit/actions/')
+  const action = useValidFilter(params, setParams, 'action', actions.data)
 
   return (
     <>
@@ -91,42 +91,41 @@ export default function Audit() {
         title="Audit Logs"
         description="Sign-ins, reservation decisions and changes to organization records."
       />
-      <form
-        className="toolbar audit-filters"
-        key={search + ':' + role}
-        onSubmit={(e) => {
-          e.preventDefault()
-          const fields = new FormData(e.currentTarget)
-          const term = fields.get('search').trim()
-          const actorRole = fields.get('role')
-          setParams({
-            ...(term && { search: term }),
-            ...(actorRole && { role: actorRole }),
-          })
-        }}
+      <FilterForm
+        key={entryKey}
+        onApply={setParams}
+        onClear={() => setParams({})}
       >
-        <label className="search">
-          <Search size={17} aria-hidden="true" />
-          <input
-            name="search"
-            aria-label="Search audit logs"
-            placeholder="Search user, action or record"
-            defaultValue={search}
-          />
-        </label>
-        <select name="role" aria-label="Filter by role" defaultValue={role}>
+        <SearchField
+          label="Search audit logs"
+          placeholder="Search user, action or record"
+          value={params.get('search')}
+        />
+        <select
+          name="role"
+          aria-label="Filter by role"
+          defaultValue={params.get('role') || ''}
+        >
           <option value="">All roles</option>
           <option value="adviser">Adviser</option>
           <option value="officer">Officer</option>
           <option value="staff">Staff</option>
         </select>
-        <button className="primary">Apply filters</button>
-        {(search || role) && (
-          <button type="button" onClick={() => setParams({})}>
-            Clear
-          </button>
-        )}
-      </form>
+        <select
+          name="action"
+          aria-label="Filter by action"
+          key={actions.data ? 'ready' : 'loading'}
+          defaultValue={action}
+        >
+          <option value="">All actions</option>
+          {actions.data?.map((name) => (
+            <option key={name} value={name}>
+              {human(name.toLowerCase())}
+            </option>
+          ))}
+        </select>
+        <DateFilters params={params} />
+      </FilterForm>
       <section className="panel audit-panel">
         <State query={query}>
           {({ results, count, next, previous }) => (

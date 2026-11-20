@@ -77,7 +77,11 @@ export const catalog = {
     singular: 'Team',
     group: 'Organization',
     description: 'Meet the teams behind DLL Elite programs and events.',
-    fields: [input('name', 'Team name'), text],
+    fields: [
+      input('name', 'Team name'),
+      text,
+      flag('is_active', 'Team active'),
+    ],
   },
   links: {
     api: 'links',
@@ -159,7 +163,7 @@ export const catalog = {
       input('email', 'Email', 'email', optional),
       options('role', 'Organization role', ['staff', 'officer']),
       input('position', 'Position', 'text', optional),
-      source('team', 'Assigned team', 'teams/?core=1', optional),
+      input('teams', 'Assigned teams', 'team-checkboxes'),
       input('contact', 'Contact information', 'text', optional),
       flag('is_active', 'Account active'),
       input(
@@ -171,5 +175,3 @@ export const catalog = {
     ],
   },
 }
-export const managePath = (c) =>
-  c.api === 'announcements' ? 'manage-announcements' : c.path

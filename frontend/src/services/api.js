@@ -35,11 +35,14 @@ export async function api(path, options = {}) {
     )
   })
   const data = await response.json().catch(() => null)
-  if (!response.ok)
-    throw new Error(
+  if (!response.ok) {
+    const error = new Error(
       errorText(data) ||
         'The server could not complete this request (' + response.status + ').',
     )
+    error.status = response.status
+    throw error
+  }
   if (data?.csrf) csrf = data.csrf
   return data
 }

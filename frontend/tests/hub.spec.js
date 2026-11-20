@@ -61,14 +61,7 @@ test('public dashboard, deep routes, responsive navigation and calendar', async 
   expect(errors).toEqual([])
 })
 
-test('protected deep link, per-user reservation draft, submission and approval', async ({
-  page,
-}) => {
-  await page.goto('/reservations/new')
-  await expect(page).toHaveURL(/login$/)
-  await signIn(page, 'test-staff')
-  await expect(page).toHaveURL(/reservations\/new$/)
-  const title = 'Student planning session'
+async function fillReservation(page, title, date, start, end) {
   await page.getByLabel('Event title').fill(title)
   await page.reload()
   await expect(page.getByLabel('Event title')).toHaveValue(title)
@@ -77,18 +70,34 @@ test('protected deep link, per-user reservation draft, submission and approval',
     .getByLabel('Venue', { exact: false })
     .filter({ visible: true })
     .selectOption({ label: 'ComLab 2' })
-  const date = new Date()
-  date.setDate(date.getDate() + 14)
-  await page
-    .getByLabel('Reservation date')
-    .fill(date.toISOString().slice(0, 10))
-  await page.getByLabel('Start time').fill('09:00')
-  await page.getByLabel('End time').fill('10:00')
+  await page.getByLabel('Reservation date').fill(date)
+  await page.getByLabel('Start time').fill(start)
+  await page.getByLabel('End time').fill(end)
   await page.getByLabel('Expected attendees').fill('12')
   await page.getByLabel('Person responsible').fill('Team lead')
   await page.getByLabel('Contact information').fill('Organization office')
+}
+
+test('protected deep link, per-user reservation draft, officer submission and adviser approval', async ({
+  page,
+}) => {
+  await page.goto('/reservations/new')
+  await expect(page).toHaveURL(/login$/)
+  await signIn(page, 'test-officer')
+  await expect(page).toHaveURL(/reservations\/new$/)
+  const title = 'Student planning session'
+  const future = new Date()
+  future.setDate(future.getDate() + 14)
+  const date = future.toISOString().slice(0, 10)
+  await fillReservation(page, title, date, '09:00', '10:00')
   await page.getByRole('button', { name: 'Save reservation' }).click()
   await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  await expect(
+    page.getByText('Reservation submitted for review.'),
+  ).toBeVisible()
+  await expect(
+    page.locator('.detail').first().getByText('Pending', { exact: true }),
+  ).toBeVisible()
   const recordURL = page.url()
   await expect(
     page.getByRole('button', { name: 'Approve', exact: true }),
@@ -96,6 +105,10 @@ test('protected deep link, per-user reservation draft, submission and approval',
   await page.goto('/reservations/new')
   await expect(page.getByLabel('Event title')).toHaveValue('')
   await page.getByLabel('Event title').fill('Unsaved private draft')
+  await page.reload()
+  await expect(page.getByLabel('Event title')).toHaveValue(
+    'Unsaved private draft',
+  )
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page).toHaveURL(/\/dashboard$/)
   await page.goto(recordURL)
@@ -107,12 +120,68 @@ test('protected deep link, per-user reservation draft, submission and approval',
   ).toBeVisible()
   await page.goto('/reservations/new')
   await expect(page.getByLabel('Event title')).toHaveValue('')
+  const automaticTitle = 'Adviser planning session'
+  await fillReservation(page, automaticTitle, date, '10:00', '11:00')
+  await page.getByRole('button', { name: 'Save reservation' }).click()
+  await expect(
+    page.getByText('Reservation automatically approved.'),
+  ).toBeVisible()
+  await expect(
+    page.locator('.detail').first().getByText('Approved', { exact: true }),
+  ).toBeVisible()
+  await page.goto('/availability?date=' + date)
+  await expect(page.getByText(automaticTitle, { exact: true })).toBeVisible()
   await page.goto('/audit')
   await expect(
     page
       .getByRole('row')
       .filter({ hasText: title })
       .getByText('Approved', { exact: true }),
+  ).toBeVisible()
+})
+
+test('Staff can view reservations and teams but cannot create either', async ({
+  page,
+}) => {
+  await page.goto('/login')
+  await signIn(page, 'test-staff')
+  await page.goto('/reservations')
+  await expect(
+    page.getByRole('heading', { name: 'Reservations' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: /Request reservation/i }),
+  ).toHaveCount(0)
+  await page.goto('/availability')
+  await expect(page.locator('a[href="/reservations/new"]')).toHaveCount(0)
+  await page.goto('/reservations/new')
+  await expect(
+    page.getByRole('heading', { name: 'Access restricted' }),
+  ).toBeVisible()
+  const { csrf } = await (await page.request.get('/api/session/')).json()
+  for (const endpoint of ['reservations', 'teams', 'announcements']) {
+    expect(
+      (
+        await page.request.post('/api/' + endpoint + '/', {
+          headers: { 'X-CSRFToken': csrf },
+          data: { title: 'Unauthorized write', role: 'adviser' },
+        })
+      ).status(),
+    ).toBe(403)
+  }
+  await page.goto('/organization-teams')
+  await expect(page.getByRole('tablist')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'New team' })).toHaveCount(0)
+  await page.goto('/announcements')
+  await expect(
+    page.getByRole('link', { name: 'General assembly guidelines' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: 'Create Announcement' }),
+  ).toHaveCount(0)
+  await page.goto('/announcements/new')
+  await expect(
+    page.getByRole('heading', { name: 'Access restricted' }),
   ).toBeVisible()
 })
 
@@ -151,9 +220,7 @@ test('adviser provisions a member and first sign-in returns to the requested pag
   await signIn(page, 'test-adviser')
   await page.getByLabel('Full name').fill('New team member')
   await page.getByLabel('Username').fill('new-member')
-  await page
-    .getByLabel('Assigned team')
-    .selectOption({ label: 'Documentation Team' })
+  await page.getByRole('checkbox', { name: 'Documentation Team' }).check()
   await togglePassword(page, 'Initial or replacement password', '123')
   await page.getByRole('button', { name: 'Save account' }).click()
   await expect(
@@ -161,7 +228,7 @@ test('adviser provisions a member and first sign-in returns to the requested pag
   ).toBeVisible()
   await page.getByLabel('Sign out').click()
   await expect(page).toHaveURL(/\/dashboard$/)
-  await page.goto('/reservations/new')
+  await page.goto('/reservations')
   await signIn(page, 'new-member', '123')
   await expect(
     page.getByRole('heading', { name: 'Change password' }),
@@ -179,7 +246,7 @@ test('adviser provisions a member and first sign-in returns to the requested pag
   )
   await page.getByRole('button', { name: 'Save password' }).click()
   await expect(
-    page.getByRole('heading', { name: 'New reservation' }),
+    page.getByRole('heading', { name: 'Reservations' }),
   ).toBeVisible()
   await page.goto('/accounts')
   await expect(
@@ -189,9 +256,20 @@ test('adviser provisions a member and first sign-in returns to the requested pag
 
 test('announcement draft survives refresh, publishes, and can be archived and deleted', async ({
   page,
+  request,
 }) => {
-  await page.goto('/manage-announcements/new')
+  await page.goto('/login')
   await signIn(page, 'test-adviser')
+  await page.goto('/manage-announcements')
+  await expect(page).toHaveURL(/\/announcements$/)
+  const nav = page.getByRole('navigation', { name: 'Main navigation' })
+  await expect(
+    nav.getByRole('link', { name: 'Announcements', exact: true }),
+  ).toHaveCount(1)
+  await expect(
+    nav.getByRole('link', { name: 'Manage Announcements' }),
+  ).toHaveCount(0)
+  await page.getByRole('link', { name: 'Create Announcement' }).click()
   const title = 'Student office hours'
   await page.getByLabel('Title').fill(title)
   await page
@@ -203,6 +281,13 @@ test('announcement draft survives refresh, publishes, and can be archived and de
   await page.getByLabel('Status').selectOption('published')
   await page.getByRole('button', { name: 'Save announcement' }).click()
   await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  const publicPath = '/api/announcements/?search=Student+office+hours'
+  expect((await (await request.get(publicPath)).json()).count).toBe(1)
+  await page.getByRole('link', { name: 'Edit', exact: true }).click()
+  await page.getByLabel('Status').selectOption('draft')
+  await page.getByRole('button', { name: 'Save announcement' }).click()
+  await expect(page.locator('.detail .badge')).toHaveText('Draft')
+  expect((await (await request.get(publicPath)).json()).count).toBe(0)
   await page.getByRole('link', { name: 'Edit', exact: true }).click()
   await page.getByLabel('Status').selectOption('archived')
   await page.getByRole('button', { name: 'Save announcement' }).click()
@@ -213,7 +298,7 @@ test('announcement draft survives refresh, publishes, and can be archived and de
   await page.getByRole('button', { name: 'Delete announcement' }).click()
   await page.getByRole('button', { name: 'Confirm deletion' }).click()
   await expect(
-    page.getByRole('heading', { name: 'Manage Announcements' }),
+    page.getByRole('heading', { name: 'Announcements', exact: true }),
   ).toBeVisible()
   await expect(page.getByRole('link', { name: title })).toHaveCount(0)
 })
@@ -247,6 +332,13 @@ test('venue creation is adviser-only and new venues appear in the reservation fo
 }) => {
   await page.goto('/venues/new')
   await signIn(page, 'test-officer')
+  await expect(
+    page.getByRole('heading', { name: 'Access restricted' }),
+  ).toBeVisible()
+  await page.goto('/organization-teams')
+  await expect(page.getByRole('tablist')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'New team' })).toHaveCount(0)
+  await page.goto('/organization-teams/new')
   await expect(
     page.getByRole('heading', { name: 'Access restricted' }),
   ).toBeVisible()
@@ -299,13 +391,11 @@ test('password eye controls, account role fields and paginated audit logs fit na
   await page.goto('/accounts/new')
   const role = page.getByLabel('Organization role')
   await role.selectOption('officer')
-  await expect(page.getByLabel('Assigned team')).toHaveCount(0)
+  const assignments = page.getByRole('group', { name: 'Assigned teams' })
+  await expect(assignments).toHaveCount(0)
   await expect(page.getByLabel('Position')).toBeVisible()
   await role.selectOption('staff')
-  await expect(page.getByLabel('Assigned team')).toHaveAttribute('required', '')
-  await expect(page.getByLabel('Assigned team').locator('option')).toHaveCount(
-    5,
-  )
+  await expect(assignments.getByRole('checkbox')).toHaveCount(4)
   await assertFits(page)
   await page.goto('/audit')
   await page.getByLabel('Search audit logs').fill('Login')
@@ -372,17 +462,19 @@ test('accounts table paginates filtered server results and preserves filters', a
     .selectOption({ label: 'Technical Team' })
   await page.getByRole('button', { name: 'Apply filters' }).click()
   const table = page.getByRole('table', { name: 'Accounts' })
-  await expect(table.getByRole('row')).toHaveCount(21)
+  await expect(table.getByRole('row')).toHaveCount(16)
   await expect(page.getByRole('button', { name: 'Previous' })).toBeDisabled()
   await expect(page.getByText('Page 1 · 21 records')).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
   await expect(page.getByText('Page 2 · 21 records')).toBeVisible()
-  await expect(table.getByRole('row')).toHaveCount(2)
+  await expect(table.getByRole('row')).toHaveCount(7)
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
   await expect(page.getByLabel('Search accounts')).toHaveValue('Directory')
   await expect(page.getByLabel('Account role')).toHaveValue('staff')
   await expect(page.getByLabel('Account status')).toHaveValue('active')
-  await expect(table.getByText('Technical Team', { exact: true })).toBeVisible()
+  await expect(
+    table.getByRole('cell', { name: 'Technical Team', exact: true }),
+  ).toHaveCount(6)
   await page.getByRole('button', { name: 'Previous' }).click()
   await expect(page.getByText('Page 1 · 21 records')).toBeVisible()
 })
@@ -420,7 +512,6 @@ test('restyled member pages and tables fit the four target widths', async ({
   })
   for (const [route, heading] of [
     ['announcements', 'Announcements'],
-    ['manage-announcements', 'Manage Announcements'],
     ['organization-activities', 'Organization Activities'],
     ['weekly-events', 'Weekly Events'],
     ['organization-teams', 'Organization Teams'],
@@ -513,9 +604,7 @@ test('temporary passwords work in both account forms and permanent changes still
     await page.getByLabel('Username').fill(username)
     await page.getByLabel('Organization role').selectOption(role)
     if (role === 'staff')
-      await page
-        .getByLabel('Assigned team')
-        .selectOption({ label: 'Technical Team' })
+      await page.getByRole('checkbox', { name: 'Technical Team' }).check()
     await page
       .getByLabel('Initial or replacement password', { exact: true })
       .fill(initial)

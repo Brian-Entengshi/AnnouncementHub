@@ -17,8 +17,11 @@ from .services import local_instant
 class BookingFixture:
     def setUp(self):
         self.team, _ = Team.objects.get_or_create(name="Technical Team")
-        self.staff = User.objects.create_user("requester", role="staff", team=self.team)
-        self.manager = User.objects.create_user("reviewer", role="officer")
+        self.staff = User.objects.create_user(
+            "requester", role="staff", teams=[self.team]
+        )
+        self.requester = User.objects.create_user("officer-requester", role="officer")
+        self.manager = User.objects.create_superuser("reviewer")
         self.venue = Venue.objects.create(name="Hall", location="Campus", capacity=30)
         self.date = timezone.localdate() + timedelta(days=4)
         self.data = dict(
@@ -33,7 +36,7 @@ class BookingFixture:
             description="Training",
         )
         self.client = APIClient()
-        self.client.force_authenticate(self.staff)
+        self.client.force_authenticate(self.requester)
 
     def create_booking(self, **kwargs):
         response = self.client.post("/api/reservations/", {**self.data, **kwargs})
@@ -47,6 +50,48 @@ class BookingFixture:
 
 
 class BookingTests(BookingFixture, APITestCase):
+    def test_only_officers_and_advisers_can_submit(self):
+        for actor in (None, self.staff):
+            self.client.force_authenticate(actor)
+            result = self.client.post(
+                "/api/reservations/",
+                {**self.data, "requester": self.manager.pk, "status": "approved"},
+            )
+            self.assertEqual(result.status_code, 403)
+        self.assertFalse(Reservation.objects.exists())
+        self.assertFalse(AuditLog.objects.filter(resource="reservation").exists())
+        self.client.force_authenticate(self.requester)
+        booking = Reservation.objects.get(pk=self.create_booking(status="approved"))
+        self.assertEqual(booking.status, "pending")
+        self.assertEqual(booking.requester, self.requester)
+        self.assertEqual(self.change(booking.pk, "approved").status_code, 403)
+        self.client.force_authenticate(self.manager)
+        self.assertEqual(self.change(booking.pk, "approved").status_code, 200)
+
+    def test_adviser_booking_has_one_approved_history_and_correct_audit(self):
+        self.client.force_authenticate(self.manager)
+        booking = Reservation.objects.get(pk=self.create_booking())
+        self.assertEqual(booking.requester, self.manager)
+        self.assertEqual(booking.status, "approved")
+        history = booking.history.get()
+        self.assertEqual(history.actor, self.manager)
+        self.assertEqual(history.status, "approved")
+        self.assertIsNotNone(history.at)
+        self.assertIn("Automatically approved", history.reason)
+        self.assertCountEqual(
+            AuditLog.objects.filter(
+                object_id=booking.pk, resource="reservation"
+            ).values_list("action", "actor_role"),
+            [("Submitted", "adviser"), ("Approved", "adviser")],
+        )
+        self.assertEqual(
+            Notification.objects.get(recipient=self.manager).message,
+            "Workshop: approved",
+        )
+        self.assertEqual(
+            self.client.post("/api/reservations/", self.data).status_code, 400
+        )
+
     def test_overlap_and_adjacent(self):
         first = self.create_booking()
         second = self.create_booking(start="11:59", end="13:00")
@@ -61,11 +106,12 @@ class BookingTests(BookingFixture, APITestCase):
         self.assertEqual(Reservation.objects.get(pk=second).history.count(), 1)
         self.assertTrue(
             Notification.objects.filter(
-                recipient=self.staff, message__contains="approved"
+                recipient=self.requester, message__contains="approved"
             ).exists()
         )
 
     def test_time_capacity_closures_and_changes_after_submission(self):
+        self.client.force_authenticate(self.manager)
         for invalid in [
             dict(end="08:00"),
             dict(end="09:00"),
@@ -78,6 +124,7 @@ class BookingTests(BookingFixture, APITestCase):
                 ).status_code,
                 400,
             )
+        self.client.force_authenticate(self.requester)
         pk = self.create_booking()
         self.client.force_authenticate(self.manager)
         start = local_instant(self.date, time(11))
@@ -90,6 +137,9 @@ class BookingTests(BookingFixture, APITestCase):
             blocks_bookings=True,
         )
         self.assertEqual(self.change(pk, "approved").status_code, 400)
+        self.assertEqual(
+            self.client.post("/api/reservations/", self.data).status_code, 400
+        )
         self.venue.available = False
         self.venue.save()
         self.assertEqual(
@@ -102,7 +152,7 @@ class BookingTests(BookingFixture, APITestCase):
     def test_status_transitions_and_private_details(self):
         pk = self.create_booking()
         self.assertEqual(self.change(pk, "approved").status_code, 403)
-        other = User.objects.create_user("other", role="staff", team=self.team)
+        other = User.objects.create_user("other", role="staff", teams=[self.team])
         self.client.force_authenticate(other)
         self.assertEqual(self.change(pk, "cancelled").status_code, 404)
         self.client.force_authenticate(self.manager)
@@ -111,7 +161,9 @@ class BookingTests(BookingFixture, APITestCase):
             self.change(pk, "rejected", "Equipment unavailable").status_code, 200
         )
         self.assertEqual(self.change(pk, "approved").status_code, 400)
+        self.client.force_authenticate(self.requester)
         pk = self.create_booking()
+        self.client.force_authenticate(self.manager)
         self.assertEqual(self.change(pk, "approved").status_code, 200)
         self.assertEqual(self.change(pk, "completed").status_code, 400)
         self.client.force_authenticate(None)
@@ -158,6 +210,23 @@ class BookingTests(BookingFixture, APITestCase):
 
 
 class CompetingApprovals(BookingFixture, TransactionTestCase):
+    def test_concurrent_adviser_submissions_cannot_double_book(self):
+        barrier = Barrier(2)
+
+        def submit(_):
+            try:
+                client = APIClient()
+                client.force_authenticate(User.objects.get(pk=self.manager.pk))
+                barrier.wait(timeout=10)
+                return client.post("/api/reservations/", self.data).status_code
+            finally:
+                connections.close_all()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(submit, range(2)))
+        self.assertCountEqual(outcomes, [201, 400])
+        self.assertEqual(Reservation.objects.filter(status="approved").count(), 1)
+
     def test_only_one_concurrent_approval_commits(self):
         first, second = self.create_booking(), self.create_booking()
         barrier = Barrier(2)

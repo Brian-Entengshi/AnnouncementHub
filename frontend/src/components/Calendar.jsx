@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,6 +9,9 @@ import {
   MapPin,
 } from 'lucide-react'
 import { useData } from '../hooks/useData'
+import { usePageState } from '../hooks/usePageState'
+import { useValidFilter } from '../hooks/usePageResults'
+import FilterForm from './FilterForm'
 import { useAuth } from '../context/auth'
 import { Heading, State, Badge, Empty } from './Common'
 import { dateKey, day, todayKey, formatDate, formatTime } from '../utils/format'
@@ -26,28 +28,31 @@ function monday(date) {
 }
 
 export default function Calendar({ availability = false }) {
-  const { user, manager } = useAuth(),
-    [searchParams, setParams] = useSearchParams()
-  const [availabilityCursor, setAvailabilityCursor] = useState(() =>
-      day(todayKey()),
-    ),
-    [availabilityMode, setAvailabilityMode] = useState('week'),
-    [all, setAll] = useState(false),
-    [eventsOnly, setEventsOnly] = useState(false)
+  const { user, manager } = useAuth()
+  const {
+    params: searchParams,
+    setParams,
+    entryKey,
+  } = usePageState(['view', 'date', 'venue'])
   const selected = searchParams.get('date')
-  const cursor = availability
-    ? availabilityCursor
-    : selected &&
-        /^\d{4}-\d{2}-\d{2}$/.test(selected) &&
-        dateKey(day(selected)) === selected
+  const cursor =
+    selected &&
+    /^\d{4}-\d{2}-\d{2}$/.test(selected) &&
+    dateKey(day(selected)) === selected
       ? day(selected)
       : day(todayKey())
-  const mode = availability
-    ? availabilityMode
-    : searchParams.get('view') === 'month'
-      ? 'month'
-      : 'week'
-  const venue = searchParams.get('venue') || ''
+  const mode = searchParams.get('view') === 'month' ? 'month' : 'week'
+  const all = manager && searchParams.get('drafts') === '1'
+  const eventsOnly = searchParams.get('dates') === 'events'
+  const venues = useData(availability ? 'venues/?bookable=1' : null, true)
+  const venue = useValidFilter(
+    searchParams,
+    setParams,
+    'venue',
+    venues.data,
+    (item) => String(item.id),
+  )
+  const status = availability ? searchParams.get('status') || '' : ''
   const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12)
   const start = mode === 'month' ? monday(monthStart) : monday(cursor)
   const days =
@@ -67,6 +72,7 @@ export default function Calendar({ availability = false }) {
     from: dates[0],
     to: dates.at(-1),
     ...(venue ? { venue } : {}),
+    ...(status ? { status } : {}),
   })
   const q = useData(
     availability
@@ -74,10 +80,17 @@ export default function Calendar({ availability = false }) {
       : 'events/?' + (manager && all ? 'manage=1&' : '') + params,
     !availability,
   )
-  const venues = useData(availability ? 'venues/' : null, true)
+  function updateFilter(name, value, options) {
+    const next = new URLSearchParams(searchParams)
+    if (value) next.set(name, value)
+    else next.delete(name)
+    setParams(next, options)
+  }
   function setCursor(date) {
-    if (availability) setAvailabilityCursor(date)
-    else setParams({ view: mode, date: dateKey(date) }, { replace: true })
+    updateFilter('date', dateKey(date), { replace: true })
+  }
+  function applyAvailability(filters) {
+    setParams({ view: mode, ...filters })
   }
   function step(direction) {
     if (mode === 'week') {
@@ -102,7 +115,7 @@ export default function Calendar({ availability = false }) {
             : 'Browse the schedule by week or select a date on the monthly calendar.'
         }
       >
-        {(availability ? user : manager) && (
+        {manager && (
           <Link
             className="button primary"
             to={availability ? '/reservations/new' : '/weekly-events/new'}
@@ -121,24 +134,14 @@ export default function Calendar({ availability = false }) {
           <button
             type="button"
             aria-pressed={mode === 'week'}
-            onClick={() =>
-              setParams(
-                { view: 'week', date: dateKey(cursor) },
-                { replace: true },
-              )
-            }
+            onClick={() => updateFilter('view', 'week')}
           >
             <List size={17} /> Weekly View
           </button>
           <button
             type="button"
             aria-pressed={mode === 'month'}
-            onClick={() =>
-              setParams(
-                { view: 'month', date: dateKey(cursor) },
-                { replace: true },
-              )
-            }
+            onClick={() => updateFilter('view', 'month')}
           >
             <CalendarDays size={17} /> Monthly Calendar View
           </button>
@@ -177,47 +180,32 @@ export default function Calendar({ availability = false }) {
                 ' – ' +
                 formatDate(dates.at(-1))}
           </b>
-          <input
-            aria-label="Go to date"
-            type="date"
-            value={dateKey(cursor)}
-            onChange={(e) => {
-              if (e.target.value) setCursor(day(e.target.value))
-            }}
-          />
+          {!availability && (
+            <input
+              aria-label="Go to date"
+              type="date"
+              value={dateKey(cursor)}
+              onChange={(event) => {
+                if (event.target.value) setCursor(day(event.target.value))
+              }}
+            />
+          )}
           {availability ? (
-            <>
-              <select
-                aria-label="Calendar view"
-                value={mode}
-                onChange={(e) => setAvailabilityMode(e.target.value)}
-              >
-                <option value="week">Week</option>
-                <option value="month">Month</option>
-              </select>
-              <select
-                aria-label="Filter venue"
-                value={venue}
-                onChange={(e) =>
-                  setParams(e.target.value ? { venue: e.target.value } : {})
-                }
-              >
-                <option value="">All venues</option>
-                {venues.data?.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                    {!v.available && ' · Unavailable'}
-                  </option>
-                ))}
-              </select>
-            </>
+            <select
+              aria-label="Calendar view"
+              value={mode}
+              onChange={(event) => updateFilter('view', event.target.value)}
+            >
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+            </select>
           ) : (
             <>
               {mode === 'week' && (
                 <select
                   aria-label="Show dates"
                   value={eventsOnly ? 'events' : 'all'}
-                  onChange={(e) => setEventsOnly(e.target.value === 'events')}
+                  onChange={(e) => updateFilter('dates', e.target.value)}
                 >
                   <option value="all">All Dates</option>
                   <option value="events">Dates With Events Only</option>
@@ -228,7 +216,9 @@ export default function Calendar({ availability = false }) {
                   <input
                     type="checkbox"
                     checked={all}
-                    onChange={(e) => setAll(e.target.checked)}
+                    onChange={(e) =>
+                      updateFilter('drafts', e.target.checked ? '1' : '')
+                    }
                   />
                   Include drafts
                 </label>
@@ -241,12 +231,48 @@ export default function Calendar({ availability = false }) {
             {venues.error} <button onClick={venues.reload}>Retry</button>
           </div>
         )}
-        {availability &&
-          venues.data?.some((v) => String(v.id) === venue && !v.available) && (
-            <p className="offline">
-              This venue is currently closed to reservations.
-            </p>
-          )}
+        {availability && (
+          <FilterForm
+            key={entryKey}
+            onApply={applyAvailability}
+            onClear={() => applyAvailability({})}
+            label="Availability filters"
+          >
+            <select
+              name="venue"
+              aria-label="Filter venue"
+              key={venues.data ? 'venue-ready' : 'venue-loading'}
+              defaultValue={venue}
+            >
+              <option value="">All venues</option>
+              {venues.data?.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+            <select
+              name="status"
+              aria-label="Schedule status"
+              defaultValue={status}
+            >
+              <option value="">All schedule entries</option>
+              <option value="approved">Approved bookings</option>
+              {user && <option value="pending">Pending requests</option>}
+              <option value="completed">Completed bookings</option>
+              <option value="notices">Venue notices</option>
+            </select>
+            <label className="filter-date">
+              Go to date{' '}
+              <input
+                aria-label="Go to date"
+                name="date"
+                type="date"
+                defaultValue={selected || ''}
+              />
+            </label>
+          </FilterForm>
+        )}
         <State query={q}>
           {(data) => {
             if (!availability && mode === 'month') {

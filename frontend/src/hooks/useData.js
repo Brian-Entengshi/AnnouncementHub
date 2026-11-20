@@ -16,7 +16,12 @@ export function useData(path, collection = false) {
       })
       .catch((error) => {
         if (!controller.signal.aborted)
-          setResult({ path, error: error.message, version })
+          setResult({
+            path,
+            error: error.message,
+            status: error.status,
+            version,
+          })
       })
     return () => controller.abort()
   }, [path, version, collection])

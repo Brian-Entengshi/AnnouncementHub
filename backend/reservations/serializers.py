@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from teams.models import Team
 from .models import Reservation, StatusChange
 from .services import check_slot
 
@@ -21,16 +22,17 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         exclude = ("venue_snapshot",)
         read_only_fields = ("requester", "status")
-        extra_kwargs = {"venue": {"required": True, "allow_null": False}}
+        extra_kwargs = {
+            "venue": {"required": True, "allow_null": False},
+            "team": {"queryset": Team.objects.filter(is_active=True)},
+        }
 
     def validate(self, attrs):
-        user = self.context["request"].user
-        if user.role == "staff":
-            attrs["team"] = user.team
         check_slot(
+            lock_venue=True,
             **{
                 key: attrs[key]
                 for key in ("venue", "date", "start", "end", "attendees")
-            }
+            },
         )
         return attrs

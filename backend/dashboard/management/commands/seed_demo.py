@@ -41,7 +41,7 @@ class Command(BaseCommand):
             username="sample-editor",
             first_name="DLL Elite Secretariat",
             role="staff",
-            team=team,
+            teams=[team],
             is_active=False,
         )
         venues = [

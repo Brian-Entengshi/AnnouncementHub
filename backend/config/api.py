@@ -3,8 +3,13 @@ from django.core.exceptions import ValidationError as FieldError
 from django.db.models.deletion import ProtectedError
 from rest_framework import serializers, viewsets
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from audit_logs.models import AuditLog
 from .permissions import PublicReadManagerWrite
+
+
+class DirectoryPagination(PageNumberPagination):
+    page_size = 15
 
 
 class ResourceViewSet(viewsets.ModelViewSet):
