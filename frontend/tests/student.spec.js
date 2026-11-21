@@ -20,28 +20,7 @@ const sectionIds = {
 
 async function expectActiveSection(page, name) {
   const active = page.locator('#public-navigation [aria-current="location"]')
-  try {
-    await expect(active).toHaveText([name])
-  } catch (error) {
-    console.log('Scroll geometry', await page.evaluate((sections) => ({
-      url: location.href,
-      scrollY,
-      innerHeight,
-      scrollHeight: document.documentElement.scrollHeight,
-      header: document.querySelector('.public-header')?.offsetHeight,
-      active: document.querySelector('#public-navigation [aria-current="location"]')?.textContent,
-      sections: Object.values(sections).map((id) => {
-        const section = document.getElementById(id)
-        return {
-          id,
-          box: section.getBoundingClientRect().toJSON(),
-          scrollMargin: getComputedStyle(section).scrollMarginTop,
-        }
-      }),
-      footer: document.querySelector('.public-footer')?.getBoundingClientRect().toJSON(),
-    }), sectionIds))
-    throw error
-  }
+  await expect(active).toHaveText([name])
 }
 
 async function scrollToSection(page, name) {
@@ -267,6 +246,8 @@ test('Student Access tracks visible sections while scrolling in both directions'
   await expect(
     page.getByRole('button', { name: 'Open public menu' }),
   ).toHaveAttribute('aria-expanded', 'false')
+  await page.goto('/student/#about')
+  await expectActiveSection(page, 'About')
 })
 
 test('advisers preview and publish landing content that survives a public refresh', async ({

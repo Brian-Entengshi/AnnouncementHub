@@ -12,6 +12,7 @@ export function useStudentNavigation(header, main, footer) {
   const { hash, pathname, key } = useLocation()
   const navigationType = useNavigationType()
   const [active, setActive] = useState('home')
+  const isLandingPage = pathname === '/student' || pathname === '/student/'
 
   useLayoutEffect(() => {
     const site = header.current?.parentElement
@@ -28,7 +29,7 @@ export function useStudentNavigation(header, main, footer) {
   }, [header])
 
   useEffect(() => {
-    if (pathname !== '/student') return
+    if (!isLandingPage) return
 
     const sections = studentSections
       .map(([, id]) => document.getElementById(id))
@@ -98,7 +99,7 @@ export function useStudentNavigation(header, main, footer) {
       window.removeEventListener('scroll', onScroll)
       window.cancelAnimationFrame(frame)
     }
-  }, [footer, header, main, pathname])
+  }, [footer, header, main, isLandingPage])
 
   useEffect(() => {
     if (!hash) {
@@ -157,5 +158,5 @@ export function useStudentNavigation(header, main, footer) {
     return () => stopAligning()
   }, [hash, key, main, navigationType])
 
-  return pathname === '/student' ? active : null
+  return isLandingPage ? active : null
 }

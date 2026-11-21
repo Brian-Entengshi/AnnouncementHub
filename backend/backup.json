@@ -367,8 +367,30 @@
   "model": "dashboard.hubsettings",
   "pk": 1,
   "fields": {
+    "hero_heading": "Club events and campus announcements",
+    "hero_welcome": "DLL Elite Student Organization",
+    "hero_description": "Find out what’s happening with DLL Elite, where to go, and when to be there.",
+    "hero_cta_label": "Explore Club Events",
+    "hero_cta_section": "events",
+    "hero_image": "",
+    "hero_image_alt": "",
+    "about_heading": "About DLL Elite",
+    "about_intro": "DLL Elite stands for Elevating Leaders Innovatively, Training & Excellence.",
+    "about_description": "The Student Club Events & Announcement Hub brings campus activity schedules and organization announcements together so students can follow the club’s work and find the details they need to attend.",
+    "about_purpose": "",
+    "about_mission": "",
+    "about_vision": "",
+    "contact_heading": "Contacts",
+    "contact_intro": "Get in touch with DLL Elite.",
     "contact_email": "encinabrian@gmail.com",
-    "office_hours": "8am-8pm"
+    "contact_phone": "",
+    "office_location": "",
+    "office_hours": "8am-8pm",
+    "facebook_url": "",
+    "instagram_url": "",
+    "website_url": "",
+    "highlight_pinned": true,
+    "announcement_page_size": 6
   }
 },
 {
@@ -1310,7 +1332,7 @@
   "pk": 2,
   "fields": {
     "password": "!",
-    "last_login": "2026-11-21T08:43:15.453Z",
+    "last_login": "2026-11-21T09:16:33.247Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -4712,6 +4734,91 @@
     "object_id": null,
     "description": "Signed out.",
     "at": "2026-11-21T08:44:09.158Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 64,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-21T09:10:57.344Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 65,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-21T09:11:02.538Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 66,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-21T09:15:31.001Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 67,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGOUT",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed out.",
+    "at": "2026-11-21T09:15:59.519Z"
+  }
+},
+{
+  "model": "audit_logs.auditlog",
+  "pk": 68,
+  "fields": {
+    "actor": [
+      "admin"
+    ],
+    "actor_name": "admin",
+    "actor_role": "adviser",
+    "action": "LOGIN",
+    "resource": "authentication",
+    "label": "",
+    "object_id": null,
+    "description": "Signed in successfully.",
+    "at": "2026-11-21T09:16:33.248Z"
   }
 }
 ]
