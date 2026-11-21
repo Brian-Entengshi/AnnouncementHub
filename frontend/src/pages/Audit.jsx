@@ -89,7 +89,7 @@ export default function Audit() {
       <Heading
         kicker="Administration"
         title="Audit Logs"
-        description="Sign-ins, reservation decisions and changes to organization records."
+        description="Sign-ins and changes to organization records."
       />
       <FilterForm
         key={entryKey}

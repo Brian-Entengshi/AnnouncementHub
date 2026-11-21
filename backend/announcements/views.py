@@ -1,12 +1,14 @@
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.functional import cached_property
 from audit_logs.models import AuditLog
 from config.api import ResourceViewSet
 from config.filters import CategoryFacetMixin, filter_date_range
-from config.permissions import manager
+from config.permissions import PublicReadManagerWrite, manager, public_reader
+from dashboard.models import HubSettings
 from notifications.models import Notification
 from .models import Announcement
-from .serializers import AnnouncementSerializer
+from .serializers import AnnouncementSerializer, PublicAnnouncementSerializer
 
 
 def published_announcements():
@@ -18,8 +20,25 @@ def published_announcements():
 class AnnouncementViewSet(CategoryFacetMixin, ResourceViewSet):
     queryset = Announcement.objects.select_related("author")
     serializer_class = AnnouncementSerializer
+    permission_classes = [PublicReadManagerWrite]
     search_fields = ["title", "description", "category"]
     exact_filters = ("category", "status")
+
+    @cached_property
+    def landing_settings(self):
+        return HubSettings.current()
+
+    def paginate_queryset(self, queryset):
+        if self.request.query_params.get("public") == "1":
+            self.paginator.page_size = self.landing_settings.announcement_page_size
+        return super().paginate_queryset(queryset)
+
+    def get_serializer_class(self):
+        return (
+            PublicAnnouncementSerializer
+            if public_reader(self.request)
+            else super().get_serializer_class()
+        )
 
     def get_queryset(self):
         query = super().get_queryset()
@@ -27,9 +46,15 @@ class AnnouncementViewSet(CategoryFacetMixin, ResourceViewSet):
             query = filter_date_range(
                 query, self.request.query_params, "published_at__date"
             )
+            if (
+                self.request.query_params.get("public") == "1"
+                and not self.landing_settings.highlight_pinned
+            ):
+                query = query.order_by("-published_at", "-pk")
         if (
             manager(self.request.user)
             and self.request.query_params.get("manage") == "1"
+            and not public_reader(self.request)
         ):
             return query
         return query.filter(pk__in=published_announcements().values("pk"))

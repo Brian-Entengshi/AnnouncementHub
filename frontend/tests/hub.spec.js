@@ -10,165 +10,23 @@ async function signIn(
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).not.toHaveURL(/\/login$/)
 }
-test('public dashboard, deep routes, responsive navigation and calendar', async ({
+test('Staff retain the member workspace and restricted management endpoints', async ({
   page,
 }) => {
-  const errors = []
-  page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('/dashboard')
+  await expect(page).toHaveURL(/login$/)
+  await signIn(page, 'test-staff')
   await expect(
     page.getByRole('heading', { name: 'Organization dashboard' }),
   ).toBeVisible()
+  const nav = page.getByRole('navigation', { name: 'Main navigation' })
+  await expect(nav.getByRole('link', { name: 'Reservations' })).toHaveCount(0)
   await expect(
-    page.getByRole('link', { name: /Leadership skills workshop/ }),
-  ).toBeVisible()
-  await expect(page.getByLabel('Open menu')).toBeHidden()
-  await page.getByRole('link', { name: 'View weekly schedule' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Weekly Events' }),
-  ).toBeVisible()
-  await page.reload()
-  await expect(page).toHaveURL(/weekly-events$/)
-  await page.getByLabel('Next period').click()
-  for (const width of [768, 390, 320]) {
-    await page.setViewportSize({ width, height: 850 })
-    await page.getByLabel('Open menu').click()
-    await page
-      .getByRole('navigation')
-      .getByRole('link', { name: 'Venue Availability' })
-      .click()
-    await expect(
-      page.getByRole('heading', { name: 'Venue Availability' }),
-    ).toBeVisible()
-    await expect(page.getByRole('navigation')).toBeHidden()
-    await page.getByLabel('Calendar view').selectOption('month')
-    await expect(page.locator('.calendar-days.month')).toBeVisible()
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBeTruthy()
-    await page.goto('/dashboard')
-    await expect(
-      page.getByRole('heading', { name: 'Organization dashboard' }),
-    ).toBeVisible()
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBeTruthy()
-  }
-  expect(errors).toEqual([])
-})
-
-async function fillReservation(page, title, date, start, end) {
-  await page.getByLabel('Event title').fill(title)
-  await page.reload()
-  await expect(page.getByLabel('Event title')).toHaveValue(title)
-  await page.getByLabel('Description').fill('Plan the next campus workshop.')
-  await page
-    .getByLabel('Venue', { exact: false })
-    .filter({ visible: true })
-    .selectOption({ label: 'ComLab 2' })
-  await page.getByLabel('Reservation date').fill(date)
-  await page.getByLabel('Start time').fill(start)
-  await page.getByLabel('End time').fill(end)
-  await page.getByLabel('Expected attendees').fill('12')
-  await page.getByLabel('Person responsible').fill('Team lead')
-  await page.getByLabel('Contact information').fill('Organization office')
-}
-
-test('protected deep link, per-user reservation draft, officer submission and adviser approval', async ({
-  page,
-}) => {
-  await page.goto('/reservations/new')
-  await expect(page).toHaveURL(/login$/)
-  await signIn(page, 'test-officer')
-  await expect(page).toHaveURL(/reservations\/new$/)
-  const title = 'Student planning session'
-  const future = new Date()
-  future.setDate(future.getDate() + 14)
-  const date = future.toISOString().slice(0, 10)
-  await fillReservation(page, title, date, '09:00', '10:00')
-  await page.getByRole('button', { name: 'Save reservation' }).click()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
-  await expect(
-    page.getByText('Reservation submitted for review.'),
+    nav.getByRole('link', { name: 'Organization Teams' }),
   ).toBeVisible()
   await expect(
-    page.locator('.detail').first().getByText('Pending', { exact: true }),
-  ).toBeVisible()
-  const recordURL = page.url()
-  await expect(
-    page.getByRole('button', { name: 'Approve', exact: true }),
+    nav.getByRole('link', { name: 'Account Management' }),
   ).toHaveCount(0)
-  await page.goto('/reservations/new')
-  await expect(page.getByLabel('Event title')).toHaveValue('')
-  await page.getByLabel('Event title').fill('Unsaved private draft')
-  await page.reload()
-  await expect(page.getByLabel('Event title')).toHaveValue(
-    'Unsaved private draft',
-  )
-  await page.getByRole('button', { name: 'Sign out' }).click()
-  await expect(page).toHaveURL(/\/dashboard$/)
-  await page.goto(recordURL)
-  await signIn(page, 'test-adviser')
-  await page.getByRole('button', { name: 'Approve', exact: true }).click()
-  await page.getByRole('button', { name: 'Confirm approve' }).click()
-  await expect(
-    page.locator('.detail').first().getByText('Approved', { exact: true }),
-  ).toBeVisible()
-  await page.goto('/reservations/new')
-  await expect(page.getByLabel('Event title')).toHaveValue('')
-  const automaticTitle = 'Adviser planning session'
-  await fillReservation(page, automaticTitle, date, '10:00', '11:00')
-  await page.getByRole('button', { name: 'Save reservation' }).click()
-  await expect(
-    page.getByText('Reservation automatically approved.'),
-  ).toBeVisible()
-  await expect(
-    page.locator('.detail').first().getByText('Approved', { exact: true }),
-  ).toBeVisible()
-  await page.goto('/availability?date=' + date)
-  await expect(page.getByText(automaticTitle, { exact: true })).toBeVisible()
-  await page.goto('/audit')
-  await expect(
-    page
-      .getByRole('row')
-      .filter({ hasText: title })
-      .getByText('Approved', { exact: true }),
-  ).toBeVisible()
-})
-
-test('Staff can view reservations and teams but cannot create either', async ({
-  page,
-}) => {
-  await page.goto('/login')
-  await signIn(page, 'test-staff')
-  await page.goto('/reservations')
-  await expect(
-    page.getByRole('heading', { name: 'Reservations' }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole('link', { name: /Request reservation/i }),
-  ).toHaveCount(0)
-  await page.goto('/availability')
-  await expect(page.locator('a[href="/reservations/new"]')).toHaveCount(0)
-  await page.goto('/reservations/new')
-  await expect(
-    page.getByRole('heading', { name: 'Access restricted' }),
-  ).toBeVisible()
-  const { csrf } = await (await page.request.get('/api/session/')).json()
-  for (const endpoint of ['reservations', 'teams', 'announcements']) {
-    expect(
-      (
-        await page.request.post('/api/' + endpoint + '/', {
-          headers: { 'X-CSRFToken': csrf },
-          data: { title: 'Unauthorized write', role: 'adviser' },
-        })
-      ).status(),
-    ).toBe(403)
-  }
   await page.goto('/organization-teams')
   await expect(page.getByRole('tablist')).toBeVisible()
   await expect(page.getByRole('link', { name: 'New team' })).toHaveCount(0)
@@ -183,15 +41,20 @@ test('Staff can view reservations and teams but cannot create either', async ({
   await expect(
     page.getByRole('heading', { name: 'Access restricted' }),
   ).toBeVisible()
+  expect((await page.request.get('/api/reservations/')).status()).toBe(404)
+  await page.goto('/reservations')
+  await expect(
+    page.getByRole('heading', { name: 'Page unavailable' }),
+  ).toBeVisible()
 })
 
 test('service worker installs the shell and excludes private API data', async ({
   page,
   context,
 }) => {
-  await page.goto('/dashboard')
+  await page.goto('/student')
   await expect(
-    page.getByRole('heading', { name: 'Organization dashboard' }),
+    page.getByRole('heading', { name: 'Club events and campus announcements' }),
   ).toBeVisible()
   await page.evaluate(() => navigator.serviceWorker.ready)
   await page.reload()
@@ -209,8 +72,8 @@ test('service worker installs the shell and excludes private API data', async ({
   expect(paths.some((p) => p.endsWith('.js'))).toBe(true)
   expect(paths.some((p) => p.startsWith('/api/'))).toBe(false)
   await context.setOffline(true)
-  await page.goto('/weekly-events')
-  await expect(page.getByText(/You are offline/)).toBeVisible()
+  await page.goto('/student')
+  await expect(page.getByText(/Cannot reach the hub/).first()).toBeVisible()
 })
 
 test('adviser provisions a member and first sign-in returns to the requested page', async ({
@@ -227,8 +90,8 @@ test('adviser provisions a member and first sign-in returns to the requested pag
     page.getByRole('heading', { name: 'New team member' }),
   ).toBeVisible()
   await page.getByLabel('Sign out').click()
-  await expect(page).toHaveURL(/\/dashboard$/)
-  await page.goto('/reservations')
+  await expect(page).toHaveURL(/\/student$/)
+  await page.goto('/organization-teams')
   await signIn(page, 'new-member', '123')
   await expect(
     page.getByRole('heading', { name: 'Change password' }),
@@ -246,7 +109,7 @@ test('adviser provisions a member and first sign-in returns to the requested pag
   )
   await page.getByRole('button', { name: 'Save password' }).click()
   await expect(
-    page.getByRole('heading', { name: 'Reservations' }),
+    page.getByRole('heading', { name: 'Organization Teams' }),
   ).toBeVisible()
   await page.goto('/accounts')
   await expect(
@@ -327,7 +190,7 @@ async function assertFits(page) {
   ).toBeTruthy()
 }
 
-test('venue creation is adviser-only and new venues appear in the reservation form', async ({
+test('venue creation is adviser-only and new venues appear in the event form', async ({
   page,
 }) => {
   await page.goto('/venues/new')
@@ -345,7 +208,7 @@ test('venue creation is adviser-only and new venues appear in the reservation fo
   await page.goto('/venues')
   await expect(page.getByRole('link', { name: 'Add Venue' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Sign out' }).click()
-  await expect(page).toHaveURL(/\/dashboard$/)
+  await expect(page).toHaveURL(/\/student$/)
   await page.goto('/login')
   await signIn(page, 'test-adviser')
   await page.goto('/venues')
@@ -357,7 +220,7 @@ test('venue creation is adviser-only and new venues appear in the reservation fo
   await expect(
     page.getByRole('heading', { name: 'New campus hall' }),
   ).toBeVisible()
-  await page.goto('/reservations/new')
+  await page.goto('/weekly-events/new')
   const venue = page
     .getByLabel('Venue', { exact: false })
     .filter({ visible: true })
@@ -423,6 +286,8 @@ test('weekly event filter groups active events and follows week navigation', asy
   const response = await request.get('/api/events/?search="Calendar workshop"')
   const { results } = await response.json()
   expect(results).toHaveLength(1)
+  await page.goto('/login')
+  await signIn(page, 'test-staff')
   await page.goto('/weekly-events')
   await page.getByLabel('Go to date').fill(results[0].date)
   const days = page.locator('.calendar-days > section')
@@ -479,24 +344,6 @@ test('accounts table paginates filtered server results and preserves filters', a
   await expect(page.getByText('Page 1 · 21 records')).toBeVisible()
 })
 
-test('student help is available to visitors only', async ({ page }) => {
-  await page.goto('/announcements')
-  await page.getByRole('button', { name: 'Hub help' }).click()
-  const help = page.getByRole('dialog')
-  await expect(help).toContainText(
-    'Students can browse club updates and schedules.',
-  )
-  await help.getByLabel('Close help').click()
-  await page.goto('/login')
-  await signIn(page, 'test-officer')
-  await expect(page.getByRole('button', { name: 'Hub help' })).toHaveCount(0)
-  expect((await page.request.get('/api/help/')).status()).toBe(403)
-  await page.goto('/audit')
-  await expect(
-    page.getByRole('heading', { name: 'Access restricted' }),
-  ).toBeVisible()
-})
-
 test('restyled member pages and tables fit the four target widths', async ({
   page,
 }) => {
@@ -519,8 +366,6 @@ test('restyled member pages and tables fit the four target widths', async ({
     ['venues', 'Venues'],
     ['venue-notices', 'Venue Notices'],
     ['availability', 'Venue Availability'],
-    ['reservations', 'Reservations'],
-    ['reservations/new', 'New reservation'],
     ['accounts', 'Account Management'],
     ['accounts/new', 'New account'],
     ['audit', 'Audit Logs'],
@@ -638,7 +483,7 @@ test('temporary passwords work in both account forms and permanent changes still
   }
 
   await page.getByLabel('Sign out').click()
-  await expect(page).toHaveURL(/dashboard$/)
+  await expect(page).toHaveURL(/student$/)
   await page.goto('/login')
   await signIn(page, 'short-staff', 'elite123')
   await expect(
@@ -656,7 +501,7 @@ test('temporary passwords work in both account forms and permanent changes still
   await expect(page).toHaveURL(/dashboard$/)
 })
 
-test('venue status filters follow the API and inactive venues cannot be booked', async ({
+test('venue status filters follow the API and inactive venues cannot be assigned to new events', async ({
   page,
 }) => {
   await page.goto('/venues/new')
@@ -687,7 +532,7 @@ test('venue status filters follow the API and inactive venues cannot be booked',
   const id = await createVenue(name)
   const detail = '/venues/' + id
   await page.getByRole('link', { name: 'Edit', exact: true }).click()
-  await page.getByLabel('Accept reservations').uncheck()
+  await page.getByLabel('Venue active').uncheck()
   await page.getByRole('button', { name: 'Save venue' }).click()
   await expect(page.getByText('Inactive', { exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Back to venues' }).click()
@@ -698,7 +543,7 @@ test('venue status filters follow the API and inactive venues cannot be booked',
   await page.getByRole('button', { name: 'Active venues', exact: true }).click()
   await expect(page.getByRole('link', { name: 'ComLab 1' })).toBeVisible()
   await expect(page.getByRole('link', { name })).toHaveCount(0)
-  await page.goto('/reservations/new')
+  await page.goto('/weekly-events/new')
   const venue = page.getByLabel('Venue').filter({ visible: true })
   await expect(venue.getByRole('option', { name: 'ComLab 1' })).toBeAttached()
   await expect(venue.getByRole('option', { name })).toHaveCount(0)
@@ -712,34 +557,32 @@ test('venue status filters follow the API and inactive venues cannot be booked',
     date: day.toISOString().slice(0, 10),
     start: '09:00',
     end: '10:00',
-    attendees: 4,
-    title: 'Status workflow booking',
-    description: 'Booking status test',
-    responsible: 'Member',
-    contact: 'Office',
+    title: 'Status workflow event',
+    description: 'Venue status test',
+    published: true,
   }
   expect(
     (
-      await page.request.post('/api/reservations/', { headers, data: payload })
+      await page.request.post('/api/events/', { headers, data: payload })
     ).status(),
   ).toBe(400)
 
   await page.goto(detail + '/edit')
-  await page.getByLabel('Accept reservations').check()
+  await page.getByLabel('Venue active').check()
   await page.getByRole('button', { name: 'Save venue' }).click()
   await page.getByRole('link', { name: 'Back to venues' }).click()
   await expect(
     page.getByRole('button', { name: 'Active venues', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('link', { name })).toBeVisible()
-  await page.goto('/reservations/new')
+  await page.goto('/weekly-events/new')
   await venue.selectOption({ label: name })
-  const created = await page.request.post('/api/reservations/', {
+  const created = await page.request.post('/api/events/', {
     headers,
     data: payload,
   })
   expect(created.status()).toBe(201)
-  const booking = await created.json()
+  const event = await created.json()
 
   await page.goto(detail)
   await page.getByRole('button', { name: 'Delete venue' }).click()
@@ -756,14 +599,11 @@ test('venue status filters follow the API and inactive venues cannot be booked',
     .getByRole('button', { name: 'Archive venue' })
     .click()
   await expect(
-    page.getByText(
-      'Venue archived. Existing reservations and notices were kept.',
-      { exact: true },
-    ),
+    page.getByText('Venue archived. Existing events and notices were kept.', {
+      exact: true,
+    }),
   ).toBeVisible()
-  const preserved = await page.request.get(
-    '/api/reservations/' + booking.id + '/',
-  )
+  const preserved = await page.request.get('/api/events/' + event.id + '/')
   expect((await preserved.json()).venue_name).toBe(name)
 })
 
@@ -883,16 +723,13 @@ test('monthly calendar highlights active dates, preserves selection, and reflect
   const orientation = await (
     await request.get('/api/events/?search="Calendar orientation"')
   ).json()
-  for (const booking of [
-    event.reservation,
-    orientation.results[0].reservation,
-  ]) {
+  for (const id of [event.id, orientation.results[0].id]) {
     expect(
       (
-        await page.request.post(
-          '/api/reservations/' + booking + '/transition/',
-          { headers, data: { status: 'cancelled' } },
-        )
+        await page.request.patch('/api/events/' + id + '/?manage=1', {
+          headers,
+          data: { cancelled: true },
+        })
       ).status(),
     ).toBe(200)
   }

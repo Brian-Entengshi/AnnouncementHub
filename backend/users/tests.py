@@ -117,17 +117,17 @@ class AccountTests(APITestCase):
         csrf = client.get("/api/session/").data["csrf"]
         result = client.post("/api/login/", payload, HTTP_X_CSRFTOKEN=csrf)
         self.assertEqual(result.status_code, 200)
-        self.assertEqual(client.get("/api/reservations/").status_code, 403)
+        self.assertEqual(client.get("/api/dashboard/").status_code, 403)
         result = client.post(
             "/api/password/",
             {"current_password": self.initial, "new_password": token_urlsafe()},
             HTTP_X_CSRFTOKEN=result.data["csrf"],
         )
         self.assertEqual(result.status_code, 200, result.data)
-        self.assertEqual(client.get("/api/reservations/").status_code, 200)
+        self.assertEqual(client.get("/api/dashboard/").status_code, 200)
         self.staff.is_active = False
         self.staff.save(update_fields=["is_active"])
-        self.assertEqual(client.get("/api/reservations/").status_code, 403)
+        self.assertEqual(client.get("/api/dashboard/").status_code, 403)
 
     def test_replacement_accepts_short_password_and_keeps_permanent_policy(self):
         self.client.force_authenticate(self.officer)
@@ -161,7 +161,7 @@ class AccountTests(APITestCase):
             ).status_code,
             200,
         )
-        self.assertEqual(client.get("/api/reservations/").status_code, 403)
+        self.assertEqual(client.get("/api/dashboard/").status_code, 403)
         weak = client.post(
             "/api/password/", {"current_password": "123", "new_password": "1234"}
         )
@@ -172,7 +172,7 @@ class AccountTests(APITestCase):
         )
         self.assertEqual(changed.status_code, 200)
         self.assertFalse(changed.data["user"]["must_change_password"])
-        self.assertEqual(client.get("/api/reservations/").status_code, 200)
+        self.assertEqual(client.get("/api/dashboard/").status_code, 200)
 
     def test_role_change_clears_staff_assignments_and_active_new_team_is_allowed(self):
         self.client.force_authenticate(self.adviser)

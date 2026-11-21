@@ -113,38 +113,22 @@ test('authenticated team tabs, keyboard navigation, scrolling and page restorati
   }
 })
 
-test('Student Access shows noninteractive team information and the API protects rosters', async ({
+test('Student Access keeps team pages and member APIs private', async ({
   page,
 }) => {
-  await page.goto('/organization-teams')
-  for (const name of core) {
-    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
-    await expect(page.getByRole('link', { name, exact: true })).toHaveCount(0)
-  }
+  await page.goto('/organization-teams/1')
+  await expect(page).toHaveURL(/\/login$/)
   await expect(
-    page.getByText('Directory member 00', { exact: true }),
+    page.getByRole('navigation', { name: 'Main navigation' }),
   ).toHaveCount(0)
   await expect(page.getByRole('table')).toHaveCount(0)
-  await expect(page.getByRole('tab')).toHaveCount(0)
-  const teams = await (
-    await page.request.get('/api/teams/?include_inactive=1')
-  ).json()
-  expect(Object.keys(teams.results[0]).sort()).toEqual([
-    'description',
-    'id',
-    'name',
-  ])
-  const id = teams.results[0].id
-  const detail = await (
-    await page.request.get('/api/teams/' + id + '/?manage=1')
-  ).json()
-  expect(Object.keys(detail).sort()).toEqual(['description', 'id', 'name'])
-  expect(
-    (await page.request.get('/api/teams/' + id + '/members/')).status(),
-  ).toBe(403)
-  await page.goto('/organization-teams/' + id)
-  await expect(page).toHaveURL(/\/organization-teams$/)
-  await expect(page.getByRole('table')).toHaveCount(0)
+  for (const path of [
+    '/api/teams/',
+    '/api/teams/1/',
+    '/api/teams/1/members/',
+  ]) {
+    expect((await page.request.get(path)).status()).toBe(403)
+  }
 })
 
 test('adviser creates a dynamic team and manages multiple Staff assignments on mobile', async ({
@@ -256,8 +240,4 @@ test('adviser creates a dynamic team and manages multiple Staff assignments on m
   await expect(teamTab(page, extra)).toHaveCount(0)
   await page.getByText('Inactive teams', { exact: true }).click()
   await expect(page.getByRole('link', { name: extra })).toBeVisible()
-  await menu(page, 'Reservations')
-  const teamFilter = page.getByLabel('Filter by team')
-  await teamFilter.selectOption({ label: extra + ' (inactive)' })
-  await expect(teamFilter).toHaveValue(teamId)
 })

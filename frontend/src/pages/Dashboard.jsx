@@ -10,7 +10,6 @@ import {
   Activity,
   ChevronRight,
   ShieldCheck,
-  ClipboardList,
   BookOpen,
 } from 'lucide-react'
 import { useData } from '../hooks/useData'
@@ -101,29 +100,18 @@ export default function Dashboard() {
               icon={MapPin}
               color="peach"
               number={data.counts.venues}
-              label="Available venues"
-              foot="Open for reservations"
+              label="Active venues"
+              foot="Campus locations"
               to="/venues"
             />
-            {data.counts.pending === null ? (
-              <Metric
-                icon={Users}
-                color="purple"
-                number={data.counts.teams}
-                label="Organization teams"
-                foot="Across DLL Elite"
-                to="/organization-teams"
-              />
-            ) : (
-              <Metric
-                icon={ClipboardList}
-                color="purple"
-                number={data.counts.pending}
-                label="Pending requests"
-                foot="Awaiting a decision"
-                to="/reservations"
-              />
-            )}
+            <Metric
+              icon={Users}
+              color="purple"
+              number={data.counts.teams}
+              label="Organization teams"
+              foot="Across DLL Elite"
+              to="/organization-teams"
+            />
           </div>
           <div className="dashboard-grid">
             <Panel

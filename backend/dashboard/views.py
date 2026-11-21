@@ -1,109 +1,139 @@
 from datetime import timedelta
 from django.utils import timezone
 from django.db import transaction
+from django.views.decorators.cache import never_cache
 from audit_logs.models import AuditLog
-from django.db.models import Q
-from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from config.permissions import adviser, manager
+from config.permissions import IsAdviser
 from announcements.views import published_announcements
 from announcements.serializers import AnnouncementSerializer
 from activities.models import Activity
 from activities.serializers import ActivitySerializer
 from events.models import Event
 from events.serializers import EventSerializer
-from venues.models import Notice, Venue
-from venues.serializers import NoticeSerializer
+from events.views import upcoming_events
+from venues.models import Venue
+from venues.serializers import NoticeSerializer, published_notices
 from teams.models import Team
-from reservations.models import Reservation
 from .models import HubSettings
+from .serializers import PublicOrganizationSerializer, SettingsSerializer
 
 
-class SettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HubSettings
-        fields = ("contact_email", "office_hours")
+LANDING_AUDIT_AREAS = (
+    (
+        "Home copy",
+        (
+            "hero_heading",
+            "hero_welcome",
+            "hero_description",
+            "hero_cta_label",
+            "hero_cta_section",
+        ),
+    ),
+    ("Home image", ("hero_image", "hero_image_alt")),
+    (
+        "About",
+        (
+            "about_heading",
+            "about_intro",
+            "about_description",
+            "about_purpose",
+            "about_mission",
+            "about_vision",
+        ),
+    ),
+    (
+        "Contacts",
+        (
+            "contact_heading",
+            "contact_intro",
+            "contact_email",
+            "contact_phone",
+            "office_location",
+            "office_hours",
+            "facebook_url",
+            "instagram_url",
+            "website_url",
+        ),
+    ),
+    ("announcement display", ("highlight_pinned", "announcement_page_size")),
+)
 
 
 @api_view(["GET", "PATCH"])
-@permission_classes([AllowAny])
-@transaction.atomic
+@permission_classes([IsAdviser])
+@never_cache
 def settings_view(request):
-    if not adviser(request.user):
-        return Response({"detail": "An adviser account is required."}, status=403)
-    obj = HubSettings.objects.filter(pk=1).first() or HubSettings(pk=1)
-    if request.method == "PATCH":
+    if request.method == "GET":
+        return Response(SettingsSerializer(HubSettings.current()).data)
+
+    with transaction.atomic():
+        obj, _ = HubSettings.objects.select_for_update().get_or_create(pk=1)
         serializer = SettingsSerializer(obj, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        AuditLog.record(
-            request.user,
-            "Updated",
-            obj,
-            resource="settings",
-            description="Updated public contact information and office hours.",
-        )
-    return Response(SettingsSerializer(obj).data)
+        changed = {
+            field
+            for field, value in serializer.validated_data.items()
+            if (
+                bool(obj.hero_image)
+                if field == "hero_image" and value is None
+                else getattr(obj, field) != value
+            )
+        }
+        if changed:
+            serializer.save()
+            areas = [
+                area
+                for area, fields in LANDING_AUDIT_AREAS
+                if changed.intersection(fields)
+            ]
+            AuditLog.record(
+                request.user,
+                "Published",
+                obj,
+                resource="settings",
+                description=f"Published Student Access changes to {', '.join(areas)}.",
+            )
+        return Response(serializer.data)
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def help_view(request):
-    if request.user.is_authenticated:
-        return Response(
-            {"detail": "Hub Help is available through Student Access."}, status=403
-        )
-    obj = HubSettings.objects.filter(pk=1).first() or HubSettings()
-    return Response(SettingsSerializer(obj).data)
+@never_cache
+def organization(request):
+    return Response(PublicOrganizationSerializer(HubSettings.current()).data)
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
 def dashboard(request):
     today = timezone.localdate()
-    events = (
-        Event.objects.filter(
-            published=True,
-            reservation__status="approved",
-            reservation__date__gte=today,
-            reservation__venue__isnull=False,
+    events = upcoming_events(
+        Event.objects.filter(published=True).select_related(
+            "venue", "activity", "author"
         )
-        .filter(
-            Q(reservation__date__gt=today)
-            | Q(reservation__end__gt=timezone.localtime().time())
-        )
-        .select_related("reservation__venue", "activity")
     )
     announcements = published_announcements().select_related("author")
     activities = Activity.objects.filter(published=True, end_date__gte=today)
-    notices = Notice.objects.filter(
-        ends_at__gt=timezone.now(), venue__archived=False
-    ).select_related("venue")
-    reservations = Reservation.objects.filter(status="pending")
-    if not manager(request.user):
-        reservations = reservations.filter(requester_id=request.user.pk)
+    notices = (
+        published_notices()
+        .filter(ends_at__gt=timezone.now())
+        .select_related("venue", "author")
+    )
     return Response(
         {
             "today": today,
             "counts": {
-                "events": events.filter(
-                    reservation__date__lt=today + timedelta(days=7)
-                ).count(),
+                "events": events.filter(date__lt=today + timedelta(days=7)).count(),
                 "announcements": announcements.count(),
                 "venues": Venue.objects.filter(archived=False, available=True).count(),
                 "teams": Team.objects.filter(is_active=True).count(),
-                "pending": reservations.count()
-                if request.user.is_authenticated
-                else None,
             },
             "events": EventSerializer(events[:4], many=True).data,
             "announcements": AnnouncementSerializer(announcements[:3], many=True).data,
             "activities": ActivitySerializer(activities[:3], many=True).data,
             "notices": NoticeSerializer(notices[:3], many=True).data,
-            "unread": request.user.notifications.filter(read=False).count()
-            if request.user.is_authenticated
-            else 0,
+            "unread": request.user.notifications.filter(read=False).count(),
         }
     )

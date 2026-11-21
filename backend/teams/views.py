@@ -11,7 +11,7 @@ from config.permissions import IsAdviser, IsManager, manager
 from users.models import User
 from users.serializers import TeamMemberSerializer
 from .models import CORE_TEAM_NAMES, Team
-from .serializers import TeamInfoSerializer, TeamSerializer
+from .serializers import TeamSerializer
 
 
 class TeamViewSet(ResourceViewSet):
@@ -23,11 +23,6 @@ class TeamViewSet(ResourceViewSet):
         if self.action == "create":
             return [IsAdviser()]
         return super().get_permissions()
-
-    def get_serializer_class(self):
-        return (
-            TeamSerializer if self.request.user.is_authenticated else TeamInfoSerializer
-        )
 
     def get_queryset(self):
         teams = super().get_queryset()

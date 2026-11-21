@@ -141,9 +141,9 @@ class DemoProgramTests(APITestCase):
         self.assertEqual(DemoProgramEntry.objects.count(), 7)
         event = Event.objects.get(title="Campus organization briefing")
         self.assertTrue(event.published)
-        self.assertEqual(event.reservation.status, "approved")
-        self.assertEqual(event.reservation.history.count(), 2)
-        self.assertFalse(event.reservation.venue.archived)
+        self.assertGreater(event.end, event.start)
+        self.assertEqual(event.author, adviser)
+        self.assertFalse(event.venue.archived)
         event.activity.title = "Edited orientation"
         event.activity.save(update_fields=["title"])
         call_command("seed_program", adviser=adviser.username, verbosity=0)
@@ -151,15 +151,17 @@ class DemoProgramTests(APITestCase):
         self.assertEqual(Activity.objects.count(), 7)
         self.assertTrue(Activity.objects.filter(title="Edited orientation").exists())
         self.assertEqual(self.client.get("/api/events/").data["count"], 7)
+        self.assertEqual(self.client.get("/api/activities/").status_code, 403)
+        self.client.force_authenticate(adviser)
         self.assertEqual(self.client.get("/api/activities/").data["count"], 7)
 
-    def test_help_is_only_available_to_student_access(self):
-        self.assertEqual(self.client.get("/api/help/").status_code, 200)
+    def test_organization_contacts_are_public_but_settings_are_protected(self):
+        self.assertEqual(self.client.get("/api/organization/").status_code, 200)
+        self.assertEqual(self.client.post("/api/organization/", {}).status_code, 405)
         self.assertEqual(self.client.get("/api/settings/").status_code, 403)
         self.client.force_authenticate(
             User.objects.create_user("officer", role="officer")
         )
-        self.assertEqual(self.client.get("/api/help/").status_code, 403)
         self.assertEqual(self.client.get("/api/settings/").status_code, 403)
         self.client.force_authenticate(User.objects.create_superuser("help-adviser"))
         self.assertEqual(
@@ -168,15 +170,15 @@ class DemoProgramTests(APITestCase):
             ).status_code,
             200,
         )
-        self.assertEqual(self.client.get("/api/help/").status_code, 403)
         self.client.force_authenticate(None)
         self.assertEqual(
-            self.client.get("/api/help/").data["office_hours"], "Monday, 09:00–12:00"
+            self.client.get("/api/organization/").data["office_hours"],
+            "Monday, 09:00–12:00",
         )
 
 
 class DemoVenueNoticeTests(APITestCase):
-    def test_notice_seed_is_idempotent_and_uses_bookable_venues(self):
+    def test_notice_seed_is_idempotent_and_uses_active_venues(self):
         from django.core.management import call_command
         from io import StringIO
         from venues.models import Notice

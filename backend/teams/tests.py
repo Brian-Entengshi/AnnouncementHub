@@ -51,13 +51,10 @@ class TeamMembershipTests(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_student_can_only_read_public_fields(self):
+    def test_student_cannot_read_team_directory_or_rosters(self):
         result = self.client.get(reverse("teams-list"), {"manage": "1"})
-        self.assertEqual(result.status_code, 200)
-        self.assertEqual(set(result.data["results"][0]), {"id", "name", "description"})
-        self.assertEqual(
-            set(self.client.get(self.team_path).data), {"id", "name", "description"}
-        )
+        self.assertEqual(result.status_code, 403)
+        self.assertEqual(self.client.get(self.team_path).status_code, 403)
         self.assertEqual(self.client.get(self.roster_path).status_code, 403)
         self.assertEqual(self.client.get(self.account_path).status_code, 403)
 
@@ -116,4 +113,4 @@ class TeamMembershipTests(APITestCase):
             self.client.patch(self.team_path, {"is_active": False}).status_code, 400
         )
         self.client.force_authenticate(None)
-        self.assertEqual(self.client.get(team_path).status_code, 404)
+        self.assertEqual(self.client.get(team_path).status_code, 403)

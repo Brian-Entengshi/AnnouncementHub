@@ -6,7 +6,6 @@ import { useAuth } from '../context/auth'
 import { api } from '../services/api'
 import { Badge, Heading, State } from './Common'
 import { formatDate, formatTime, human, stamp } from '../utils/format'
-import ReservationActions from './ReservationActions'
 import ConfirmDelete from './ConfirmDelete'
 import ConfirmAction from './ConfirmAction'
 
@@ -23,19 +22,14 @@ const metadata = [
   'date',
   'start',
   'end',
-  'attendees',
-  'requester_name',
-  'team_name',
   'assigned_teams',
-  'responsible',
   'contact',
-  'notes',
   'activity_name',
   'start_date',
   'end_date',
   'starts_at',
   'ends_at',
-  'blocks_bookings',
+  'publication_status',
   'username',
   'email',
   'role',
@@ -92,14 +86,12 @@ export default function RecordDetail({ config: c, id }) {
             kicker={c.singular}
             title={item.title || item.name || item.full_name || item.username}
           >
-            {manager &&
-              c.api !== 'reservations' &&
-              !(c.api === 'notices' && item.venue === null) && (
-                <Link className="button" to={path + '/' + id + '/edit'}>
-                  <Pencil size={16} />
-                  Edit
-                </Link>
-              )}
+            {manager && !(c.api === 'notices' && item.venue === null) && (
+              <Link className="button" to={path + '/' + id + '/edit'}>
+                <Pencil size={16} />
+                Edit
+              </Link>
+            )}
           </Heading>
           {state?.notice && (
             <p className="success-notice" role="status">
@@ -108,8 +100,7 @@ export default function RecordDetail({ config: c, id }) {
           )}
           <section className="panel detail">
             {(item.retired_venue ||
-              (['reservations', 'notices'].includes(c.api) &&
-                item.venue === null)) && (
+              (c.api === 'notices' && item.venue === null)) && (
               <p className="historical-note">
                 Retired venue. The original venue name is preserved for this
                 record.
@@ -196,14 +187,9 @@ export default function RecordDetail({ config: c, id }) {
                 )}
               </div>
             )}
-            {manager && c.api === 'events' && (
-              <Link className="button" to={'/reservations/' + item.reservation}>
-                View booking
-              </Link>
-            )}
             {manager &&
               (c.api !== 'venues' || adviser) &&
-              !['reservations', 'accounts'].includes(c.api) && (
+              c.api !== 'accounts' && (
                 <div className="detail-footer">
                   {c.api === 'venues' && !item.archived && (
                     <button onClick={() => setConfirm('archive')}>
@@ -228,8 +214,8 @@ export default function RecordDetail({ config: c, id }) {
                 cancel={() => setConfirm('')}
                 confirm={remove}
               >
-                Existing bookings and notices will be kept. The venue will no
-                longer accept new reservations.
+                Existing events and notices will be kept. The venue will leave
+                the active schedule.
               </ConfirmAction>
             )}
             {confirm === 'delete' && (
@@ -246,9 +232,6 @@ export default function RecordDetail({ config: c, id }) {
               </p>
             )}
           </section>
-          {c.api === 'reservations' && (
-            <ReservationActions item={item} reload={q.reload} />
-          )}
         </>
       )}
     </State>

@@ -1,7 +1,3 @@
 export function isActiveEvent(event) {
-  return (
-    event.published &&
-    !event.retired_venue &&
-    ['scheduled', 'ongoing'].includes(event.status)
-  )
+  return event.published && ['scheduled', 'ongoing'].includes(event.status)
 }

@@ -1,0 +1,239 @@
+.landing-manager {
+  max-width: 1360px;
+  min-width: 0;
+}
+
+.landing-manager > .landing-manager-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.landing-manager-heading h2 {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+
+.landing-manager-heading p,
+.landing-editor-heading p {
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.landing-manager-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 10px clamp(12px, 2vw, 22px);
+  border-bottom: 1px solid var(--line);
+  background: #f5f7f6;
+}
+
+.landing-manager-tabs button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.landing-manager-tabs button:hover {
+  border-color: #c2c2c1;
+  background: white;
+}
+
+.landing-manager-tabs button[aria-selected='true'] {
+  background: #1a272f;
+  color: white;
+}
+
+.landing-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 22px);
+  padding: clamp(12px, 2vw, 22px);
+}
+
+.landing-editor-form {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.landing-editor-heading h3 {
+  font-size: 1.12rem;
+}
+
+.landing-editor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.landing-editor-fields textarea {
+  min-height: 88px;
+}
+
+.landing-field-hint {
+  display: block;
+  margin-top: 5px;
+}
+
+.landing-image-field {
+  display: grid;
+  gap: 7px;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f6f8f7;
+}
+
+.landing-image-field button {
+  justify-self: start;
+}
+
+.landing-editor-feedback .actions {
+  padding-top: 12px;
+}
+
+.landing-published {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 11px 12px;
+  border: 1px solid #c0d9ca;
+  border-radius: 7px;
+  background: #edf7f0;
+  color: #214b33;
+  font-weight: 600;
+}
+
+.landing-editor-feedback > .error {
+  margin-bottom: 10px;
+}
+
+.landing-preview {
+  min-width: 0;
+  align-self: start;
+  overflow: hidden;
+}
+
+.landing-preview.panel > header {
+  justify-content: flex-start;
+  padding: 12px 14px;
+  background: #f5f7f6;
+}
+
+.landing-preview h3[id] {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.landing-preview-site.public-site {
+  min-height: 0;
+  overflow-wrap: anywhere;
+}
+
+.landing-preview-site .public-width {
+  width: calc(100% - 32px);
+}
+
+.landing-preview-site .public-section,
+.landing-preview-site .public-hero-grid,
+.landing-preview-site .public-about,
+.landing-preview-site .public-contact-layout {
+  padding-block: 18px;
+}
+
+.landing-preview-site .public-hero-grid,
+.landing-preview-site .public-about,
+.landing-preview-site .public-about-facts,
+.landing-preview-site .public-contact-layout,
+.landing-preview-site .public-contact-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.landing-preview-site .public-about-emblem img {
+  width: 86px;
+  height: 86px;
+}
+
+.landing-preview-site .public-about-emblem {
+  min-height: 112px;
+  padding: 10px;
+}
+
+.landing-preview-site .public-contact-card {
+  padding: 12px;
+}
+
+.landing-preview-site .public-hero h1 {
+  max-width: none;
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
+}
+
+.landing-preview-site .public-hero img {
+  max-height: 145px;
+  object-fit: cover;
+}
+
+.landing-preview-site .public-hero-description,
+.landing-preview-site .public-hero-actions {
+  margin-top: 10px;
+}
+
+.landing-preview-site .public-section-heading h2 {
+  font-size: 1.4rem;
+}
+
+.landing-display-preview {
+  padding: 14px;
+}
+
+.landing-display-preview dl {
+  display: grid;
+  gap: 12px;
+  margin-block: 0 16px;
+}
+
+.landing-display-preview dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.landing-display-preview dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+@media (max-width: 1050px) {
+  .landing-editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-preview {
+    width: min(100%, 680px);
+  }
+}
+
+@media (max-width: 540px) {
+  .landing-editor-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-manager-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-manager-tabs button {
+    justify-content: flex-start;
+    padding-inline: 9px;
+  }
+}

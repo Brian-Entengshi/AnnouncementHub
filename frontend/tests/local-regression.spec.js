@@ -80,14 +80,12 @@ test('existing adviser and officer complete the audit, venue, and account workfl
   const venueName = 'QA facility ' + tag
   const staffName = 'QA staff ' + tag
   const blockedVenue = 'Blocked facility ' + tag
-  await page.goto('/dashboard')
-  await page.getByRole('button', { name: 'Hub help' }).click()
-  await expect(page.getByRole('dialog')).toBeVisible()
-  await page.getByRole('button', { name: 'Close help' }).click()
+  await page.goto('/student')
+  await expect(
+    page.getByRole('navigation', { name: 'Public navigation' }),
+  ).toBeVisible()
 
   const admin = await login(page, 'ADMIN')
-  await expect(page.getByRole('button', { name: 'Hub help' })).toHaveCount(0)
-  expect((await page.request.get('/api/help/')).status()).toBe(403)
   await page.goto('/venues/new')
   await page.getByLabel('Venue name').fill(venueName)
   await page.getByLabel('Location').fill('Campus east entrance')
@@ -145,9 +143,7 @@ test('existing adviser and officer complete the audit, venue, and account workfl
     .getByRole('button', { name: 'Archive venue' })
     .click()
   await expect(
-    page.getByText(
-      'Venue archived. Existing reservations and notices were kept.',
-    ),
+    page.getByText('Venue archived. Existing events and notices were kept.'),
   ).toBeVisible()
 
   await page.goto('/accounts')
@@ -176,11 +172,9 @@ test('existing adviser and officer complete the audit, venue, and account workfl
 
   const officer = await login(page, 'OFFICER')
   expect(officer.teams).toEqual([])
-  await expect(page.getByRole('button', { name: 'Hub help' })).toHaveCount(0)
   const { csrf } = await (await page.request.get('/api/session/')).json()
   const headers = { 'X-CSRFToken': csrf }
   expect((await page.request.get('/api/audit/')).status()).toBe(403)
-  expect((await page.request.get('/api/help/')).status()).toBe(403)
   expect(
     (
       await page.request.post('/api/venues/', {

@@ -109,6 +109,7 @@ function Editor({ config: c, initial, id }) {
       available: true,
       status: 'draft',
       role: 'staff',
+      publication_status: 'draft',
       ...initial,
     }
     for (const field of fields) {
@@ -166,6 +167,7 @@ function Editor({ config: c, initial, id }) {
     const data = new FormData()
     for (const f of visibleFields) {
       if (f.type === 'team-checkboxes') continue
+      if (id && f.name === 'venue' && !values.venue && !initial.venue) continue
       const v = values[f.name]
       if (f.type === 'file') {
         if (v instanceof File) data.append(f.name, v)
@@ -206,18 +208,7 @@ function Editor({ config: c, initial, id }) {
             ? path + '?team=' + item.id + '&page=1'
             : itemPath + '?settings=1'
           : itemPath,
-        {
-          replace: true,
-          state:
-            c.api === 'reservations'
-              ? {
-                  notice:
-                    item.status === 'approved'
-                      ? 'Reservation automatically approved.'
-                      : 'Reservation submitted for review.',
-                }
-              : undefined,
-        },
+        { replace: true },
       )
     } catch (err) {
       setError(err.message)
@@ -232,12 +223,6 @@ function Editor({ config: c, initial, id }) {
         title={(id ? 'Edit ' : 'New ') + c.singular.toLowerCase()}
       />
       <form className="panel form" onSubmit={submit}>
-        {c.api === 'reservations' && (
-          <p className="full">
-            Requested by <strong>{user.full_name || user.username}</strong>. All
-            booking times are in Manila.
-          </p>
-        )}
         {visibleFields.map((f) => {
           if (f.type === 'team-checkboxes')
             return (
@@ -272,11 +257,7 @@ function Editor({ config: c, initial, id }) {
                     f.name === 'venue' &&
                     String(initial?.venue) === String(values.venue)
                       ? initial?.venue_name
-                      : f.name === 'reservation' &&
-                          String(initial?.reservation) ===
-                            String(values.reservation)
-                        ? initial?.venue_name
-                        : undefined
+                      : undefined
                   }
                   onChange={(v) => change(f.name, v)}
                 />

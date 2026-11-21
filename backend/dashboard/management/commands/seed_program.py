@@ -2,13 +2,10 @@ from datetime import time, timedelta
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 from activities.models import Activity
 from audit_logs.models import AuditLog
 from dashboard.models import DemoProgramEntry
 from events.models import Event
-from reservations.models import Reservation
-from reservations.services import approve_booking, check_slot, record_status
 from users.models import User
 from venues.models import Venue
 
@@ -19,12 +16,11 @@ PROGRAM = (
         "orientation",
         "DLL Elite member orientation",
         "Campus organization briefing",
-        "The officers introduce new students to campus committees, walk through event sign-up, and explain how to request a venue.",
+        "The officers introduce new students to campus committees and walk through event sign-up.",
         "Audio-Visual Room (AVR)",
         0,
         time(9),
         time(10, 30),
-        32,
     ),
     (
         "campus-care",
@@ -35,7 +31,6 @@ PROGRAM = (
         1,
         time(8),
         time(10),
-        48,
     ),
     (
         "leadership",
@@ -46,7 +41,6 @@ PROGRAM = (
         3,
         time(9),
         time(11),
-        22,
     ),
     (
         "editorial",
@@ -57,7 +51,6 @@ PROGRAM = (
         3,
         time(13, 30),
         time(15),
-        20,
     ),
     (
         "documentation",
@@ -68,7 +61,6 @@ PROGRAM = (
         5,
         time(10),
         time(12),
-        18,
     ),
     (
         "production",
@@ -79,7 +71,6 @@ PROGRAM = (
         8,
         time(14),
         time(16),
-        20,
     ),
     (
         "planning",
@@ -90,15 +81,12 @@ PROGRAM = (
         10,
         time(10, 30),
         time(12),
-        16,
     ),
 )
 
 
 class Command(BaseCommand):
-    help = (
-        "Add the DLL Elite demonstration program once, using conflict-checked bookings."
-    )
+    help = "Add the DLL Elite demonstration program once, with public event schedules."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -111,7 +99,7 @@ class Command(BaseCommand):
         ).first()
         if adviser is None:
             raise CommandError(
-                "Choose an existing active adviser for the demonstration bookings."
+                "Choose an existing active adviser for the demonstration program."
             )
         tomorrow = timezone.localdate() + timedelta(days=1)
         added = sum(self.add_entry(adviser, tomorrow, entry) for entry in PROGRAM)
@@ -130,7 +118,6 @@ class Command(BaseCommand):
             offset,
             start,
             end,
-            attendees,
         ) = entry
         if DemoProgramEntry.objects.filter(key=key).exists():
             return False
@@ -146,16 +133,7 @@ class Command(BaseCommand):
         if not venue:
             self.stderr.write(f"Skipped {title}: {venue_name} is unavailable.")
             return False
-        for extra_days in (0, 7, 14):
-            date = tomorrow + timedelta(days=offset + extra_days)
-            try:
-                check_slot(venue, date, start, end, attendees)
-                break
-            except ValidationError:
-                continue
-        else:
-            self.stderr.write(f"Skipped {title}: no valid booking slot was available.")
-            return False
+        date = tomorrow + timedelta(days=offset)
         activity = Activity.objects.create(
             title=title,
             description=description,
@@ -169,27 +147,14 @@ class Command(BaseCommand):
             activity,
             description="Installed a demonstration activity.",
         )
-        booking = Reservation.objects.create(
-            title=event_title,
-            description=description,
-            venue=venue,
-            requester=adviser,
-            date=date,
-            start=start,
-            end=end,
-            attendees=attendees,
-            responsible="DLL Elite demonstration program",
-            contact="Organization office",
-            notes="Local demonstration booking installed by seed_program.",
-        )
-        record_status(booking, adviser)
-        approve_booking(
-            booking, adviser, "Demonstration booking. Venue and schedule validated."
-        )
         event = Event.objects.create(
             title=event_title,
             description=description,
-            reservation=booking,
+            venue=venue,
+            date=date,
+            start=start,
+            end=end,
+            author=adviser,
             activity=activity,
             published=True,
         )
@@ -197,7 +162,7 @@ class Command(BaseCommand):
             adviser,
             "Created",
             event,
-            description="Published a demonstration event for the validated booking.",
+            description="Published a demonstration event.",
         )
         DemoProgramEntry.objects.create(key=key)
         return True

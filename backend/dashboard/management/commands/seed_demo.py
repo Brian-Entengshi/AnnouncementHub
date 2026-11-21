@@ -5,7 +5,6 @@ from django.utils import timezone
 from activities.models import Activity
 from announcements.models import Announcement
 from events.models import Event
-from reservations.models import Reservation, StatusChange
 from teams.models import Team
 from users.models import User
 from venues.models import Venue, Notice
@@ -24,7 +23,6 @@ class Command(BaseCommand):
                 model.objects.exists()
                 for model in (
                     Event,
-                    Reservation,
                     Announcement,
                     Notice,
                     Activity,
@@ -85,30 +83,14 @@ class Command(BaseCommand):
                 "Explore a collaborative workflow for documenting student events.",
             ),
         ]:
-            booking = Reservation.objects.create(
-                title=title,
-                description=description,
-                venue=venue,
-                requester=author,
-                team=team,
-                date=today + timedelta(days=offset),
-                start=time(hour),
-                end=time(hour + 2),
-                attendees=20,
-                responsible="DLL Elite Secretariat",
-                contact="Organization office",
-                status="approved",
-            )
-            StatusChange.objects.create(
-                reservation=booking,
-                actor=author,
-                status="approved",
-                reason="Sample booking",
-            )
             Event.objects.create(
                 title=title,
                 description=description,
-                reservation=booking,
+                venue=venue,
+                author=author,
+                date=today + timedelta(days=offset),
+                start=time(hour),
+                end=time(hour + 2),
                 activity=activity,
                 published=True,
             )
@@ -147,10 +129,12 @@ class Command(BaseCommand):
         Notice.objects.create(
             venue=venues[2],
             title="ComLab 1 equipment maintenance",
-            description="Lab bookings pause during the scheduled equipment inspection.",
+            description="The lab is temporarily closed for a scheduled equipment inspection.",
             starts_at=starts,
             ends_at=starts + timedelta(hours=4),
-            blocks_bookings=True,
+            publication_status="published",
+            published_at=timezone.now(),
+            author=author,
         )
         UsefulLink.objects.create(
             title="Google Scholar",

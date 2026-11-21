@@ -17,46 +17,6 @@ import ResourcePage from '../components/ResourcePage'
 const config = catalog.teams
 const path = '/' + config.path
 
-function PublicTeams() {
-  const { params, setParams } = usePageState(['page'])
-  const { query, page, setPage } = usePageResults(
-    'teams/?' + params,
-    params,
-    setParams,
-  )
-  return (
-    <>
-      <Heading
-        kicker={config.group}
-        title={config.name}
-        description={config.description}
-      />
-      <State query={query}>
-        {({ results, count, next, previous }) => (
-          <>
-            <div className="record-grid">
-              {results.map((team) => (
-                <article className="panel record-card" key={team.id}>
-                  <h2>{team.name}</h2>
-                  <p>{team.description}</p>
-                </article>
-              ))}
-            </div>
-            {count === 0 && <Empty>No teams are listed.</Empty>}
-            {(next || previous) && (
-              <PageControls
-                {...{ page, count, next, previous }}
-                onPage={setPage}
-                resource="Team"
-              />
-            )}
-          </>
-        )}
-      </State>
-    </>
-  )
-}
-
 function TeamTabs({ teams, selected, onSelect }) {
   const bar = useRef(null)
   useEffect(() => {
@@ -315,7 +275,7 @@ function TeamRoster({ team, manager, params, setParams, scope, onDelete }) {
         >
           {member
             ? 'Only this team assignment will be removed.'
-            : 'Teams linked to accounts or reservations must be made inactive to preserve those records.'}
+            : 'Make teams with existing members inactive to preserve those memberships.'}
         </ConfirmAction>
       )}
     </section>
@@ -416,7 +376,6 @@ export default function Teams() {
   const { user, manager } = useAuth()
   const { id } = useParams()
   const { pathname, search } = useLocation()
-  if (!user) return id ? <Navigate replace to={path} /> : <PublicTeams />
   if (
     pathname.endsWith('/new') ||
     pathname.endsWith('/edit') ||

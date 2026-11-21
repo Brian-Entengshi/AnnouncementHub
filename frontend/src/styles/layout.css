@@ -130,8 +130,7 @@
 }
 .crumb,
 .top-actions,
-.header-date,
-.sign-in {
+.header-date {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -149,11 +148,6 @@
   font-size: 0.82rem;
   padding-right: 13px;
   border-right: 1px solid #dce1df;
-}
-.sign-in {
-  font-size: 0.82rem;
-  font-weight: 650;
-  min-height: 38px;
 }
 .top-actions .icon {
   border: 0;
@@ -179,7 +173,6 @@
 .scrim {
   display: none !important;
 }
-.help-dialog,
 dialog[open] {
   max-width: min(450px, 92vw);
   padding: 28px;
@@ -187,16 +180,6 @@ dialog[open] {
   border-radius: 12px;
   color: #1a272f;
   box-shadow: 0 10px 44px #1220282c;
-}
-.help-dialog::backdrop {
-  background: #12202880;
-}
-.help-dialog h2,
-.help-dialog p {
-  margin: 12px 0;
-}
-.help-dialog .close {
-  float: right;
 }
 @media (max-width: 1024px) {
   .workspace {
@@ -259,8 +242,5 @@ dialog[open] {
   }
   .top-actions {
     gap: 6px;
-  }
-  .sign-in {
-    font-size: 0.78rem;
   }
 }

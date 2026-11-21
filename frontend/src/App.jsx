@@ -23,48 +23,63 @@ import Teams from './pages/Teams'
 import UsefulLinks from './pages/UsefulLinks'
 import Venues from './pages/Venues'
 import VenueNotices from './pages/VenueNotices'
-import Reservations from './pages/Reservations'
 import Accounts from './pages/Accounts'
+import StudentLayout from './components/StudentLayout'
+import StudentHome from './pages/StudentHome'
+import StudentRecord from './pages/StudentRecord'
 
-function Guard({ role, children }) {
-  const auth = useAuth(),
-    location = useLocation()
-  if (auth.loading)
+function SessionReady({ children }) {
+  const { loading, error, refresh } = useAuth()
+  if (loading)
     return (
       <div role="status" className="empty">
         Opening workspace…
       </div>
     )
-  if (auth.error)
+  if (error)
     return (
       <div className="error" role="alert">
-        {auth.error} <button onClick={auth.refresh}>Retry connection</button>
+        {error} <button onClick={refresh}>Retry connection</button>
       </div>
     )
-  if (role && !auth.user)
-    return (
-      <Navigate
-        replace
-        to="/login"
-        state={{
-          from:
-            location.pathname +
-            (location.state?.hubView ? '' : location.search),
-        }}
-      />
+  return children
+}
+
+function MemberLayout() {
+  const { user } = useAuth()
+  const location = useLocation()
+  const from =
+    location.pathname + (location.state?.hubView ? '' : location.search)
+  let destination
+  if (!user) {
+    const match = /^\/(announcements|weekly-events)(?:\/(\d+))?\/?$/.exec(
+      location.pathname,
     )
-  if (
-    auth.user?.must_change_password &&
-    !['/password', '/login'].includes(location.pathname)
+    if (match) {
+      const section = match[1] === 'announcements' ? 'announcements' : 'events'
+      destination = match[2]
+        ? '/student/' + section + '/' + match[2]
+        : '/student#' + section
+    } else {
+      destination = '/login'
+    }
+  } else if (user.must_change_password && location.pathname !== '/password') {
+    destination = '/password'
+  }
+  return (
+    <SessionReady>
+      {destination ? (
+        <Navigate replace to={destination} state={{ from }} />
+      ) : (
+        <Layout />
+      )}
+    </SessionReady>
   )
-    return (
-      <Navigate
-        replace
-        to="/password"
-        state={{ from: location.pathname + location.search }}
-      />
-    )
-  if (role && role !== 'member' && !auth[role])
+}
+
+function RoleGate({ role, children }) {
+  const auth = useAuth()
+  if (role && !auth[role]) {
     return (
       <section className="panel detail">
         <h1>Access restricted</h1>
@@ -72,8 +87,10 @@ function Guard({ role, children }) {
         <Link to="/dashboard">Return to dashboard</Link>
       </section>
     )
+  }
   return children
 }
+
 const pages = [
   [catalog.announcements, Announcements],
   [catalog.activities, Activities],
@@ -82,7 +99,6 @@ const pages = [
   [catalog.links, UsefulLinks],
   [catalog.venues, Venues],
   [catalog.notices, VenueNotices],
-  [catalog.reservations, Reservations],
   [catalog.accounts, Accounts],
 ]
 
@@ -100,75 +116,84 @@ function LegacyAnnouncementRoute() {
   )
 }
 
+function StartPage() {
+  const { user, loading } = useAuth()
+  if (loading) return <SessionReady />
+  return <Navigate replace to={user ? '/dashboard' : '/student'} />
+}
+
 function HubRoutes() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Navigate replace to="/dashboard" />} />
+      <Route index element={<StartPage />} />
+      <Route
+        path="manage-announcements/*"
+        element={<LegacyAnnouncementRoute />}
+      />
+      <Route element={<StudentLayout />}>
+        <Route path="student" element={<StudentHome />} />
+        <Route path="student/events/:id" element={<StudentRecord event />} />
+        <Route path="student/announcements/:id" element={<StudentRecord />} />
         <Route
-          path="dashboard"
+          path="login"
           element={
-            <Guard>
-              <Dashboard />
-            </Guard>
+            <SessionReady>
+              <Authentication />
+            </SessionReady>
           }
         />
         <Route
-          path="manage-announcements/*"
-          element={<LegacyAnnouncementRoute />}
-        />
-        {pages.flatMap(([c, Page]) =>
-          ['', '/:id', '/new', '/:id/edit']
-            .filter((s) => !(c.api === 'reservations' && s.endsWith('edit')))
-            .map((s) => {
-              const role =
-                c.api === 'accounts'
-                  ? 'manager'
-                  : ['venues', 'teams'].includes(c.api) && s === '/new'
-                    ? 'adviser'
-                    : c.api === 'reservations' && s !== '/new'
-                      ? 'member'
-                      : s === '/new' || s.endsWith('edit')
-                        ? 'manager'
-                        : null
-              return (
-                <Route
-                  key={c.path + s}
-                  path={c.path + s}
-                  element={
-                    <Guard role={role}>
-                      <Page key={c.path + s} />
-                    </Guard>
-                  }
-                />
-              )
-            }),
-        )}
-        {[
-          ['availability', null, Availability],
-          ['login', null, Authentication],
-          ['password', 'member', Authentication],
-          ['notifications', 'member', Notifications],
-          ['settings', 'adviser', Settings],
-          ['audit', 'adviser', Audit],
-        ].map(([p, role, Page]) => (
-          <Route
-            key={p}
-            path={p}
-            element={
-              <Guard role={role}>
-                <Page password={p === 'password'} />
-              </Guard>
-            }
-          />
-        ))}
-        <Route
           path="*"
           element={
-            <section className="panel detail">
-              <h1>Page not found</h1>
-              <Link to="/dashboard">Open dashboard</Link>
+            <section className="public-width public-record">
+              <h1>Page unavailable</h1>
+              <Link to="/student">Return to Student Access</Link>
             </section>
+          }
+        />
+      </Route>
+      <Route element={<MemberLayout />}>
+        <Route path="dashboard" element={<Dashboard />} />
+        {pages.flatMap(([c, Page]) =>
+          ['', '/:id', '/new', '/:id/edit'].map((suffix) => {
+            const role =
+              c.api === 'accounts'
+                ? 'manager'
+                : ['venues', 'teams'].includes(c.api) && suffix === '/new'
+                  ? 'adviser'
+                  : suffix === '/new' || suffix.endsWith('edit')
+                    ? 'manager'
+                    : null
+            return (
+              <Route
+                key={c.path + suffix}
+                path={c.path + suffix}
+                element={
+                  <RoleGate role={role}>
+                    <Page key={c.path + suffix} />
+                  </RoleGate>
+                }
+              />
+            )
+          }),
+        )}
+        <Route path="availability" element={<Availability />} />
+        <Route path="password" element={<Authentication password />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route
+          path="settings"
+          element={
+            <RoleGate role="adviser">
+              <Settings />
+            </RoleGate>
+          }
+        />
+        <Route
+          path="audit"
+          element={
+            <RoleGate role="adviser">
+              <Audit />
+            </RoleGate>
           }
         />
       </Route>

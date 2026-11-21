@@ -1,76 +1,71 @@
-from datetime import time, timedelta
+from datetime import datetime, time, timedelta
+
+from django.db import connection
 from django.utils import timezone
 from rest_framework.test import APITestCase
-from reservations.models import Reservation
+
 from audit_logs.models import AuditLog
+from events.models import Event
 from teams.models import Team
 from users.models import User
-from .models import Venue
+from .models import Notice, Venue
 
 
 class VenueTests(APITestCase):
     def setUp(self):
-        self.adviser = User.objects.create_superuser("adviser")
-        self.officer = User.objects.create_user("officer", role="officer")
+        self.adviser = User.objects.create_superuser("venue-adviser")
+        self.officer = User.objects.create_user("venue-officer", role="officer")
         self.staff = User.objects.create_user(
-            "staff", role="staff", teams=[Team.objects.get(name="Technical Team")]
+            "venue-staff", role="staff", teams=[Team.objects.first()]
         )
+        self.venue = Venue.objects.get(name="ComLab 1")
+        self.day = timezone.localdate() + timedelta(days=7)
+        self.start = timezone.make_aware(datetime.combine(self.day, time(9)))
 
-    def test_default_venues_and_creation_permissions(self):
+    def test_active_venues_and_creation_permissions(self):
         expected = {
             "Audio-Visual Room (AVR)",
             "DLL Grounds",
-            *(f"ComLab {n}" for n in range(1, 6)),
+            *(f"ComLab {i}" for i in range(1, 6)),
         }
-        response = self.client.get("/api/venues/?bookable=1")
+        self.assertEqual(self.client.get("/api/venues/").status_code, 403)
+        self.client.force_authenticate(self.officer)
         self.assertEqual(
-            {venue["name"] for venue in response.data["results"]}, expected
+            {item["name"] for item in self.client.get("/api/venues/").data["results"]},
+            expected,
         )
-        payload = {"name": "New facility", "location": "Campus", "capacity": 30}
-        for actor in (None, self.officer, self.staff):
-            self.client.force_authenticate(actor)
-            self.assertEqual(self.client.post("/api/venues/", payload).status_code, 403)
+        body = {"name": "Hall", "location": "Campus", "capacity": 20}
+        for user in (None, self.officer, self.staff):
+            self.client.force_authenticate(user)
+            self.assertEqual(self.client.post("/api/venues/", body).status_code, 403)
         self.client.force_authenticate(self.adviser)
-        result = self.client.post("/api/venues/", payload)
+        result = self.client.post("/api/venues/", body)
         self.assertEqual(result.status_code, 201, result.data)
         self.assertEqual(
-            self.client.post(
-                "/api/venues/", {**payload, "name": "NEW FACILITY"}
-            ).status_code,
-            400,
+            self.client.post("/api/venues/", {**body, "name": "HALL"}).status_code, 400
         )
-        self.assertEqual(self.client.get("/api/venues/?bookable=1").data["count"], 8)
+        path = f"/api/venues/{result.data['id']}/"
         self.client.force_authenticate(self.officer)
+        self.assertEqual(self.client.patch(path, {"available": False}).status_code, 200)
         self.assertEqual(
-            self.client.patch(
-                f"/api/venues/{result.data['id']}/", {"description": "Updated"}
-            ).status_code,
-            200,
+            self.client.get("/api/venues/?status=inactive").data["count"], 1
         )
-
-    def test_archive_keeps_booking_details_and_blocks_new_reservations(self):
-        legacy = Venue.objects.create(
-            name="Innovation Lab",
-            location="Campus",
-            capacity=20,
-        )
-        booking = Reservation.objects.create(
-            venue=legacy,
-            requester=self.staff,
-            date=timezone.localdate() + timedelta(days=2),
-            start=time(9),
-            end=time(10),
-            attendees=5,
-            title="Original booking",
-            description="Original event",
-            responsible="Organizer",
-            contact="Office",
-            status="approved",
-        )
-        path = f"/api/venues/{legacy.pk}/"
-        self.client.force_authenticate(self.officer)
         self.assertEqual(self.client.delete(path).status_code, 403)
-        self.assertEqual(self.client.post(path + "archive/").status_code, 403)
+        self.client.force_authenticate(self.adviser)
+        self.assertEqual(self.client.delete(path).status_code, 200)
+        self.assertEqual(self.client.delete(path).status_code, 404)
+
+    def test_archiving_protects_linked_events_and_preserves_schedule(self):
+        event = Event.objects.create(
+            title="Lab session",
+            description="Lab practice",
+            venue=self.venue,
+            date=self.day,
+            start=time(9),
+            end=time(11),
+            published=True,
+        )
+        path = f"/api/venues/{self.venue.pk}/"
         self.client.force_authenticate(self.adviser)
         self.assertEqual(self.client.delete(path).status_code, 409)
         self.assertFalse(
@@ -81,191 +76,104 @@ class VenueTests(APITestCase):
         self.assertEqual(
             AuditLog.objects.filter(resource="venue", action="Archived").count(), 1
         )
-        booking.refresh_from_db()
-        self.assertEqual(booking.status, "approved")
-        self.client.force_authenticate(self.staff)
-        self.assertNotIn(
-            legacy.pk,
-            [row["id"] for row in self.client.get("/api/venues/").data["results"]],
-        )
         self.assertEqual(
-            self.client.get(f"/api/reservations/{booking.pk}/").data["venue_name"],
-            legacy.name,
+            self.client.get("/api/venues/?status=archived").data["count"], 1
         )
-        self.client.force_authenticate(self.adviser)
-        result = self.client.post(
-            "/api/reservations/",
-            {
-                "venue": legacy.pk,
-                "date": booking.date.isoformat(),
-                "start": "13:00",
-                "end": "14:00",
-                "attendees": 5,
-                "title": "New booking",
-                "description": "New event",
-                "responsible": "Organizer",
-                "contact": "Office",
-            },
+        self.assertEqual(self.client.patch(path, {"available": True}).status_code, 400)
+        self.assertEqual(
+            self.client.get(
+                "/api/availability/", {"from": self.day, "to": self.day}
+            ).data["events"],
+            [],
         )
-        self.assertEqual(result.status_code, 400)
-        self.assertIn("venue", result.data)
+        self.client.force_authenticate(None)
+        item = self.client.get(f"/api/events/{event.pk}/").data
+        self.assertEqual(item["venue_name"], self.venue.name)
+        self.assertEqual(item["date"], str(self.day))
+
+    def test_notices_publish_unpublish_archive_and_feed_availability(self):
         self.client.force_authenticate(self.officer)
-        self.assertEqual(self.client.get("/api/venues/?archived=1").data["count"], 1)
-        self.assertEqual(self.client.delete(path).status_code, 403)
-        self.assertTrue(
-            Reservation.objects.filter(pk=booking.pk, venue=legacy).exists()
-        )
-
-    def test_unreferenced_venue_deletion_writes_one_audit_record(self):
-        venue = Venue.objects.create(
-            name="Seminar Room",
-            location="Campus",
-            capacity=60,
-            archived=True,
-            available=False,
-        )
-        path = f"/api/venues/{venue.pk}/"
-        self.client.force_authenticate(self.adviser)
-        self.assertEqual(self.client.delete(path).status_code, 200)
-        self.assertEqual(self.client.get(path).status_code, 404)
-        self.assertEqual(self.client.delete(path).status_code, 404)
-        self.assertEqual(
-            AuditLog.objects.filter(
-                resource="venue", action="Deleted", object_id=venue.pk
-            ).count(),
-            1,
-        )
-
-    def test_inactive_is_separate_and_cannot_take_new_bookings(self):
-        venue = Venue.objects.create(
-            name="Status test venue", location="Campus", capacity=30
-        )
-        day = timezone.localdate() + timedelta(days=3)
-        existing = Reservation.objects.create(
-            venue=venue,
-            requester=self.staff,
-            date=day,
-            start=time(9),
-            end=time(10),
-            attendees=5,
-            title="Existing booking",
-            description="Previously approved booking",
-            responsible="Member",
-            contact="Office",
-            status="approved",
-        )
-        payload = {
-            "venue": venue.pk,
-            "date": day.isoformat(),
-            "start": "13:00",
-            "end": "14:00",
-            "attendees": 5,
-            "title": "Afternoon booking",
-            "description": "New request",
-            "responsible": "Member",
-            "contact": "Office",
-        }
-        self.client.force_authenticate(self.adviser)
-        url = f"/api/venues/{venue.pk}/"
-
-        def ids(path):
-            return {item["id"] for item in self.client.get(path).data["results"]}
-
-        self.assertIn(venue.pk, ids("/api/venues/?status=active"))
-        self.assertEqual(self.client.patch(url, {"available": False}).status_code, 200)
-        self.assertNotIn(venue.pk, ids("/api/venues/?status=active"))
-        self.assertIn(venue.pk, ids("/api/venues/?status=inactive"))
-        self.assertNotIn(venue.pk, ids("/api/venues/?bookable=1"))
-        refused = self.client.post("/api/reservations/", payload)
-        self.assertEqual(refused.status_code, 400)
-        self.assertIn("venue", refused.data)
-        self.assertEqual(self.client.patch(url, {"available": True}).status_code, 200)
-        self.assertNotIn(venue.pk, ids("/api/venues/?status=inactive"))
-        self.assertIn(venue.pk, ids("/api/venues/?bookable=1"))
-        self.assertEqual(
-            self.client.post("/api/reservations/", payload).status_code, 201
-        )
-        existing.refresh_from_db()
-        self.assertEqual(existing.status, "approved")
-        self.assertEqual(existing.venue, venue)
-
-    def test_retired_venue_cleanup_preserves_history_and_hides_it_from_current_schedules(
-        self,
-    ):
-        from importlib import import_module
-        from types import SimpleNamespace
-        from django.apps import apps
-        from django.db import connection
-        from events.models import Event
-        from .models import Notice
-
-        names = ("Seminar Room", "Media Studio", "Innovation Lab", "College Auditorium")
-        venues = [
-            Venue.objects.create(name=name, location="Campus", capacity=25)
-            for name in names
-        ]
-        day = timezone.localdate() + timedelta(days=1)
-        booking = Reservation.objects.create(
-            venue=venues[1],
-            requester=self.staff,
-            title="Original booking",
-            description="Historical",
-            date=day,
-            start=time(9),
-            end=time(11),
-            attendees=10,
-            status="approved",
-            responsible="Member",
-            contact="Office",
-        )
-        notice = Notice.objects.create(
-            venue=venues[1],
-            title="Original maintenance notice",
-            description="Historical notice",
-            starts_at=timezone.now(),
-            ends_at=timezone.now() + timedelta(days=2),
-        )
-        event = Event.objects.create(
-            title="Original event", reservation=booking, published=True
-        )
-        migration = import_module("venues.migrations.0004_remove_retired_venues")
-        migration.remove_retired_venues(apps, SimpleNamespace(connection=connection))
-
-        self.assertFalse(Venue.objects.filter(name__in=names).exists())
-        booking.refresh_from_db()
-        notice.refresh_from_db()
-        self.assertIsNone(booking.venue_id)
-        self.assertIsNone(notice.venue_id)
-        self.assertEqual(booking.status, "approved")
-        self.assertEqual(booking.venue_display_name, "Media Studio")
-        self.assertEqual(notice.venue_display_name, "Media Studio")
-
-        self.client.force_authenticate(self.adviser)
-        self.assertEqual(
-            self.client.get(f"/api/reservations/{booking.id}/").data["venue_name"],
-            "Media Studio",
-        )
-        self.assertEqual(
-            self.client.get(f"/api/notices/{notice.id}/").data["venue_name"],
-            "Media Studio",
-        )
-        self.assertEqual(self.client.get("/api/notices/?manage=1").data["count"], 0)
-        event_response = self.client.get(f"/api/events/{event.id}/").data
-        self.assertEqual(event_response["venue_name"], "Media Studio")
-        self.assertTrue(event_response["retired_venue"])
-        self.assertEqual(self.client.get("/api/dashboard/").data["events"], [])
-        self.assertEqual(
-            self.client.get("/api/reservations/?for_event=1").data["count"], 0
-        )
-        result = self.client.post(
-            "/api/events/",
+        notice = self.client.post(
+            "/api/notices/",
             {
-                "title": "New event",
-                "description": "New schedule",
-                "reservation": booking.id,
+                "title": "Lab inspection",
+                "description": "Scheduled inspection",
+                "venue": self.venue.pk,
+                "starts_at": self.start,
+                "ends_at": self.start + timedelta(hours=2),
             },
         )
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(notice.status_code, 201, notice.data)
+        path = f"/api/notices/{notice.data['id']}/"
+        self.assertEqual(notice.data["publication_status"], "draft")
+        responded = self.client.patch(
+            path + "?manage=1", {"publication_status": "published"}
+        )
+        self.assertEqual(responded.status_code, 200, responded.data)
+        self.assertIsNotNone(responded.data["published_at"])
+        self.assertEqual(Notice.objects.get(pk=notice.data["id"]).author, self.officer)
+        Event.objects.create(
+            title="Workshop",
+            description="Lab activity",
+            venue=self.venue,
+            date=self.day,
+            start=time(12),
+            end=time(13),
+            published=True,
+        )
+        Event.objects.create(
+            title="Draft event",
+            description="Internal",
+            venue=self.venue,
+            date=self.day,
+            start=time(13),
+            end=time(14),
+        )
+        params = {"from": self.day, "to": self.day, "venue": self.venue.pk}
+        response = self.client.get("/api/availability/", params).data
+        self.assertEqual([item["title"] for item in response["events"]], ["Workshop"])
+        self.assertEqual(response["notices"][0]["venue_name"], self.venue.name)
         self.assertEqual(
-            self.client.get("/api/availability/").data, {"slots": [], "notices": []}
+            self.client.get("/api/availability/", {**params, "status": "events"}).data[
+                "notices"
+            ],
+            [],
+        )
+        self.assertEqual(
+            self.client.get("/api/availability/", {**params, "status": "notices"}).data[
+                "events"
+            ],
+            [],
+        )
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.get("/api/availability/").status_code, 403)
+        public = self.client.get(path).data
+        self.assertEqual(public["author_name"], "Organization Officer")
+        self.assertNotIn("author", public)
+        self.assertNotIn("publication_status", public)
+        self.assertEqual(self.client.delete(path).status_code, 403)
+        for status in ("draft", "archived"):
+            self.client.force_authenticate(self.officer)
+            self.assertEqual(
+                self.client.patch(
+                    path + "?manage=1", {"publication_status": status}
+                ).status_code,
+                200,
+            )
+            self.assertEqual(
+                self.client.get("/api/availability/", params).data["notices"], []
+            )
+            self.client.force_authenticate(None)
+            self.assertEqual(self.client.get(path + "?manage=1").status_code, 404)
+        self.client.force_authenticate(self.officer)
+        self.assertEqual(self.client.delete(path + "?manage=1").status_code, 204)
+
+    def test_retired_reservation_tables_and_endpoint_are_absent(self):
+        self.client.force_authenticate(self.adviser)
+        self.assertEqual(self.client.get("/api/reservations/").status_code, 404)
+        self.assertFalse(
+            any(
+                name.startswith("reservations_")
+                for name in connection.introspection.table_names()
+            )
         )

@@ -1,6 +1,6 @@
 # DLL Elite Student Club Events & Announcement Hub
 
-A campus workspace for published club announcements, activities, weekly events, team information, resources and venue schedules. Students can browse the public dashboard. Members sign in to request venues, and officers and advisers review requests and manage the organization.
+A campus workspace for club announcements, organization activities, weekly events, useful links, venues, and venue notices. Student Access is the public landing page. Members sign in to use the organization workspace.
 
 ## Run locally on Windows
 
@@ -29,13 +29,13 @@ npm ci
 npm run dev
 ```
 
-Open [the local dashboard](http://localhost:5173/dashboard) using the port printed by Vite. The Vite server proxies `/api/` to Django, so login, CSRF and media downloads share the browser origin.
+Open [Student Access](http://localhost:5173/student) using the port printed by Vite. The Vite server proxies `/api/` to Django, so login, CSRF and media downloads share the browser origin.
 
-**Demonstration data.** The initialized development database includes sample campus records. On a fresh checkout, run `python manage.py seed_demo` with the virtual environment active to add these samples to an empty hub. The command skips a hub with existing content. Its sample author is inactive and has no usable password. Core teams are installed by migration independently of the demonstration.
+**Demonstration data.** Run `python manage.py seed_demo` from `backend/` to add sample announcements, events, activities, links, and a venue notice to an empty hub. Its sample author has an unusable password. Migrations install the core teams separately.
 
-To add the extended demonstration program to an existing local database, run `python manage.py seed_program --adviser <existing-adviser-username>` from `backend/`. It schedules seven activities and related events from tomorrow in Philippine time. Each booking goes through the same availability, capacity and overlap checks as a normal approval. The command preserves existing content and records each installed item so it can be rerun safely.
+To add the extended demonstration program to an existing local database, run `python manage.py seed_program --adviser <existing-adviser-username>` from `backend/`. It schedules seven activities and related events from tomorrow in Philippine time. The command preserves existing content and records each installed item so it can be rerun safely.
 
-Run `python manage.py seed_venue_notices` to install the demonstration notices. It adds ten records across the seven default venues when all venues are active and suitable windows are available. Current advisories leave existing bookings open. Upcoming maintenance windows go through the normal overlap checks, and managers can filter **Venue Notices** to see the expired example. The command skips records already installed, including records edited since seeding.
+Run `python manage.py seed_venue_notices` to install the demonstration notices. It adds ten records across the seven default venues when all venues are active. Managers can filter **Venue Notices** to see the expired example. The command skips records already installed, including records edited since seeding.
 
 Run `python manage.py seed_demo_staff` to bring each active team to 17 active Staff members. It uses fictional names and `@example.test` addresses, leaves existing accounts and assignments intact, and gives some members a second team. Demo accounts have unusable passwords.
 
@@ -43,10 +43,10 @@ Run `python manage.py seed_demo_staff` to bring each active team to 17 active St
 
 | Role | Access |
 | --- | --- |
-| Visitor | Open Hub Help and view published announcements, activities, events, public team information, useful links, venues, notices and the availability calendar. Private bookings appear as reserved slots. |
-| Staff | Public features, team rosters, access to their historical reservations, status history and notifications. |
-| Officer | Submit venue requests for review, manage organization content, edit existing venues and teams, and manage notices, staff accounts and assignments. |
-| Adviser | Officer capabilities, automatic approval for their own valid venue requests, creation of teams and venues, venue archiving and deletion, officer account management, audit logs and organization settings. |
+| Visitor | Browse published announcements and Club Events on Student Access, read venue notices linked to events, and view configured public contacts. |
+| Staff | Use the member dashboard, view organization activities, schedules, team rosters, useful links, venues, published notices, and personal notifications. |
+| Officer | Manage organization content, edit existing venues and teams, and manage notices, Staff accounts, and team assignments. |
+| Adviser | Officer capabilities, creation of teams and venues, venue archiving and deletion, officer account management, audit logs, and organization settings. |
 
 The first adviser signs in using the username and password entered at `createsuperuser`. Repeat that command to provision another adviser. There is no public registration endpoint. The Django admin at `/admin/` provides superusers with read-only inspection of hub records. The web workspace handles changes and records their history.
 
@@ -57,40 +57,36 @@ The first adviser signs in using the username and password entered at `createsup
 
 The account API returns 15 accounts per page. Scroll inside the table to reach the rest of a page. The column headers stay visible on desktop, and the pager sits below the scroll area.
 
-## Reserving a venue and publishing an event
+## Venue schedules and publishing
 
-The default venues are Audio-Visual Room (AVR), DLL Grounds, and ComLab 1 through ComLab 5. Advisers can add venues from **Venues → Add Venue**. Managers can switch between **Active venues**, **Inactive venues**, and **Archived venues**. Turning off **Accept reservations** moves a venue to Inactive and blocks new requests. Existing reserved time slots do not change a venue's global status.
+The seven default venues are Audio-Visual Room (AVR), DLL Grounds, and ComLab 1 through ComLab 5. Advisers add venues through **Venues → Add Venue**. Use the Active, Inactive, and Archived filters to review venue records. An adviser can archive a venue linked to events or notices. Their existing dates and venue details stay accessible on the records.
 
-An adviser can permanently delete a venue with no dependent records. If any bookings or notices reference it, choose **Archive venue** instead. Existing schedules and history remain visible, and new bookings cannot select the archived venue.
+Create an event in **Weekly Events → New event**. Select an active venue, enter its date and start and end times in Philippine time, and optionally link an organization activity. Select **Publish event** to share it. Mark it cancelled from Edit when the event is called off.
 
-The migration for Seminar Room, Media Studio, Innovation Lab, and College Auditorium removes those four Venue rows after saving their names in the linked reservations and notices. Existing records retain their original venue names in their details. Back up the database before applying that migration to another environment.
+Use **Venue Notices** to draft, publish, unpublish, or archive venue announcements. **Venue Availability** combines published notices and events at active venues. Filter by venue, show events or notices, and browse weekly or monthly periods.
 
-In **Weekly Events**, use **Weekly View** or **Monthly Calendar View**. The month view highlights dates with scheduled or ongoing events. Select a date to see all its events, including cancellations. **Dates With Events Only** remains available in Weekly View.
-
-1. Open **Venue Availability**, select a venue and inspect the week or month. Notices identify maintenance and other closure periods.
-2. Sign in as an officer or adviser and open **Reservations → Request reservation**. Enter a future date, start and end times, attendance, responsible person and contact details. All schedules use Philippine time.
-3. Adviser requests are approved immediately after validation. Officer requests remain **Pending** and notify reviewers. Pending requests can compete for a slot.
-4. An adviser or another officer can approve or reject an officer's request. Rejection requires a reason. Staff can view and cancel their own existing pending or approved bookings. Reviewers can mark approved bookings completed once their scheduled time has elapsed.
-5. To publish a scheduled event, open **Weekly Events → New event**, choose an approved reservation, optionally link an organization activity, and select **Publish event**. The booking supplies date, time and venue. Cancelling the booking marks the linked event cancelled on the public schedule.
-
-Approvals recheck capacity, venue availability, closure periods and overlapping approved bookings inside a database transaction. Two intervals overlap when the existing start precedes the proposed end and the existing end follows the proposed start. Back-to-back bookings are allowed. New closures and capacity reductions are also checked against approved bookings.
-
-SQLite uses `BEGIN IMMEDIATE` for these transactions. Writers take turns across the entire database, including when two reviewers approve simultaneously. A writer can time out under heavy contention. The validation path also acquires a venue row lock on databases that support it. Re-run the competing-approval and submission tests against the configured database engine before deploying.
+When upgrading from the previous release, back up SQLite before running migrations. The event migration copies each existing date, time, venue, and cancellation state before dropping the old reservation tables. It keeps the saved names of retired venues on historical records.
 
 ## Content, drafts and privacy
 
 - **Apply filters** runs the selected search and filters together. **Clear** removes the search and filters and returns paginated lists to page one. In Venue Availability, Clear returns the schedule to the current period while keeping the chosen calendar view.
-- The current tab remembers the last applied filters, search, list page, venue status tab and calendar preferences separately for each signed-in account. Student Access has its own saved state. Browser history retains each visited view, and Account Management restores the internal scroll position when reopening the same results. Search terms stay out of URLs.
+- The current tab remembers the last applied filters, search, list page, venue status tab and calendar preferences separately for each signed-in account. Browser history retains each visited view, and Account Management restores the internal scroll position when reopening the same results. Search terms stay out of URLs.
 - **Announcements** includes draft management, publication, pinning, expiration, archiving, images and optional PDF attachments for advisers and officers. Student Access and Staff see published, current announcements. Existing `/manage-announcements` links redirect to the equivalent `/announcements` route.
 - **Organization Activities** tracks date-based upcoming, ongoing and completed initiatives. Multiple scheduled events can link to one activity.
-- **Organization Teams** shows paginated rosters to signed-in members and informational cards to Student Access. Tabs come from the active teams in Django and remember the selected team and roster page. Advisers can create teams. Advisers and officers can edit teams, remove individual memberships, and assign Staff through Account Management. Inactive teams remain available for managers to review and are removed from the public directory and new assignment choices. The four core teams keep their names and stay active.
-- **Notifications** contains read status, links and reservation decisions. **Audit Logs** gives advisers a searchable, paginated history of sign-ins, sign-outs and administrative changes. A failed sign-in records the failure without the submitted credentials. Settings controls the contact details shown in Student Access Hub Help.
+- **Organization Teams** shows paginated rosters to signed-in members. Tabs come from the active teams in Django and remember the selected team and roster page. Advisers can create teams. Advisers and officers can edit teams, remove individual memberships, and assign Staff through Account Management. Inactive teams remain available for managers to review and are removed from new assignment choices. The four core teams keep their names and stay active.
+- **Notifications** contains read status and links to organization updates. **Audit Logs** gives advisers a searchable, paginated history of sign-ins, sign-outs and administrative changes. A failed sign-in records the failure without the submitted credentials.
 - Resource forms save drafts per account, form and record in the current tab’s session storage. Drafts expire after seven days and clear on successful save, cancellation or sign-out. Passwords and uploaded file contents are excluded. Reselect a file after refreshing.
 - File uploads support JPEG, PNG and WebP images and PDF announcement attachments, up to 5 MB each. Django checks access when serving uploaded files.
 
+## Managing Student Access
+
+Advisers can open **Settings → Landing Page Management** to edit Home, About, Contacts, and announcement display preferences. The editor previews Home, About, and Contacts as you type. **Save and publish** updates the public page immediately and logs the sections changed. Optional fields can be left blank.
+
+Use **Announcements** to edit publication status and pin a post. In Landing Page Management, advisers can highlight the newest published pinned post and choose how many announcements students see per page. Back up uploaded hero images with the rest of the media files.
+
 ## Database backup and restore
 
-From `backend/`, run `python manage.py export_hub_fixture` to regenerate `backup.json`. The fixture preserves accounts, roles, groups, permissions, team memberships, booking history and the rest of the application's database records. Account passwords in the export are unusable, and active sessions are excluded. The fixture contains private application data.
+From `backend/`, run `python manage.py export_hub_fixture` to regenerate `backup.json`. The fixture preserves accounts, roles, groups, permissions, team memberships, event schedules, venue notices, and the rest of the application's database records. Account passwords in the export are unusable, and active sessions are excluded. The fixture contains private application data.
 
 To restore to a new database:
 
@@ -103,7 +99,7 @@ To restore to a new database:
    python manage.py loaddata backup.json
    ```
 
-3. Verify restored users, teams, memberships, venues, reservations, and audit history before opening the new database to users. Run `python manage.py changepassword <adviser-username>` to recover adviser access, then issue temporary passwords to members who need sign-in. Demo accounts can stay disabled for sign-in.
+3. Verify restored users, teams, memberships, venues, event schedules, and audit history before opening the new database to users. Run `python manage.py changepassword <adviser-username>` to recover adviser access, then issue temporary passwords to members who need sign-in. Demo accounts can stay disabled for sign-in.
 4. Back up and restore `backend/media/` or your deployed media storage separately. The fixture stores paths for uploads. Copy the files into the target media storage with the same paths.
 
 ## Project structure
@@ -115,8 +111,7 @@ backend/
   teams/                  Team directory and membership
   announcements/          Publication and attachments
   activities/             Date-based organizational initiatives
-  events/                 Events linked to approved bookings
-  reservations/           Request validation, transitions and history
+  events/                 Independent event schedules and publication
   venues/                 Venues, closure notices and availability
   useful_links/           Resource directory
   notifications/          Per-member inbox
@@ -151,7 +146,7 @@ Use `backend/.env.example` and `frontend/.env.example` as templates. Vite enviro
 
 For deployment, build the frontend with `npm run build`, serve `frontend/dist/` over HTTPS and run Django using a production WSGI or ASGI server. Configure the same host to proxy `/api/` and `/admin/` to Django. Run `manage.py collectstatic` and serve `/static/` from `backend/staticfiles/`. Preserve the public host and protocol at the proxy, enable secure cookies with debug disabled and keep the database and media on persistent storage. Keep uploaded files behind the Django media endpoint.
 
-**SPA fallback.** Serve existing frontend files directly and rewrite other frontend navigation requests to `/index.html`. For example, use `try_files $uri $uri/ /index.html;` in the frontend location of an nginx server. Give the API, admin and static routes their own locations before applying this fallback. This preserves a route such as `/reservations/new` after refresh.
+**SPA fallback.** Serve existing frontend files directly and rewrite other frontend navigation requests to `/index.html`. For example, use `try_files $uri $uri/ /index.html;` in the frontend location of an nginx server. Give the API, admin and static routes their own locations before applying this fallback. This preserves a route such as `/student/announcements/1` after refresh.
 
 ## Install the PWA
 
@@ -184,7 +179,6 @@ The optional `tests/local-regression.spec.js` test takes a disposable, migrated 
 | --- | --- |
 | Dashboard cannot reach the hub | Start Django, check the Vite proxy target, and reload the same frontend origin. |
 | Login or write returns a CSRF error | Open the app through Vite or the same-origin production proxy. Check the public host, protocol and cookie settings. |
-| A booking cannot be approved | Check the latest venue availability, capacity, closure notices and approved slots. The request must still be pending and start in the future. |
 | A team or venue cannot be deleted | Review linked records. Make a team inactive or archive a venue to retain its history. |
 | Recent operations are missing from Audit Logs, or writes fail immediately after migrating | Restart any Django process still serving older code and check that Vite proxies to the restarted process. Confirm the target database with `manage.py migrate --check`. |
 | A page works by clicking but fails on refresh | Check the frontend host’s SPA fallback and API route precedence. |

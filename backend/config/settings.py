@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     "users",
     "teams",
     "venues",
-    "reservations",
     "events",
     "activities",
     "announcements",

@@ -28,7 +28,7 @@ function monday(date) {
 }
 
 export default function Calendar({ availability = false }) {
-  const { user, manager } = useAuth()
+  const { manager } = useAuth()
   const {
     params: searchParams,
     setParams,
@@ -44,7 +44,7 @@ export default function Calendar({ availability = false }) {
   const mode = searchParams.get('view') === 'month' ? 'month' : 'week'
   const all = manager && searchParams.get('drafts') === '1'
   const eventsOnly = searchParams.get('dates') === 'events'
-  const venues = useData(availability ? 'venues/?bookable=1' : null, true)
+  const venues = useData(availability ? 'venues/' : null, true)
   const venue = useValidFilter(
     searchParams,
     setParams,
@@ -111,17 +111,13 @@ export default function Calendar({ availability = false }) {
         title={availability ? 'Venue Availability' : 'Weekly Events'}
         description={
           availability
-            ? 'Check bookings and closures before requesting a space.'
+            ? 'Browse published events and notices for active venues.'
             : 'Browse the schedule by week or select a date on the monthly calendar.'
         }
       >
-        {manager && (
-          <Link
-            className="button primary"
-            to={availability ? '/reservations/new' : '/weekly-events/new'}
-          >
-            <Plus size={16} />
-            {availability ? 'Request venue' : 'New event'}
+        {manager && !availability && (
+          <Link className="button primary" to="/weekly-events/new">
+            <Plus size={16} /> New event
           </Link>
         )}
       </Heading>
@@ -253,13 +249,11 @@ export default function Calendar({ availability = false }) {
             </select>
             <select
               name="status"
-              aria-label="Schedule status"
+              aria-label="Schedule type"
               defaultValue={status}
             >
               <option value="">All schedule entries</option>
-              <option value="approved">Approved bookings</option>
-              {user && <option value="pending">Pending requests</option>}
-              <option value="completed">Completed bookings</option>
+              <option value="events">Published events</option>
               <option value="notices">Venue notices</option>
             </select>
             <label className="filter-date">
@@ -286,7 +280,7 @@ export default function Calendar({ availability = false }) {
               )
             }
             const rows = availability
-              ? data.slots
+              ? data.events
               : eventsOnly
                 ? data.filter(isActiveEvent)
                 : data
@@ -299,6 +293,10 @@ export default function Calendar({ availability = false }) {
             if (!visibleDates.length)
               return <Empty>No scheduled events this week.</Empty>
             const notices = availability ? data.notices : []
+            if (availability && !rows.length && !notices.length)
+              return (
+                <Empty>No published events or notices in this period.</Empty>
+              )
             return (
               <div className={'calendar-days ' + mode}>
                 {visibleDates.map((date) => {
@@ -320,7 +318,7 @@ export default function Calendar({ availability = false }) {
                         </b>
                       </h3>
                       <div>
-                        {slot.map((r, i) => {
+                        {slot.map((r) => {
                           const info = (
                             <>
                               <strong>{r.title}</strong>
@@ -344,25 +342,14 @@ export default function Calendar({ availability = false }) {
                               />
                             </>
                           )
-                          return r.id ? (
+                          return (
                             <Link
                               className="slot"
                               key={r.id}
-                              to={
-                                '/' +
-                                (availability
-                                  ? 'reservations'
-                                  : 'weekly-events') +
-                                '/' +
-                                r.id
-                              }
+                              to={'/weekly-events/' + r.id}
                             >
                               {info}
                             </Link>
-                          ) : (
-                            <div className="slot" key={i}>
-                              {info}
-                            </div>
                           )
                         })}
                         {alerts.map((n) => (
@@ -373,8 +360,7 @@ export default function Calendar({ availability = false }) {
                           >
                             <strong>{n.title}</strong>
                             <small>
-                              {n.venue_name} ·{' '}
-                              {n.blocks_bookings ? 'Closure' : 'Notice'} ·{' '}
+                              {n.venue_name} · 'Notice' ·{' '}
                               {formatTime(n.starts_at.slice(11, 19))} –{' '}
                               {formatTime(n.ends_at.slice(11, 19))}
                             </small>

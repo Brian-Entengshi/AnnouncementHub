@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -30,7 +31,19 @@ class Notice(models.Model):
     description = models.TextField()
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
-    blocks_bookings = models.BooleanField(default=False)
+    publication_status = models.CharField(
+        max_length=10,
+        choices=[
+            ("draft", "Draft"),
+            ("published", "Published"),
+            ("archived", "Archived"),
+        ],
+        default="draft",
+    )
+    published_at = models.DateTimeField(null=True, blank=True)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     class Meta:
         ordering = ["starts_at", "id"]

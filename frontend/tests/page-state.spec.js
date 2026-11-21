@@ -54,15 +54,6 @@ const lists = [
     match: 'Google Scholar',
     extra: 'Campus library guide',
   },
-  {
-    page: 'Reservations',
-    search: 'leadership',
-    facet: 'status',
-    filter: 'approved',
-    venue: 'Audio-Visual Room (AVR)',
-    match: 'Leadership skills workshop',
-    extra: 'General assembly',
-  },
 ]
 for (const scenario of lists) {
   test(
@@ -190,7 +181,7 @@ test('account filters, page and internal scroll restore without leaking to anoth
   ).toBe(true)
   await page.setViewportSize({ width: 1440, height: 960 })
   await page.getByRole('button', { name: 'Sign out' }).click()
-  await expect(page).toHaveURL(/dashboard$/)
+  await expect(page).toHaveURL(/student$/)
   await login(page, 'test-officer')
   await menu(page, 'Account Management')
   await expect(search).toHaveValue('')
@@ -288,7 +279,7 @@ test('availability remembers applied venue, date, status and month view, and dro
   await menu(page, 'Venue Availability')
   await page.getByLabel('Calendar view').selectOption('month')
   const venue = page.getByLabel('Filter venue', { exact: true })
-  const status = page.getByLabel('Schedule status')
+  const status = page.getByLabel('Schedule type')
   const date = page.getByLabel('Go to date')
   await expect(
     page.getByRole('link', { name: /Keep the east walkway clear/ }).first(),
@@ -333,16 +324,11 @@ test('availability remembers applied venue, date, status and month view, and dro
 test('seeded venue notices appear and historical notices stay restricted to managers', async ({
   page,
 }) => {
-  await page.goto('/venue-notices')
-  await expect(
-    page.getByRole('link', { name: 'AVR equipment checkout guidelines' }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole('link', { name: 'ComLab 5 network maintenance' }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole('link', { name: 'ComLab 3 workstation cleaning completed' }),
-  ).toHaveCount(0)
+  const response = await page.request.get('/api/notices/')
+  const titles = (await response.json()).results.map((item) => item.title)
+  expect(titles).toContain('AVR equipment checkout guidelines')
+  expect(titles).toContain('ComLab 5 network maintenance')
+  expect(titles).not.toContain('ComLab 3 workstation cleaning completed')
   await login(page)
   await menu(page, 'Venue Notices')
   await page.getByLabel('Filter by status').selectOption('expired')

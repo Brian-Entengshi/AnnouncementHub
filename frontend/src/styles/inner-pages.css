@@ -143,9 +143,6 @@
 .inner-page .records-activities .record-card {
   border-top-color: #9babbe;
 }
-.inner-page .records-reservations .record-card {
-  border-top-color: #b7a585;
-}
 .inner-page .records-links .record-foot a {
   border-radius: 6px;
   padding: 6px 8px;
@@ -342,10 +339,6 @@
 .notification-entry small {
   display: block;
   margin-top: 3px;
-}
-.help-dialog .help-contact {
-  border-top: 1px solid #c2c2c1;
-  padding-top: 10px;
 }
 @media (max-width: 880px) {
   .table-actions a,

@@ -5,7 +5,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from audit_logs.models import AuditLog
-from .permissions import PublicReadManagerWrite
+from .permissions import MemberReadManagerWrite
 
 
 class DirectoryPagination(PageNumberPagination):
@@ -13,7 +13,7 @@ class DirectoryPagination(PageNumberPagination):
 
 
 class ResourceViewSet(viewsets.ModelViewSet):
-    permission_classes = [PublicReadManagerWrite]
+    permission_classes = [MemberReadManagerWrite]
     filter_backends = [SearchFilter]
     exact_filters = ()
 

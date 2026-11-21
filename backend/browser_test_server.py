@@ -38,7 +38,6 @@ def main():
         from teams.models import Team
         from audit_logs.models import AuditLog
         from events.models import Event
-        from reservations.models import Reservation
         from useful_links.models import UsefulLink
         from venues.models import Venue
 
@@ -76,23 +75,15 @@ def main():
             ("Calendar orientation", 0, 11, "approved"),
             ("Calendar cancelled session", 1, 9, "cancelled"),
         ]:
-            reservation = Reservation.objects.create(
+            Event.objects.create(
+                title=title,
+                description="Calendar test event",
                 venue=venue,
-                requester=adviser,
+                author=adviser,
                 date=future_monday + timedelta(days=offset),
                 start=time(hour),
                 end=time(hour + 1),
-                attendees=10,
-                title=title,
-                description="Calendar test event",
-                responsible="Organizer",
-                contact="Campus office",
-                status=status,
-            )
-            Event.objects.create(
-                title=title,
-                description=reservation.description,
-                reservation=reservation,
+                cancelled=status == "cancelled",
                 published=True,
             )
 

@@ -15,16 +15,12 @@ import {
   PanelsTopLeft,
   MapPin,
   CalendarCheck2,
-  ClipboardList,
   Bell,
   Settings,
-  LogIn,
   LogOut,
   Menu,
   X,
   ChevronRight,
-  CircleHelp,
-  BookOpen,
   Building2,
   ShieldCheck,
   History,
@@ -33,7 +29,6 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/auth'
 import { useData } from '../hooks/useData'
-import { State } from './Common'
 import { formatDate, todayKey } from '../utils/format'
 
 const main = [
@@ -67,57 +62,11 @@ function Group({ title, items }) {
     </div>
   )
 }
-function Help({ close }) {
-  const q = useData('help/'),
-    ref = useRef(null)
-  useEffect(() => {
-    ref.current.showModal()
-  }, [])
-  return (
-    <dialog ref={ref} onClose={close} className="help-dialog">
-      <button className="icon close" onClick={close} aria-label="Close help">
-        <X />
-      </button>
-      <BookOpen />
-      <h2>Hub help</h2>
-      <p>
-        Students can browse club updates and schedules. Ask your officer or
-        adviser for a member account to request a venue.
-      </p>
-      <State query={q}>
-        {(r) => (
-          <div
-            className={
-              r.contact_email || r.office_hours ? 'help-contact' : undefined
-            }
-          >
-            {r.contact_email && (
-              <p>
-                <a href={'mailto:' + r.contact_email}>{r.contact_email}</a>
-              </p>
-            )}
-            {r.office_hours && <p>Office hours · {r.office_hours}</p>}
-          </div>
-        )}
-      </State>
-    </dialog>
-  )
-}
 export default function Layout() {
-  const {
-      user,
-      loading,
-      error: sessionError,
-      manager,
-      adviser,
-      logout,
-      setSession,
-    } = useAuth(),
+  const { user, manager, adviser, logout, setSession } = useAuth(),
     location = useLocation(),
     navigate = useNavigate()
-  const studentAccess = !user && !loading && !sessionError
   const [drawer, setDrawer] = useState(false),
-    [help, setHelp] = useState(false),
     [error, setError] = useState(''),
     [offline, setOffline] = useState(!navigator.onLine)
   const q = useData(
@@ -174,14 +123,10 @@ export default function Layout() {
       trigger?.focus()
     }
   }, [drawer])
-  const venues = [
-    ...venue,
-    ...(user ? [['Reservations', '/reservations', ClipboardList]] : []),
-  ]
   const page =
     [
       ...main,
-      ...venues,
+      ...venue,
       ...admin,
       ...adviserNav,
       ['Notifications', '/notifications'],
@@ -194,7 +139,7 @@ export default function Layout() {
     try {
       const next = await logout()
       startTransition(() => {
-        navigate('/dashboard', { replace: true })
+        navigate('/student', { replace: true })
         setSession(next)
       })
       setDrawer(false)
@@ -237,7 +182,7 @@ export default function Layout() {
         </div>
         <nav aria-label="Main navigation">
           <Group title="Organization" items={main} />
-          <Group title="Venue desk" items={venues} />
+          <Group title="Venue desk" items={venue} />
           {manager && (
             <Group
               title="Administration"
@@ -246,30 +191,13 @@ export default function Layout() {
           )}
         </nav>
         <div className="sidebar-bottom">
-          {studentAccess && (
-            <button
-              onClick={() => {
-                setDrawer(false)
-                setHelp(true)
-              }}
-            >
-              <CircleHelp size={17} />
-              Hub help
-            </button>
-          )}
           <div className="identity">
             <span className="avatar">
-              {user ? (
-                (user.full_name || user.username).slice(0, 1)
-              ) : (
-                <Users size={17} />
-              )}
+              {(user.full_name || user.username).slice(0, 1)}
             </span>
             <div>
-              <strong>
-                {user?.full_name || user?.username || 'Public workspace'}
-              </strong>
-              <small>{user ? user.role + ' account' : 'Student access'}</small>
+              <strong>{user.full_name || user.username}</strong>
+              <small>{user.role + ' account'}</small>
             </div>
             {user && (
               <button onClick={leave} aria-label="Sign out">
@@ -305,30 +233,18 @@ export default function Layout() {
                 year: 'numeric',
               })}
             </span>
-            {user ? (
-              <>
-                <Link
-                  className="icon notification"
-                  aria-label="Notifications"
-                  to="/notifications"
-                >
-                  <Bell size={19} />
-                  {q.data?.unread > 0 && <i />}
-                </Link>
-                <Link
-                  className="icon"
-                  to="/password"
-                  aria-label="Change password"
-                >
-                  <KeyRound size={17} />
-                </Link>
-              </>
-            ) : (
-              <Link className="sign-in" to="/login">
-                <LogIn size={15} />
-                Member sign in
-              </Link>
-            )}
+
+            <Link
+              className="icon notification"
+              aria-label="Notifications"
+              to="/notifications"
+            >
+              <Bell size={19} />
+              {q.data?.unread > 0 && <i />}
+            </Link>
+            <Link className="icon" to="/password" aria-label="Change password">
+              <KeyRound size={17} />
+            </Link>
           </div>
         </header>
         <main
@@ -349,7 +265,6 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
-      {studentAccess && help && <Help close={() => setHelp(false)} />}
     </div>
   )
 }

@@ -38,7 +38,6 @@ export function ResourceList({ config: c }) {
     {
       announcements: 'Create Announcement',
       venues: 'Add Venue',
-      reservations: 'Request reservation',
     }[c.api] || 'New ' + c.singular.toLowerCase()
   return (
     <>

@@ -4,6 +4,7 @@
 @import './styles/workflows.css';
 @import './styles/inner-pages.css';
 @import './styles/schedule.css';
+@import './styles/student.css';
 :root {
   font-family: Inter, 'Segoe UI', Arial, sans-serif;
   color: #1a272f;
