@@ -5,6 +5,8 @@ export const studentSections = [
   ['Home', 'home'],
   ['About', 'about'],
   ['Announcements', 'announcements'],
+  ['Club Events', 'events'],
+  ['Useful Links', 'useful-links'],
   ['Contacts', 'contacts'],
 ]
 
@@ -117,7 +119,8 @@ export function useStudentNavigation(header, main, footer) {
     function align() {
       const top = section.getBoundingClientRect().top + window.scrollY
       const margin = parseFloat(getComputedStyle(section).scrollMarginTop) || 0
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight
       const target = Math.max(0, Math.min(top - margin, maxScroll))
       if (previousTarget !== undefined && Math.abs(target - previousTarget) < 1)
         return

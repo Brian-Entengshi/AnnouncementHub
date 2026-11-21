@@ -99,6 +99,9 @@ export function ResourceList({ config: c }) {
                       <FileText size={16} />
                     )}
                     <span>{r.category || r.role || c.singular}</span>
+                    {c.api === 'links' && manager && (
+                      <Badge value={r.is_public ? 'public' : 'members only'} />
+                    )}
                     {r.pinned && <span className="featured-label">Pinned</span>}
                     {r.status && <Badge value={r.status} />}
                     {c.api === 'venues' && (

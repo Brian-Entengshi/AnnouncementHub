@@ -65,7 +65,7 @@ class TeamMembershipTests(APITestCase):
         self.assertEqual(result.data["count"], 1)
         self.assertEqual(
             set(result.data["results"][0]),
-            {"id", "full_name", "username", "position", "is_active", "date_joined"},
+            {"id", "full_name", "position"},
         )
         self.assertEqual(self.client.delete(self.remove_path).status_code, 403)
         self.assertEqual(
@@ -75,6 +75,67 @@ class TeamMembershipTests(APITestCase):
             403,
         )
 
+    def test_staff_team_scope_cannot_be_broadened_by_routes_or_query_parameters(self):
+        unassigned = Team.objects.get(name="Editing Team")
+        inactive = Team.objects.create(name="Retired team", is_active=False)
+        self.staff.teams.add(inactive)
+        unrelated_member = User.objects.create_user(
+            "unrelated-staff", role="staff", teams=[unassigned]
+        )
+        self.client.force_authenticate(self.staff)
+        list_url = reverse("teams-list")
+        for params in (
+            {},
+            {"include_inactive": 1},
+            {"mine": 0, "core": 1},
+            {"manage": 1},
+        ):
+            result = self.client.get(list_url, params)
+            self.assertEqual(result.status_code, 200)
+            self.assertEqual(
+                {item["id"] for item in result.data["results"]},
+                {self.technical.pk, self.documentation.pk},
+            )
+        self.assertEqual(
+            self.client.get(list_url, {"inactive": 1, "search": "Editing"}).data[
+                "count"
+            ],
+            0,
+        )
+        for team in (unassigned, inactive):
+            for action in ("teams-detail", "teams-members"):
+                self.assertEqual(
+                    self.client.get(
+                        reverse(action, args=[team.pk]), {"manage": 1, "mine": 0}
+                    ).status_code,
+                    404,
+                )
+        self.assertEqual(
+            self.client.get(
+                reverse("accounts-detail", args=[unrelated_member.pk])
+            ).status_code,
+            403,
+        )
+        self.assertEqual(self.client.get("/api/dashboard/").data["counts"]["teams"], 2)
+
+        self.staff.teams.remove(self.technical)
+        result = self.client.get(list_url)
+        self.assertEqual(
+            [item["id"] for item in result.data["results"]], [self.documentation.pk]
+        )
+        self.assertEqual(self.client.get(self.team_path).status_code, 404)
+        self.assertEqual(self.client.get(self.roster_path).status_code, 404)
+        self.assertEqual(self.client.get("/api/dashboard/").data["counts"]["teams"], 1)
+
+        for actor in (self.adviser, self.officer):
+            self.client.force_authenticate(actor)
+            result = self.client.get(list_url, {"include_inactive": 1})
+            self.assertEqual(result.data["count"], 5)
+            result = self.client.get(reverse("teams-members", args=[unassigned.pk]))
+            self.assertEqual(
+                result.data["results"][0]["username"], unrelated_member.username
+            )
+
     def test_officer_removes_one_membership_and_manager_cannot_remove_last(self):
         self.client.force_authenticate(self.officer)
         self.assertEqual(self.client.delete(self.remove_path).status_code, 204)
@@ -83,6 +144,15 @@ class TeamMembershipTests(APITestCase):
         self.assertEqual(list(self.staff.teams.all()), [self.documentation])
         self.assertEqual(self.client.get(self.roster_path).data["count"], 0)
         self.assertEqual(self.client.get(self.team_path).data["member_count"], 0)
+        self.assertTrue(
+            AuditLog.objects.filter(
+                actor=self.officer,
+                resource="account",
+                action="Team assignment changed",
+                object_id=self.staff.pk,
+                description="Removed membership in Technical Team.",
+            ).exists()
+        )
         result = self.client.delete(
             reverse("teams-remove-member", args=[self.documentation.pk, self.staff.pk])
         )

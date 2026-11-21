@@ -22,38 +22,68 @@ class VenueTests(APITestCase):
         self.day = timezone.localdate() + timedelta(days=7)
         self.start = timezone.make_aware(datetime.combine(self.day, time(9)))
 
-    def test_active_venues_and_creation_permissions(self):
+    def test_venue_management_is_adviser_only(self):
         expected = {
             "Audio-Visual Room (AVR)",
             "DLL Grounds",
             *(f"ComLab {i}" for i in range(1, 6)),
         }
-        self.assertEqual(self.client.get("/api/venues/").status_code, 403)
-        self.client.force_authenticate(self.officer)
+        body = {"name": "Hall", "location": "Campus", "capacity": 20}
+        existing = f"/api/venues/{self.venue.pk}/"
+        for user in (None, self.officer, self.staff):
+            self.client.force_authenticate(user)
+            self.assertEqual(
+                self.client.get("/api/venues/?status=inactive").status_code, 403
+            )
+            self.assertEqual(self.client.get(existing).status_code, 403)
+            self.assertEqual(self.client.post("/api/venues/", body).status_code, 403)
+            self.assertEqual(self.client.put(existing, body).status_code, 403)
+            self.assertEqual(
+                self.client.patch(existing, {"available": False}).status_code, 403
+            )
+            self.assertEqual(self.client.delete(existing).status_code, 403)
+            self.assertEqual(self.client.post(existing + "archive/").status_code, 403)
+
+        self.assertFalse(AuditLog.objects.filter(resource="venue").exists())
+        self.client.force_authenticate(self.adviser)
         self.assertEqual(
             {item["name"] for item in self.client.get("/api/venues/").data["results"]},
             expected,
         )
-        body = {"name": "Hall", "location": "Campus", "capacity": 20}
-        for user in (None, self.officer, self.staff):
-            self.client.force_authenticate(user)
-            self.assertEqual(self.client.post("/api/venues/", body).status_code, 403)
-        self.client.force_authenticate(self.adviser)
         result = self.client.post("/api/venues/", body)
         self.assertEqual(result.status_code, 201, result.data)
         self.assertEqual(
             self.client.post("/api/venues/", {**body, "name": "HALL"}).status_code, 400
         )
         path = f"/api/venues/{result.data['id']}/"
-        self.client.force_authenticate(self.officer)
         self.assertEqual(self.client.patch(path, {"available": False}).status_code, 200)
         self.assertEqual(
             self.client.get("/api/venues/?status=inactive").data["count"], 1
         )
-        self.assertEqual(self.client.delete(path).status_code, 403)
-        self.client.force_authenticate(self.adviser)
         self.assertEqual(self.client.delete(path).status_code, 200)
         self.assertEqual(self.client.delete(path).status_code, 404)
+
+    def test_authenticated_options_only_expose_active_venue_names(self):
+        Venue.objects.create(
+            name="Unavailable", location="Campus", capacity=20, available=False
+        )
+        Venue.objects.create(
+            name="Archived", location="Campus", capacity=20, archived=True
+        )
+        url = "/api/venue-options/?status=archived&manage=1"
+        self.assertEqual(self.client.get(url).status_code, 403)
+        for user in (self.adviser, self.officer, self.staff):
+            self.client.force_authenticate(user)
+            result = self.client.get(url)
+            self.assertEqual(result.status_code, 200)
+            self.assertEqual(result.data["count"], 7)
+            for venue in result.data["results"]:
+                self.assertEqual(set(venue), {"id", "name"})
+                self.assertNotIn(venue["name"], {"Unavailable", "Archived"})
+            self.assertEqual(
+                self.client.post(url, {"name": "Unauthorized"}).status_code, 405
+            )
+            self.assertEqual(self.client.get("/api/availability/").status_code, 200)
 
     def test_archiving_protects_linked_events_and_preserves_schedule(self):
         event = Event.objects.create(

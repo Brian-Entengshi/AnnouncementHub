@@ -5,6 +5,12 @@ from config.permissions import public_author
 from .models import Notice, Venue
 
 
+class VenueOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Venue
+        fields = ("id", "name")
+
+
 class VenueSerializer(serializers.ModelSerializer):
     available = serializers.BooleanField(default=True)
 

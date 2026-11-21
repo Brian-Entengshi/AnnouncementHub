@@ -49,6 +49,7 @@ def main():
             description="Opening hours",
             category="Campus",
             url="https://example.org/",
+            is_public=True,
         )
         secret = os.environ["ELITE_BROWSER_TEST_PASSWORD"]
         adviser = User.objects.create_superuser("test-adviser", password=secret)

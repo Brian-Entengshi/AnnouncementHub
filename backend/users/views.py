@@ -39,7 +39,7 @@ class AccountViewSet(ResourceViewSet):
 
     def perform_update(self, serializer):
         previous = serializer.instance.is_active
-        previous_teams = {team.pk for team in serializer.instance.teams.all()}
+        previous_teams = {team.pk: team.name for team in serializer.instance.teams.all()}
         password_replaced = "password" in serializer.validated_data
         updated = serializer.save()
         actor = self.request.user
@@ -52,19 +52,23 @@ class AccountViewSet(ResourceViewSet):
                 resource="account",
                 description="Assigned a temporary password and required a password change.",
             )
-        teams = list(updated.teams.all())
-        if previous_teams != {team.pk for team in teams}:
-            description = (
-                "Assigned to " + ", ".join(team.name for team in teams) + "."
-                if teams
-                else "Cleared team assignment."
-            )
+        current_teams = {team.pk: team.name for team in updated.teams.all()}
+        added = current_teams.keys() - previous_teams.keys()
+        removed = previous_teams.keys() - current_teams.keys()
+        changes = []
+        if added:
+            names = ", ".join(sorted(current_teams[team_id] for team_id in added))
+            changes.append(f"Assigned to {names}.")
+        if removed:
+            names = ", ".join(sorted(previous_teams[team_id] for team_id in removed))
+            changes.append(f"Removed membership in {names}.")
+        if changes:
             AuditLog.record(
                 actor,
                 "Team assignment changed",
                 updated,
                 resource="account",
-                description=description,
+                description=" ".join(changes),
             )
         if previous != updated.is_active:
             AuditLog.record(

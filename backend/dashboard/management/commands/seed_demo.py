@@ -141,6 +141,7 @@ class Command(BaseCommand):
             url="https://scholar.google.com",
             description="Find research for workshops and organization projects.",
             category="Research",
+            is_public=True,
         )
         self.stdout.write(
             "Demo records created. The sample author is inactive and has no usable password."

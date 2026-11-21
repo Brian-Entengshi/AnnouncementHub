@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from users.serializers import TeamMemberSerializer
 from .models import CORE_TEAM_NAMES, Team
 
 
@@ -27,3 +28,8 @@ class TeamSerializer(TeamInfoSerializer):
             "is_core",
             "member_count",
         )
+
+
+class StaffRosterSerializer(TeamMemberSerializer):
+    class Meta(TeamMemberSerializer.Meta):
+        fields = ("id", "full_name", "position")

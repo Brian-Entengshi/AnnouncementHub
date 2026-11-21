@@ -8,6 +8,7 @@ import {
   PublicHomeSection,
 } from '../components/StudentSections'
 import { useData } from '../hooks/useData'
+import PublicUsefulLinks from '../components/PublicUsefulLinks'
 
 export default function StudentHome() {
   const settings = useData('organization/')
@@ -16,7 +17,6 @@ export default function StudentHome() {
     <>
       <div id="home">
         <PublicHomeSection content={content} />
-        <PublicClubEvents />
       </div>
       <section id="about" className="public-section public-about-section">
         <PublicAboutSection content={content} />
@@ -24,6 +24,8 @@ export default function StudentHome() {
       <PublicAnnouncements
         highlightPinned={content.highlight_pinned === true}
       />
+      <PublicClubEvents />
+      <PublicUsefulLinks />
       <section id="contacts" className="public-section public-contacts-section">
         <PublicContactsSection content={content} />
         {settings.error && (

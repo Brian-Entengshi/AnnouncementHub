@@ -13,6 +13,7 @@ import {
   BookOpen,
 } from 'lucide-react'
 import { useData } from '../hooks/useData'
+import { useAuth } from '../context/auth'
 import { Badge, State, Empty, Panel } from '../components/Common'
 import { formatDate, formatTime } from '../utils/format'
 
@@ -53,6 +54,7 @@ function EventRow({ event }) {
   )
 }
 export default function Dashboard() {
+  const { adviser, manager } = useAuth()
   const q = useData('dashboard/')
   return (
     <State query={q}>
@@ -102,14 +104,20 @@ export default function Dashboard() {
               number={data.counts.venues}
               label="Active venues"
               foot="Campus locations"
-              to="/venues"
+              to={
+                adviser
+                  ? '/venues'
+                  : manager
+                    ? '/availability'
+                    : '/venue-notices'
+              }
             />
             <Metric
               icon={Users}
               color="purple"
               number={data.counts.teams}
-              label="Organization teams"
-              foot="Across DLL Elite"
+              label={manager ? 'Organization teams' : 'My teams'}
+              foot={manager ? 'Across DLL Elite' : 'Active assignments'}
               to="/organization-teams"
             />
           </div>
@@ -179,9 +187,11 @@ export default function Dashboard() {
               ) : (
                 <Empty>No current or upcoming notices.</Empty>
               )}
-              <Link className="panel-foot" to="/availability">
-                Check venue availability <ChevronRight size={14} />
-              </Link>
+              {manager && (
+                <Link className="panel-foot" to="/availability">
+                  Check venue availability <ChevronRight size={14} />
+                </Link>
+              )}
             </Panel>
             <Panel
               title="Organization activities"

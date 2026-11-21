@@ -107,6 +107,31 @@ class AccountTests(APITestCase):
         self.assertEqual(updated.status_code, 200, updated.data)
         self.assertEqual(updated.data["teams"], [extra.pk])
 
+    def test_account_edit_audits_the_specific_teams_added_and_removed(self):
+        self.client.force_authenticate(self.officer)
+        documentation = Team.objects.get(name="Documentation Team")
+        editing = Team.objects.get(name="Editing Team")
+        self.staff.teams.add(documentation)
+        path = reverse("accounts-detail", args=[self.staff.pk])
+
+        response = self.client.patch(path, {"teams": [editing.pk, documentation.pk]})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(set(response.data["teams"]), {editing.pk, documentation.pk})
+        audit_entries = AuditLog.objects.filter(
+            actor=self.officer,
+            resource="account",
+            object_id=self.staff.pk,
+            action="Team assignment changed",
+        )
+        self.assertEqual(
+            audit_entries.get().description,
+            "Assigned to Editing Team. Removed membership in Technical Team.",
+        )
+
+        response = self.client.patch(path, {"teams": [documentation.pk, editing.pk]})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(audit_entries.count(), 1)
+
     def test_login_csrf_rotation_password_change_and_deactivation(self):
         self.staff.set_password(self.initial)
         self.staff.must_change_password = True

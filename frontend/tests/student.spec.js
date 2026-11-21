@@ -15,6 +15,8 @@ const sectionIds = {
   Home: 'home',
   About: 'about',
   Announcements: 'announcements',
+  'Club Events': 'events',
+  'Useful Links': 'useful-links',
   Contacts: 'contacts',
 }
 
@@ -80,12 +82,16 @@ test('Student Access uses a public navbar, published content and responsive sect
     'Home',
     'About',
     'Announcements',
+    'Club Events',
+    'Useful Links',
     'Contacts',
   ])
   await expect(page.getByRole('link', { name: 'Member sign in' })).toBeVisible()
   for (const [label, heading] of [
     ['About', 'About DLL Elite'],
     ['Announcements', 'Announcements'],
+    ['Club Events', 'Club Events'],
+    ['Useful Links', 'Useful Links'],
     ['Contacts', 'Contacts'],
     ['Home', 'Club events and campus announcements'],
   ]) {
@@ -136,7 +142,9 @@ test('Student Access uses a public navbar, published content and responsive sect
   await page.getByLabel('Announcement category').selectOption('Organization')
   await page.getByRole('button', { name: 'Apply filters' }).click()
   await expect(page.locator('.public-announcement')).toHaveCount(1)
-  await page.getByRole('link', { name: 'General assembly guidelines', exact: true }).click()
+  await page
+    .getByRole('link', { name: 'General assembly guidelines', exact: true })
+    .click()
   await expect(
     page.getByRole('heading', {
       name: 'General assembly guidelines',
@@ -154,6 +162,15 @@ test('Student Access uses a public navbar, published content and responsive sect
   await expectCenteredFooter(page)
   for (const width of [768, 390, 320]) {
     await page.setViewportSize({ width, height: 850 })
+    await page.getByRole('button', { name: 'Open public menu' }).click()
+    await nav.getByRole('link', { name: 'Useful Links' }).click()
+    await expect(
+      page.getByRole('heading', { name: 'Useful Links' }),
+    ).toBeInViewport()
+    await expect(
+      page.getByRole('button', { name: 'Open public menu' }),
+    ).toHaveAttribute('aria-expanded', 'false')
+    await expectActiveSection(page, 'Useful Links')
     await page.getByRole('button', { name: 'Open public menu' }).click()
     await nav.getByRole('link', { name: 'Contacts' }).click()
     await expect(
@@ -217,7 +234,11 @@ test('Student Access tracks visible sections while scrolling in both directions'
   for (const section of [
     'About',
     'Announcements',
+    'Club Events',
+    'Useful Links',
     'Contacts',
+    'Useful Links',
+    'Club Events',
     'Announcements',
     'About',
     'Home',
@@ -232,6 +253,8 @@ test('Student Access tracks visible sections while scrolling in both directions'
     page.getByRole('button', { name: 'Open public menu' }),
   ).toHaveAttribute('aria-expanded', 'false')
   await expectActiveSection(page, 'Contacts')
+  await scrollToSection(page, 'Useful Links')
+  await scrollToSection(page, 'Club Events')
   await scrollToSection(page, 'Announcements')
   await scrollToSection(page, 'About')
   await scrollToSection(page, 'Announcements')
@@ -248,6 +271,125 @@ test('Student Access tracks visible sections while scrolling in both directions'
   ).toHaveAttribute('aria-expanded', 'false')
   await page.goto('/student/#about')
   await expectActiveSection(page, 'About')
+})
+
+test('adviser publishes, updates and deletes a Student Access resource from Useful Links', async ({
+  page,
+  browser,
+  baseURL,
+  request,
+}) => {
+  const title = 'Resource publication verification'
+  const revisedTitle = 'Resource publication verification revised'
+  const category = 'Student study resources'
+  const initialUrl = 'https://example.org/study-guide'
+  const revisedUrl = 'https://example.org/updated-study-guide'
+  const studentContext = await browser.newContext({ baseURL })
+  const student = await studentContext.newPage()
+  const resource = (title) =>
+    student.locator('.public-resource-card').filter({
+      has: student.getByRole('heading', { name: title, exact: true }),
+    })
+
+  try {
+    await student.goto('/student#useful-links')
+    await expect(resource('Campus library guide')).toBeVisible()
+    await expect(
+      student.getByRole('navigation', { name: 'Main navigation' }),
+    ).toHaveCount(0)
+    await login(page, 'test-adviser')
+    await page
+      .getByRole('navigation', { name: 'Main navigation' })
+      .getByRole('link', { name: 'Useful Links' })
+      .click()
+    await page.getByRole('link', { name: 'New link' }).click()
+    await page.getByLabel('Title').fill(title)
+    await page.getByLabel('Web address').fill(initialUrl)
+    await page.getByLabel('Category').fill(category)
+    await page
+      .getByLabel('Description')
+      .fill('A subject guide offered to students.')
+    await expect(page.getByLabel('Show on Student Access')).not.toBeChecked()
+    await page.getByRole('button', { name: 'Save link' }).click()
+    await expect(page.getByRole('heading', { name: title })).toBeVisible()
+    const id = page.url().split('/').at(-1)
+    const detail = '/api/links/' + id + '/'
+
+    await student.reload()
+    await expect(resource('Campus library guide')).toBeVisible()
+    await expect(resource(title)).toHaveCount(0)
+    expect((await request.get(detail)).status()).toBe(404)
+    expect((await page.request.get(detail + '?public=1')).status()).toBe(404)
+    const privateCategories = await (
+      await request.get('/api/links/categories/')
+    ).json()
+    expect(privateCategories).not.toContain(category)
+
+    await page.getByRole('link', { name: 'Edit', exact: true }).click()
+    await page.getByLabel('Show on Student Access').check()
+    await page.getByRole('button', { name: 'Save link' }).click()
+    await expect(page.getByRole('heading', { name: title })).toBeVisible()
+    await student.reload()
+    await expect(resource(title)).toContainText(
+      'A subject guide offered to students.',
+    )
+    await expect(resource(title)).toContainText(category)
+    const publicResult = await request.get(detail)
+    expect(publicResult.ok()).toBe(true)
+    expect(await publicResult.json()).toEqual({
+      id: Number(id),
+      title,
+      category,
+      url: initialUrl,
+      description: 'A subject guide offered to students.',
+    })
+    expect(
+      (
+        await request.patch(detail, { data: { title: 'Anonymous edit' } })
+      ).status(),
+    ).toBe(403)
+
+    await page.getByRole('link', { name: 'Edit', exact: true }).click()
+    await page.getByLabel('Title').fill(revisedTitle)
+    await page.getByLabel('Web address').fill(revisedUrl)
+    await page.getByRole('button', { name: 'Save link' }).click()
+    await expect(
+      page.getByRole('heading', { name: revisedTitle }),
+    ).toBeVisible()
+    await student.reload()
+    const outbound = resource(revisedTitle).getByRole('link', {
+      name: 'Visit resource: ' + revisedTitle,
+    })
+    await expect(outbound).toHaveAttribute('href', revisedUrl)
+    await expect(outbound).toHaveAttribute('target', '_blank')
+    await expect(outbound).toHaveAttribute('rel', /\bnoopener\b/)
+    await expect(outbound).toHaveAttribute('rel', /\bnoreferrer\b/)
+    await studentContext.route(revisedUrl, (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<title>Updated public resource</title>',
+      }),
+    )
+    const [popup] = await Promise.all([
+      studentContext.waitForEvent('page'),
+      outbound.click(),
+    ])
+    await expect(popup).toHaveURL(revisedUrl)
+    await expect(popup).toHaveTitle('Updated public resource')
+    await popup.close()
+
+    await page.getByRole('button', { name: 'Delete link' }).click()
+    await page.getByRole('button', { name: 'Confirm deletion' }).click()
+    await expect(
+      page.getByRole('heading', { name: 'Useful Links' }),
+    ).toBeVisible()
+    await student.reload()
+    await expect(resource('Campus library guide')).toBeVisible()
+    await expect(resource(revisedTitle)).toHaveCount(0)
+    expect((await request.get(detail)).status()).toBe(404)
+  } finally {
+    await studentContext.close()
+  }
 })
 
 test('advisers preview and publish landing content that survives a public refresh', async ({
@@ -618,8 +760,8 @@ test('officers publish events and venue notices for public reading and Venue Ava
     'dashboard',
     'teams',
     'venues',
+    'venue-options',
     'activities',
-    'links',
     'availability',
     'accounts',
     'audit',

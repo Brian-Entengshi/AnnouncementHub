@@ -16,7 +16,7 @@ from events.serializers import EventSerializer
 from events.views import upcoming_events
 from venues.models import Venue
 from venues.serializers import NoticeSerializer, published_notices
-from teams.models import Team
+from teams.models import Team, scope_team_directory
 from .models import HubSettings
 from .serializers import PublicOrganizationSerializer, SettingsSerializer
 
@@ -128,7 +128,9 @@ def dashboard(request):
                 "events": events.filter(date__lt=today + timedelta(days=7)).count(),
                 "announcements": announcements.count(),
                 "venues": Venue.objects.filter(archived=False, available=True).count(),
-                "teams": Team.objects.filter(is_active=True).count(),
+                "teams": scope_team_directory(
+                    Team.objects.filter(is_active=True), request.user
+                ).count(),
             },
             "events": EventSerializer(events[:4], many=True).data,
             "announcements": AnnouncementSerializer(announcements[:3], many=True).data,

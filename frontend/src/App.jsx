@@ -6,6 +6,7 @@ import {
   Link,
   useLocation,
 } from 'react-router-dom'
+import { useEffect } from 'react'
 import AuthProvider from './context/AuthProvider'
 import { useAuth } from './context/auth'
 import Layout from './components/Layout'
@@ -46,8 +47,12 @@ function SessionReady({ children }) {
 }
 
 function MemberLayout() {
-  const { user } = useAuth()
+  const { user, refresh } = useAuth()
   const location = useLocation()
+  const userId = user?.id
+  useEffect(() => {
+    if (userId) refresh({ background: true })
+  }, [userId, location.pathname, refresh])
   const from =
     location.pathname + (location.state?.hubView ? '' : location.search)
   let destination
@@ -157,13 +162,15 @@ function HubRoutes() {
         {pages.flatMap(([c, Page]) =>
           ['', '/:id', '/new', '/:id/edit'].map((suffix) => {
             const role =
-              c.api === 'accounts'
-                ? 'manager'
-                : ['venues', 'teams'].includes(c.api) && suffix === '/new'
-                  ? 'adviser'
-                  : suffix === '/new' || suffix.endsWith('edit')
-                    ? 'manager'
-                    : null
+              c.api === 'venues'
+                ? 'adviser'
+                : c.api === 'accounts'
+                  ? 'manager'
+                  : c.api === 'teams' && suffix === '/new'
+                    ? 'adviser'
+                    : suffix === '/new' || suffix.endsWith('edit')
+                      ? 'manager'
+                      : null
             return (
               <Route
                 key={c.path + suffix}

@@ -131,6 +131,145 @@ test('Student Access keeps team pages and member APIs private', async ({
   }
 })
 
+test('Staff roster visibility follows current memberships and keeps paging private', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  await page.goto('/login')
+  await signIn(page)
+  await expect(page).toHaveURL(/dashboard$/)
+  const allTeams = (await (await page.request.get('/api/teams/')).json())
+    .results
+  const technical = allTeams.find(({ name }) => name === core[0])
+  const documentation = allTeams.find(({ name }) => name === core[1])
+  const editing = allTeams.find(({ name }) => name === core[2])
+  const accounts = await (
+    await page.request.get('/api/accounts/?search=test-staff')
+  ).json()
+  const staff = accounts.results.find(
+    ({ username }) => username === 'test-staff',
+  )
+  const accountPath = '/api/accounts/' + staff.id + '/'
+  const { csrf } = await (await page.request.get('/api/session/')).json()
+  const headers = { 'X-CSRFToken': csrf }
+  const assign = (teams) =>
+    page.request.patch(accountPath, { headers, data: { teams } })
+  const staffContext = await browser.newContext({ baseURL })
+  const member = await staffContext.newPage()
+  let temporaryTeamPath
+
+  try {
+    expect((await assign([technical.id, documentation.id])).ok()).toBe(true)
+    await member.goto('/login')
+    await signIn(member, 'test-staff')
+    await menu(member, 'Organization Teams')
+    const tabs = member
+      .getByRole('tablist', { name: 'Organization teams' })
+      .getByRole('tab')
+    await expect(tabs).toHaveText([technical.name, documentation.name])
+    await selectTeam(member, technical.name)
+    const roster = member.getByRole('table', { name: 'Team members' })
+    const pager = member.getByRole('navigation', { name: 'Team member pages' })
+    await expect(roster.getByRole('row')).toHaveCount(16)
+    for (const name of ['Username', 'Actions', 'Joined']) {
+      await expect(roster.getByRole('columnheader', { name })).toHaveCount(0)
+    }
+    const rosterPath = '/api/teams/' + technical.id + '/members/'
+    const rosterApi = await (await member.request.get(rosterPath)).json()
+    expect(Object.keys(rosterApi.results[0]).sort()).toEqual([
+      'full_name',
+      'id',
+      'position',
+    ])
+    await pager.getByRole('button', { name: 'Next' }).click()
+    await expect(pager.getByText(/Page 2/)).toBeVisible()
+    await menu(member, 'Dashboard')
+    await menu(member, 'Organization Teams')
+    await expect(pager.getByText(/Page 2/)).toBeVisible()
+    await selectTeam(member, documentation.name)
+    await expect(pager.getByText(/Page 1/)).toBeVisible()
+
+    const accessible = await (
+      await member.request.get('/api/teams/?include_inactive=1')
+    ).json()
+    expect(accessible.results.map(({ id }) => id)).toEqual([
+      technical.id,
+      documentation.id,
+    ])
+    const unassigned = '/api/teams/' + editing.id + '/'
+    expect((await member.request.get(unassigned)).status()).toBe(404)
+    expect((await member.request.get(unassigned + 'members/')).status()).toBe(
+      404,
+    )
+    expect((await member.request.get(accountPath)).status()).toBe(403)
+    await member.goto('/organization-teams/' + editing.id)
+    await expect(tabs).toHaveText([technical.name, documentation.name])
+    await expect(
+      member.getByRole('tabpanel').getByRole('heading', { name: editing.name }),
+    ).toHaveCount(0)
+
+    await selectTeam(member, documentation.name)
+    expect((await assign([technical.id])).ok()).toBe(true)
+    const formerlyAssigned = '/api/teams/' + documentation.id + '/'
+    expect(
+      (await member.request.get(formerlyAssigned + 'members/')).status(),
+    ).toBe(404)
+    await member.reload()
+    await expect(tabs).toHaveText([technical.name])
+    await expect(teamTab(member, technical.name)).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    const createTeam = await page.request.post('/api/teams/', {
+      headers,
+      data: {
+        name: 'Campus Liaison Team',
+        description: 'Coordinates club work with campus offices.',
+      },
+    })
+    expect(createTeam.ok()).toBe(true)
+    const temporaryTeam = await createTeam.json()
+    temporaryTeamPath = '/api/teams/' + temporaryTeam.id + '/'
+    const setTeamActive = (is_active) =>
+      page.request.patch(temporaryTeamPath, { headers, data: { is_active } })
+    const refreshOnFocus = () =>
+      member.evaluate(() => window.dispatchEvent(new Event('focus')))
+
+    expect((await assign([technical.id, temporaryTeam.id])).ok()).toBe(true)
+    await refreshOnFocus()
+    await expect(tabs).toHaveText([technical.name, temporaryTeam.name])
+    await selectTeam(member, temporaryTeam.name)
+
+    expect((await setTeamActive(false)).ok()).toBe(true)
+    expect((await member.request.get(temporaryTeamPath)).status()).toBe(404)
+    const temporaryRosterPath = temporaryTeamPath + 'members/'
+    expect((await member.request.get(temporaryRosterPath)).status()).toBe(404)
+    await refreshOnFocus()
+    await expect(tabs).toHaveText([technical.name])
+    await expect(teamTab(member, technical.name)).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await expect(member).not.toHaveURL(/\?team=/)
+
+    expect((await setTeamActive(true)).ok()).toBe(true)
+    await refreshOnFocus()
+    await expect(tabs).toHaveText([technical.name, temporaryTeam.name])
+    await selectTeam(member, temporaryTeam.name)
+    await expect(roster.getByRole('row')).toHaveCount(2)
+  } finally {
+    await staffContext.close()
+    expect((await assign(staff.teams)).ok()).toBe(true)
+    if (temporaryTeamPath) {
+      expect(
+        (await page.request.delete(temporaryTeamPath, { headers })).status(),
+      ).toBe(204)
+    }
+  }
+})
+
 test('adviser creates a dynamic team and manages multiple Staff assignments on mobile', async ({
   page,
 }) => {

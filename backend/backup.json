@@ -360,7 +360,8 @@
     "title": "Google Scholar",
     "description": "Find research for workshops and organization projects.",
     "url": "https://scholar.google.com",
-    "category": "Research"
+    "category": "Research",
+    "is_public": true
   }
 },
 {

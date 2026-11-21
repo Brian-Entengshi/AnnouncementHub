@@ -39,10 +39,11 @@ const main = [
   ['Organization Teams', '/organization-teams', Users],
   ['Useful Links', '/useful-links', Link2],
 ]
+const venueNotices = ['Venue Notices', '/venue-notices', MapPin]
 const venue = [
   ['Venue Availability', '/availability', CalendarCheck2],
   ['Venues', '/venues', Building2],
-  ['Venue Notices', '/venue-notices', MapPin],
+  venueNotices,
 ]
 const admin = [['Account Management', '/accounts', ShieldCheck]]
 const adviserNav = [
@@ -135,6 +136,10 @@ export default function Layout() {
     ].find(
       ([, url]) => location.pathname.split('/')[1] === url.slice(1),
     )?.[0] || 'Dashboard'
+  const organizationItems = manager ? main : [...main, venueNotices]
+  const venueItems = adviser
+    ? venue
+    : venue.filter(([, path]) => path !== '/venues')
   async function leave() {
     try {
       const next = await logout()
@@ -181,11 +186,11 @@ export default function Layout() {
           </button>
         </div>
         <nav aria-label="Main navigation">
-          <Group title="Organization" items={main} />
-          <Group title="Venue desk" items={venue} />
+          <Group title="Organization" items={organizationItems} />
+          {manager && <Group title="Venue desk" items={venueItems} />}
           {manager && (
             <Group
-              title="Administration"
+              title={adviser ? 'Administration' : 'Staff administration'}
               items={[...admin, ...(adviser ? adviserNav : [])]}
             />
           )}

@@ -75,14 +75,16 @@ function TeamTabs({ teams, selected, onSelect }) {
 }
 
 function MemberTable({ members, manager, onRemove }) {
-  const headings = [
-    'Member name',
-    'Username',
-    'Position',
-    'Account status',
-    'Joined',
-  ]
-  if (manager) headings.push('Actions')
+  const headings = manager
+    ? [
+        'Member name',
+        'Username',
+        'Position',
+        'Account status',
+        'Joined',
+        'Actions',
+      ]
+    : ['Member name', 'Position']
   return (
     <table className="audit-table account-table" aria-label="Team members">
       <thead>
@@ -96,7 +98,8 @@ function MemberTable({ members, manager, onRemove }) {
       </thead>
       <tbody>
         {members.map((member) => {
-          const name = member.full_name || member.username
+          const name =
+            member.full_name || (manager ? member.username : 'Team member')
           const account = '/accounts/' + member.id
           const cells = [
             manager ? (
@@ -106,16 +109,16 @@ function MemberTable({ members, manager, onRemove }) {
             ) : (
               name
             ),
-            member.username,
+            ...(manager ? [member.username] : []),
             member.position || 'Staff member',
-            <Badge
-              key="status"
-              value={member.is_active ? 'active' : 'inactive'}
-            />,
-            formatDate(member.date_joined),
           ]
           if (manager)
             cells.push(
+              <Badge
+                key="status"
+                value={member.is_active ? 'active' : 'inactive'}
+              />,
+              formatDate(member.date_joined),
               <div key="actions" className="table-actions">
                 <Link
                   to={account}
@@ -363,7 +366,11 @@ function MemberTeams() {
               />
             </>
           ) : (
-            <Empty>No active teams.</Empty>
+            <Empty>
+              {manager
+                ? 'No active teams.'
+                : 'No active teams are assigned to your account.'}
+            </Empty>
           )
         }
       </State>
@@ -383,5 +390,11 @@ export default function Teams() {
   )
     return <ResourcePage config={config} />
   if (id) return <Navigate replace to={path + '?team=' + id + '&page=1'} />
-  return <MemberTeams key={user.id} />
+  const access = manager
+    ? user.role
+    : user.assigned_teams
+        .filter((team) => team.is_active)
+        .map((team) => team.id)
+        .join(',')
+  return <MemberTeams key={user.id + ':' + access} />
 }

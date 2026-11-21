@@ -10,8 +10,8 @@ from config.api import DirectoryPagination, ResourceViewSet
 from config.permissions import IsAdviser, IsManager, manager
 from users.models import User
 from users.serializers import TeamMemberSerializer
-from .models import CORE_TEAM_NAMES, Team
-from .serializers import TeamSerializer
+from .models import CORE_TEAM_NAMES, Team, scope_team_directory
+from .serializers import StaffRosterSerializer, TeamSerializer
 
 
 class TeamViewSet(ResourceViewSet):
@@ -25,8 +25,8 @@ class TeamViewSet(ResourceViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        teams = super().get_queryset()
         user = self.request.user
+        teams = scope_team_directory(super().get_queryset(), user)
         can_manage = manager(user)
         if self.action == "list":
             if can_manage and self.request.query_params.get("inactive") == "1":
@@ -39,7 +39,7 @@ class TeamViewSet(ResourceViewSet):
                 teams = teams.filter(pk__in=user.teams.values("pk"))
             if self.request.query_params.get("core") == "1":
                 teams = teams.filter(name__in=CORE_TEAM_NAMES)
-        elif not can_manage or self.action == "members":
+        elif self.action == "members":
             teams = teams.filter(is_active=True)
         if user.is_authenticated and self.action in ("list", "retrieve"):
             teams = teams.annotate(
@@ -58,7 +58,10 @@ class TeamViewSet(ResourceViewSet):
         team = self.get_object()
         members = team.staff_members.filter(role="staff").order_by("username")
         page = self.paginate_queryset(members)
-        return self.get_paginated_response(TeamMemberSerializer(page, many=True).data)
+        serializer = (
+            TeamMemberSerializer if manager(request.user) else StaffRosterSerializer
+        )
+        return self.get_paginated_response(serializer(page, many=True).data)
 
     @action(
         detail=True,

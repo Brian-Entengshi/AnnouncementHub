@@ -43,10 +43,10 @@ Run `python manage.py seed_demo_staff` to bring each active team to 17 active St
 
 | Role | Access |
 | --- | --- |
-| Visitor | Browse published announcements and Club Events on Student Access, read venue notices linked to events, and view configured public contacts. |
-| Staff | Use the member dashboard, view organization activities, schedules, team rosters, useful links, venues, published notices, and personal notifications. |
-| Officer | Manage organization content, edit existing venues and teams, and manage notices, Staff accounts, and team assignments. |
-| Adviser | Officer capabilities, creation of teams and venues, venue archiving and deletion, officer account management, audit logs, and organization settings. |
+| Visitor | Browse published announcements, Club Events, and approved Useful Links on Student Access, read venue notices linked to events, and view configured public contacts. |
+| Staff | Use the member dashboard, view organization activities and schedules, browse assigned teams and their rosters, and read useful links, published venue notices, and personal notifications. Existing read-only Venue Availability links still work. |
+| Officer | Manage organization content, edit teams, publish venue notices, use Venue Availability, and manage Staff accounts and assignments. |
+| Adviser | Officer capabilities, full Venue Management, team creation, officer account management, audit logs, and organization settings. |
 
 The first adviser signs in using the username and password entered at `createsuperuser`. Repeat that command to provision another adviser. There is no public registration endpoint. The Django admin at `/admin/` provides superusers with read-only inspection of hub records. The web workspace handles changes and records their history.
 
@@ -72,8 +72,9 @@ When upgrading from the previous release, back up SQLite before running migratio
 - **Apply filters** runs the selected search and filters together. **Clear** removes the search and filters and returns paginated lists to page one. In Venue Availability, Clear returns the schedule to the current period while keeping the chosen calendar view.
 - The current tab remembers the last applied filters, search, list page, venue status tab and calendar preferences separately for each signed-in account. Browser history retains each visited view, and Account Management restores the internal scroll position when reopening the same results. Search terms stay out of URLs.
 - **Announcements** includes draft management, publication, pinning, expiration, archiving, images and optional PDF attachments for advisers and officers. Student Access and Staff see published, current announcements. Existing `/manage-announcements` links redirect to the equivalent `/announcements` route.
+- **Useful Links** keeps new links members-only until an adviser or officer selects **Show on Student Access**. The public section uses the same resource directory and lists only approved links.
 - **Organization Activities** tracks date-based upcoming, ongoing and completed initiatives. Multiple scheduled events can link to one activity.
-- **Organization Teams** shows paginated rosters to signed-in members. Tabs come from the active teams in Django and remember the selected team and roster page. Advisers can create teams. Advisers and officers can edit teams, remove individual memberships, and assign Staff through Account Management. Inactive teams remain available for managers to review and are removed from new assignment choices. The four core teams keep their names and stay active.
+- **Organization Teams** shows paginated rosters and remembers the selected team and roster page. Staff see their active assigned teams and each roster’s names and positions. Advisers can create teams. Advisers and officers can edit teams, remove individual memberships, and assign Staff through Account Management. Inactive teams remain available for managers to review and are removed from new assignment choices. The four core teams keep their names and stay active.
 - **Notifications** contains read status and links to organization updates. **Audit Logs** gives advisers a searchable, paginated history of sign-ins, sign-outs and administrative changes. A failed sign-in records the failure without the submitted credentials.
 - Resource forms save drafts per account, form and record in the current tab’s session storage. Drafts expire after seven days and clear on successful save, cancellation or sign-out. Passwords and uploaded file contents are excluded. Reselect a file after refreshing.
 - File uploads support JPEG, PNG and WebP images and PDF announcement attachments, up to 5 MB each. Django checks access when serving uploaded files.

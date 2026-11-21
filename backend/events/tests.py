@@ -83,7 +83,6 @@ class EventPublicationTests(APITestCase):
             "dashboard",
             "activities",
             "teams",
-            "links",
             "venues",
             "availability",
             "accounts",

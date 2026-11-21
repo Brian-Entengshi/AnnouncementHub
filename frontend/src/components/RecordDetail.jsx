@@ -30,6 +30,7 @@ const metadata = [
   'starts_at',
   'ends_at',
   'publication_status',
+  'is_public',
   'username',
   'email',
   'role',
@@ -38,6 +39,7 @@ const metadata = [
   'published',
 ]
 function display(k, v) {
+  if (k === 'is_public') return v ? 'Public' : 'Members only'
   if (k === 'assigned_teams')
     return v
       .map(({ name, is_active }) => name + (is_active ? '' : ' (inactive)'))
@@ -140,7 +142,11 @@ export default function RecordDetail({ config: c, id }) {
                 )
                 .map((k) => (
                   <div key={k}>
-                    <dt>{human(k.replace('_name', ''))}</dt>
+                    <dt>
+                      {k === 'is_public'
+                        ? 'Visibility'
+                        : human(k.replace('_name', ''))}
+                    </dt>
                     <dd>{display(k, item[k])}</dd>
                   </div>
                 ))}

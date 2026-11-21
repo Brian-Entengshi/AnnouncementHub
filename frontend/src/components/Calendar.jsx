@@ -28,7 +28,7 @@ function monday(date) {
 }
 
 export default function Calendar({ availability = false }) {
-  const { manager } = useAuth()
+  const { manager, adviser } = useAuth()
   const {
     params: searchParams,
     setParams,
@@ -44,7 +44,7 @@ export default function Calendar({ availability = false }) {
   const mode = searchParams.get('view') === 'month' ? 'month' : 'week'
   const all = manager && searchParams.get('drafts') === '1'
   const eventsOnly = searchParams.get('dates') === 'events'
-  const venues = useData(availability ? 'venues/' : null, true)
+  const venues = useData(availability ? 'venue-options/' : null, true)
   const venue = useValidFilter(
     searchParams,
     setParams,
@@ -382,10 +382,12 @@ export default function Calendar({ availability = false }) {
       </div>
       {availability && (
         <div className="actions calendar-links">
-          <Link className="button" to="/venues">
-            <List size={16} />
-            Venue directory
-          </Link>
+          {adviser && (
+            <Link className="button" to="/venues">
+              <List size={16} />
+              Venue directory
+            </Link>
+          )}
           <Link className="button" to="/venue-notices">
             <CalendarDays size={16} />
             Venue notices

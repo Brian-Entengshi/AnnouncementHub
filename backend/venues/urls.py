@@ -7,4 +7,5 @@ router.register("venues", views.VenueViewSet, basename="venues")
 router.register("notices", views.NoticeViewSet, basename="notices")
 urlpatterns = router.urls + [
     path("availability/", views.availability),
+    path("venue-options/", views.VenueOptionList.as_view(), name="venue-options"),
 ]

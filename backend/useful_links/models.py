@@ -6,6 +6,7 @@ class UsefulLink(models.Model):
     description = models.TextField(blank=True)
     url = models.URLField()
     category = models.CharField(max_length=60)
+    is_public = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["category", "title", "pk"]

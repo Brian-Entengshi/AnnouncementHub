@@ -64,7 +64,7 @@ export const catalog = {
     fields: [
       title,
       text,
-      source('venue', 'Venue', 'venues/'),
+      source('venue', 'Venue', 'venue-options/'),
       input('date', 'Event date', 'date'),
       input('start', 'Start time (Manila)', 'time'),
       input('end', 'End time (Manila)', 'time'),
@@ -99,6 +99,7 @@ export const catalog = {
       input('url', 'Web address', 'url'),
       input('category', 'Category'),
       { ...text, required: false },
+      flag('is_public', 'Show on Student Access'),
     ],
   },
   venues: {
@@ -126,7 +127,7 @@ export const catalog = {
     fields: [
       title,
       text,
-      source('venue', 'Venue', 'venues/'),
+      source('venue', 'Venue', 'venue-options/'),
       input('starts_at', 'Starts (Manila time)', 'datetime-local'),
       input('ends_at', 'Ends (Manila time)', 'datetime-local'),
       options('publication_status', 'Publication status', [

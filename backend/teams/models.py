@@ -1,5 +1,7 @@
 from django.db import models
 
+from config.permissions import manager
+
 
 CORE_TEAM_NAMES = (
     "Technical Team",
@@ -19,3 +21,11 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def scope_team_directory(queryset, user):
+    if manager(user):
+        return queryset
+    if not user.is_authenticated:
+        return queryset.none()
+    return queryset.filter(pk__in=user.teams.values("pk"), is_active=True)

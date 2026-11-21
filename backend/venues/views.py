@@ -4,6 +4,8 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from rest_framework.decorators import action, api_view
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from audit_logs.models import AuditLog
@@ -16,6 +18,7 @@ from notifications.models import Notification
 from .models import Venue, Notice
 from .serializers import (
     VenueSerializer,
+    VenueOptionSerializer,
     NoticeSerializer,
     PublicNoticeSerializer,
     published_notices,
@@ -23,25 +26,20 @@ from .serializers import (
 
 
 class VenueViewSet(ResourceViewSet):
+    permission_classes = [IsAdviser]
     queryset = Venue.objects.all()
     serializer_class = VenueSerializer
     search_fields = ["name", "location", "description"]
-
-    def get_permissions(self):
-        if self.action in ("create", "destroy", "archive"):
-            return [IsAdviser()]
-        return super().get_permissions()
 
     def get_queryset(self):
         venues = super().get_queryset()
         if self.action != "list":
             return venues
-        if manager(self.request.user):
-            status = self.request.query_params.get("status")
-            if status == "archived":
-                return venues.filter(archived=True)
-            if status == "inactive":
-                return venues.filter(archived=False, available=False)
+        status = self.request.query_params.get("status")
+        if status == "archived":
+            return venues.filter(archived=True)
+        if status == "inactive":
+            return venues.filter(archived=False, available=False)
         return venues.filter(archived=False, available=True)
 
     @transaction.atomic
@@ -81,6 +79,12 @@ class VenueViewSet(ResourceViewSet):
         return Response(
             {"detail": "Venue archived. Existing events and notices were kept."}
         )
+
+
+class VenueOptionList(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Venue.objects.filter(archived=False, available=True)
+    serializer_class = VenueOptionSerializer
 
 
 class NoticeViewSet(ResourceViewSet):

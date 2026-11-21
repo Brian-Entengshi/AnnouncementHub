@@ -91,6 +91,17 @@ export default function ResourceFilters({
           ))}
         </select>
       )}
+      {kind === 'links' && manager && (
+        <select
+          name="is_public"
+          aria-label="Filter by link visibility"
+          defaultValue={params.get('is_public') || ''}
+        >
+          <option value="">All visibility</option>
+          <option value="true">Public</option>
+          <option value="false">Members only</option>
+        </select>
+      )}
       {['announcements', 'activities', 'notices'].includes(kind) && (
         <DateFilters params={params} />
       )}

@@ -27,9 +27,49 @@ test('Staff retain the member workspace and restricted management endpoints', as
   await expect(
     nav.getByRole('link', { name: 'Account Management' }),
   ).toHaveCount(0)
+  for (const name of [
+    'Venues',
+    'Venue Availability',
+    'Audit Logs',
+    'Settings',
+  ]) {
+    await expect(nav.getByRole('link', { name, exact: true })).toHaveCount(0)
+  }
+  await expect(nav.getByRole('heading', { name: 'Venue desk' })).toHaveCount(0)
+  const organization = nav.locator('.nav-group').filter({
+    has: page.getByRole('heading', { name: 'Organization', exact: true }),
+  })
+  await expect(
+    organization.getByRole('link', { name: 'Venue Notices' }),
+  ).toBeVisible()
+  await expect(
+    page.locator('main a[href="/venues"], main a[href="/availability"]'),
+  ).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeHidden()
   await page.goto('/organization-teams')
   await expect(page.getByRole('tablist')).toBeVisible()
+  await expect(page.getByRole('tab')).toHaveText(['Technical Team'])
   await expect(page.getByRole('link', { name: 'New team' })).toHaveCount(0)
+  await page.goto('/venues')
+  await expect(
+    page.getByRole('heading', { name: 'Access restricted' }),
+  ).toBeVisible()
+  expect((await page.request.get('/api/venues/')).status()).toBe(403)
+  for (const width of [768, 390, 320]) {
+    await page.setViewportSize({ width, height: 850 })
+    const toggle = page.getByRole('button', { name: 'Open menu' })
+    await toggle.click()
+    await expect(
+      organization.getByRole('link', { name: 'Venue Notices' }),
+    ).toBeVisible()
+    await organization.getByRole('link', { name: 'Venue Notices' }).click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(
+      page.getByRole('heading', { name: 'Venue Notices' }),
+    ).toBeVisible()
+    await assertFits(page)
+  }
+  await page.setViewportSize({ width: 1440, height: 960 })
   await page.goto('/announcements')
   await expect(
     page.getByRole('link', { name: 'General assembly guidelines' }),
@@ -190,7 +230,7 @@ async function assertFits(page) {
   ).toBeTruthy()
 }
 
-test('venue creation is adviser-only and new venues appear in the event form', async ({
+test('venue management is adviser-only and officers retain scheduling tools', async ({
   page,
 }) => {
   await page.goto('/venues/new')
@@ -198,6 +238,62 @@ test('venue creation is adviser-only and new venues appear in the event form', a
   await expect(
     page.getByRole('heading', { name: 'Access restricted' }),
   ).toBeVisible()
+  const nav = page.getByRole('navigation', { name: 'Main navigation' })
+  await expect(
+    nav.getByRole('link', { name: 'Venues', exact: true }),
+  ).toHaveCount(0)
+  await expect(
+    nav.getByRole('link', { name: 'Venue Availability' }),
+  ).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Venue Notices' })).toBeVisible()
+  await expect(
+    nav.getByRole('link', { name: 'Account Management' }),
+  ).toBeVisible()
+  const options = await page.request.get('/api/venue-options/')
+  expect(options.ok()).toBe(true)
+  const choice = (await options.json()).results[0]
+  expect(Object.keys(choice).sort()).toEqual(['id', 'name'])
+  const { csrf } = await (await page.request.get('/api/session/')).json()
+  const headers = { 'X-CSRFToken': csrf }
+  const detail = '/api/venues/' + choice.id + '/'
+  for (const endpoint of [
+    '/api/venues/',
+    '/api/venues/?status=archived',
+    detail,
+  ]) {
+    expect((await page.request.get(endpoint)).status()).toBe(403)
+  }
+  expect(
+    (
+      await page.request.patch(detail, { headers, data: { available: false } })
+    ).status(),
+  ).toBe(403)
+  expect(
+    (await page.request.post(detail + 'archive/', { headers })).status(),
+  ).toBe(403)
+  expect((await page.request.delete(detail, { headers })).status()).toBe(403)
+  for (const path of [
+    '/venues',
+    '/venues/' + choice.id,
+    '/venues/' + choice.id + '/edit',
+  ]) {
+    await page.goto(path)
+    await expect(
+      page.getByRole('heading', { name: 'Access restricted' }),
+    ).toBeVisible()
+  }
+  await page.getByRole('link', { name: 'Venue Availability' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Venue Availability' }),
+  ).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Venue directory' })).toHaveCount(
+    0,
+  )
+  await page.goto('/weekly-events/new')
+  await page
+    .getByLabel('Venue', { exact: false })
+    .filter({ visible: true })
+    .selectOption({ label: choice.name })
   await page.goto('/organization-teams')
   await expect(page.getByRole('tablist')).toBeVisible()
   await expect(page.getByRole('link', { name: 'New team' })).toHaveCount(0)
@@ -205,13 +301,11 @@ test('venue creation is adviser-only and new venues appear in the event form', a
   await expect(
     page.getByRole('heading', { name: 'Access restricted' }),
   ).toBeVisible()
-  await page.goto('/venues')
-  await expect(page.getByRole('link', { name: 'Add Venue' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page).toHaveURL(/\/student$/)
   await page.goto('/login')
   await signIn(page, 'test-adviser')
-  await page.goto('/venues')
+  await nav.getByRole('link', { name: 'Venues', exact: true }).click()
   await page.getByRole('link', { name: 'Add Venue' }).click()
   await page.getByLabel('Venue name').fill('New campus hall')
   await page.getByLabel('Location').fill('East wing')
